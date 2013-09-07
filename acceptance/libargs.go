@@ -159,7 +159,7 @@ func withIdentity(ar bool, f func(gophercloud.AccessProvider)) {
 func withServerApi(acc gophercloud.AccessProvider, f func(gophercloud.CloudServersProvider)) {
 	api, err := gophercloud.ServersApi(acc, gophercloud.ApiCriteria{
 		Name:      "cloudServersOpenStack",
-		Region:    acc.Regions()[0],
+		Region:    "DFW",
 		VersionId: "2",
 		UrlChoice: gophercloud.PublicURL,
 	})
@@ -176,6 +176,23 @@ func withServerApi(acc gophercloud.AccessProvider, f func(gophercloud.CloudServe
 func waitForServerState(api gophercloud.CloudServersProvider, id, state string) error {
 	for {
 		s, err := api.ServerById(id)
+		if err != nil {
+			return err
+		}
+		if s.Status == state {
+			return nil
+		}
+		time.Sleep(10 * time.Second)
+	}
+	panic("Impossible")
+}
+
+// waitForImageState polls, every 10 seconds, for a given image to appear in the indicated state.
+// This call will block forever if it never appears in the desired state, so if a timeout is required,
+// make sure to call this function in a goroutine.
+func waitForImageState(api gophercloud.CloudServersProvider, id, state string) error {
+	for {
+		s, err := api.ImageById(id)
 		if err != nil {
 			return err
 		}

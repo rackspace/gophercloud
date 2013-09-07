@@ -131,6 +131,9 @@ type CloudServersProvider interface {
 	// Other providers may reserve the right to act on additional fields.
 	RebuildServer(id string, ns NewServer) (*Server, error)
 
+	// CreateImage will create a new image from the specified server id returning the id of the new image.
+	CreateImage(id string, ci CreateImage) (string, error)
+
 	// Addresses
 
 	// ListAddresses yields the list of available addresses for the server.
@@ -144,6 +147,12 @@ type CloudServersProvider interface {
 	// ListImages yields the list of available operating system images.  This function
 	// returns full details for each image, if available.
 	ListImages() ([]Image, error)
+
+	// ImageById yields details about a specific image.
+	ImageById(id string) (*Image, error)
+
+	// DeleteImageById will delete the specific image.
+	DeleteImageById(id string) error
 
 	// Flavors
 

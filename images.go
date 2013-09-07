@@ -21,6 +21,36 @@ func (gsp *genericServersProvider) ListImages() ([]Image, error) {
 	return is, err
 }
 
+func (gsp *genericServersProvider) ImageById(id string) (*Image, error) {
+	var is *Image
+
+	err := gsp.context.WithReauth(gsp.access, func() error {
+		url := gsp.endpoint + "/images/" + id
+		return perigee.Get(url, perigee.Options{
+			CustomClient: gsp.context.httpClient,
+			Results:      &struct{ Image **Image }{&is},
+			MoreHeaders: map[string]string{
+				"X-Auth-Token": gsp.access.AuthToken(),
+			},
+		})
+	})
+	return is, err
+}
+
+func (gsp *genericServersProvider) DeleteImageById(id string) error {
+	err := gsp.context.WithReauth(gsp.access, func() error {
+		url := gsp.endpoint + "/images/" + id
+		_, err := perigee.Request("DELETE", url, perigee.Options{
+			CustomClient: gsp.context.httpClient,
+			MoreHeaders: map[string]string{
+				"X-Auth-Token": gsp.access.AuthToken(),
+			},
+		})
+		return err
+	})
+	return err
+}
+
 // ImageLink provides a reference to a image by either ID or by direct URL.
 // Some services use just the ID, others use just the URL.
 // This structure provides a common means of expressing both in a single field.
