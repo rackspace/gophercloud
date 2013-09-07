@@ -19,6 +19,9 @@ type AccessProvider interface {
 	// Reauthenticate attempts to acquire a new authentication token, if the feature is enabled by
 	// AuthOptions.AllowReauth.
 	Reauthenticate() error
+
+	//Regions returns a list of regions found in all enpoints
+	Regions() []string
 }
 
 // CloudServersProvider instances encapsulate a Cloud Servers API, should one exist in the service catalog

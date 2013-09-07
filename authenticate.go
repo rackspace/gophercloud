@@ -190,3 +190,26 @@ func (a *Access) Revoke(tok string) error {
 	})
 	return err
 }
+
+// See AccessProvider interface definition for details.
+func (a *Access) Regions() []string {
+	s := make([]string, 0)
+	for i := range a.ServiceCatalog {
+		for n := range a.ServiceCatalog[i].Endpoints {
+			if stringInSlice(a.ServiceCatalog[i].Endpoints[n].Region, s) == false {
+				s = append(s, a.ServiceCatalog[i].Endpoints[n].Region)
+			}
+		}
+	}
+	return s
+}
+
+//checks if string is already in slice.
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
