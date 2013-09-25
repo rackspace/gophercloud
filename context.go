@@ -118,6 +118,22 @@ func (c *Context) ServersApi(acc AccessProvider, criteria ApiCriteria) (CloudSer
 	return gcp, nil
 }
 
+// Instantiates a cloud storage API object for the provider given.
+func (c *Context) ObjectStoreApi(acc AccessProvider, criteria ApiCriteria) (ObjectStoreProvider, error) {
+	url := acc.FirstEndpointUrlByCriteria(criteria)
+	if url == "" {
+		return nil, ErrEndpoint
+	}
+
+	osp := &openstackObjectStoreProvider{
+		endpoint: url,
+		context: c,
+		access: acc,
+	}
+
+	return osp, nil
+}
+
 // WithReauthHandler configures the context to handle reauthentication attempts using the supplied
 // funtion.  By default, reauthentication happens by invoking Authenticate(), which is unlikely to be
 // useful in a unit test.

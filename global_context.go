@@ -51,6 +51,11 @@ func ServersApi(acc AccessProvider, criteria ApiCriteria) (CloudServersProvider,
 	return globalContext.ServersApi(acc, criteria)
 }
 
+// Instantiates an Object Storage object for the provider given.
+func ObjectStoreApi(acc AccessProvider, criteria ApiCriteria) (ObjectStoreProvider, error) {
+	return globalContext.ObjectStoreApi(acc, criteria)
+}
+
 // ActualResponseCode inspects a returned error, and discovers the actual response actual
 // response code that caused the error to be raised.
 func ActualResponseCode(e error) (int, error) {
