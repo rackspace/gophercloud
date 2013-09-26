@@ -19,18 +19,35 @@ type openstackObjectStoreProvider struct {
 	access AccessProvider
 }
 
-func (osp *openstackObjectStoreProvider) CreateContainer(name string) error {
+type openstackContainer struct {
+	// Name labels the container.
+	Name string
+
+	// Provider links the container to an actual provider.
+	Provider ObjectStoreProvider
+}
+
+func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container, error) {
+	var container Container
+
 	err := osp.context.WithReauth(osp.access, func() error {
 		url := osp.endpoint + "/" + name
-		return perigee.Put(url, perigee.Options{
+		err := perigee.Put(url, perigee.Options{
 			CustomClient: osp.context.httpClient,
 			MoreHeaders: map[string]string{
 				"X-Auth-Token": osp.access.AuthToken(),
 			},
 			OkCodes: []int{201},
 		})
+		if err == nil {
+			container = &openstackContainer{
+				Name: name,
+				Provider: osp,
+			}
+		}
+		return err
 	})
-	return err
+	return container, err
 }
 
 func (osp *openstackObjectStoreProvider) DeleteContainer(name string) error {
@@ -45,4 +62,8 @@ func (osp *openstackObjectStoreProvider) DeleteContainer(name string) error {
 		})
 	})
 	return err
+}
+
+func (c *openstackContainer) Delete() error {
+	return c.Provider.DeleteContainer(c.Name)
 }

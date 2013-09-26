@@ -26,11 +26,21 @@ type AccessProvider interface {
 type ObjectStoreProvider interface {
 	// CreateContainer attempts to create a container for objects on the remote provider's cloud
 	// storage infrastructure.
-	CreateContainer(name string) error
+	CreateContainer(name string) (Container, error)
 
 	// DeleteContainer attempts to delete an empty container.
 	// This call WILL fail if the container is not empty.
 	DeleteContainer(name string) error
+}
+
+// Container instances more or less correspond to directories or volume table of contents structures in
+// more traditional filesystems.
+type Container interface {
+	// Delete() dispenses with the container.
+	// NOTE: Upon returning from this method call without error,
+	// the reference to the container no longer refers to a container hosted by your provider.
+	// Future calls to the container will produce errors.
+	Delete() error
 }
 
 // CloudServersProvider instances encapsulate a Cloud Servers API, should one exist in the service catalog
