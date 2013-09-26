@@ -21,6 +21,18 @@ type AccessProvider interface {
 	Reauthenticate() error
 }
 
+// ObjectStorageProvider instances encapsulate a cloud-based storage API, should one exist in the service catalog
+// for your provider.
+type ObjectStoreProvider interface {
+	// CreateContainer attempts to create a container for objects on the remote provider's cloud
+	// storage infrastructure.
+	CreateContainer(name string) error
+
+	// DeleteContainer attempts to delete an empty container.
+	// This call WILL fail if the container is not empty.
+	DeleteContainer(name string) error
+}
+
 // CloudServersProvider instances encapsulate a Cloud Servers API, should one exist in the service catalog
 // for your provider.
 type CloudServersProvider interface {

@@ -94,7 +94,7 @@ func (c *Context) ProviderByName(name string) (p Provider, err error) {
 		}
 	}
 	if strings.Contains(name, "://") {
-		p = Provider {
+		p = Provider{
 			AuthEndpoint: name,
 		}
 		return p, nil
@@ -116,6 +116,22 @@ func (c *Context) ServersApi(acc AccessProvider, criteria ApiCriteria) (CloudSer
 	}
 
 	return gcp, nil
+}
+
+// Instantiates a cloud storage API object for the provider given.
+func (c *Context) ObjectStoreApi(acc AccessProvider, criteria ApiCriteria) (ObjectStoreProvider, error) {
+	url := acc.FirstEndpointUrlByCriteria(criteria)
+	if url == "" {
+		return nil, ErrEndpoint
+	}
+
+	osp := &openstackObjectStoreProvider{
+		endpoint: url,
+		context:  c,
+		access:   acc,
+	}
+
+	return osp, nil
 }
 
 // WithReauthHandler configures the context to handle reauthentication attempts using the supplied
