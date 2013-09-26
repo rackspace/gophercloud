@@ -174,7 +174,7 @@ func withObjectStoreApi(acc gophercloud.AccessProvider, f func(gophercloud.Objec
 	api, err := gophercloud.ObjectStoreApi(acc, gophercloud.ApiCriteria{
 		// Rackspace, at least, provides no Version attribute for service catalog entries
 		// related to object storage.  Therefore, our API criteria is unversioned.
-		Type:	"object-store",
+		Type:      "object-store",
 		UrlChoice: gophercloud.PublicURL,
 	})
 	if err != nil {

@@ -110,7 +110,7 @@ func (c *Context) papersPlease(p Provider, options AuthOptions) (*Access, error)
 		return nil, ErrCredentials
 	}
 
-  _, err := perigee.Request("POST", p.AuthEndpoint, perigee.Options{
+	_, err := perigee.Request("POST", p.AuthEndpoint, perigee.Options{
 		CustomClient: c.httpClient,
 		ReqBody: &AuthContainer{
 			Auth: Auth{
@@ -133,7 +133,7 @@ func (c *Context) papersPlease(p Provider, options AuthOptions) (*Access, error)
 		access.options = options
 		access.provider = p
 		access.context = c
-  }
+	}
 	return access, err
 }
 
