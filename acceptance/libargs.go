@@ -169,6 +169,21 @@ func withServerApi(acc gophercloud.AccessProvider, f func(gophercloud.CloudServe
 	f(api)
 }
 
+// withObjectStoreApi acquires the cloud object storage API.
+func withObjectStoreApi(acc gophercloud.AccessProvider, f func(gophercloud.ObjectStoreProvider)) {
+	api, err := gophercloud.ObjectStoreApi(acc, gophercloud.ApiCriteria{
+		// Rackspace, at least, provides no Version attribute for service catalog entries
+		// related to object storage.  Therefore, our API criteria is unversioned.
+		Type:      "object-store",
+		UrlChoice: gophercloud.PublicURL,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	f(api)
+}
+
 // waitForServerState polls, every 10 seconds, for a given server to appear in the indicated state.
 // This call will block forever if it never appears in the desired state, so if a timeout is required,
 // make sure to call this function in a goroutine.
