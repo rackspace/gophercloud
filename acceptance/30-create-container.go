@@ -17,13 +17,13 @@ func main() {
 			containerName := randomString("container-", 16)
 
 			log("Creating container " + containerName)
-			err := osp.CreateContainer(containerName)
+			container, err := osp.CreateContainer(containerName)
 			if err != nil {
 				panic(err)
 			}
 
 			log("Deleting container " + containerName)
-			err = osp.DeleteContainer(containerName)
+			err = container.Delete()
 			if err != nil {
 				panic(err)
 			}
