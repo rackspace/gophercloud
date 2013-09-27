@@ -1,15 +1,19 @@
 package gophercloud
 
 import (
-	"net/http"
 	"github.com/racker/perigee"
 	"strings"
+	"log"
+)
+
+const (
+	ContainerMetadataPrefix = "x-container-meta-"
 )
 
 // containerMetaName takes an unadorned custom metadata key and formats it suitably for map
 // look-up.
 func containerMetaName(s string) string {
-	return strings.ToLower("x-container-meta-" + s)
+	return strings.ToLower(ContainerMetadataPrefix + s)
 }
 
 // The openstackObjectStorageProvider structure provides the implementation for generic OpenStack-compatible
@@ -37,7 +41,7 @@ type openstackContainer struct {
 	Provider *openstackObjectStoreProvider
 
 	// customValues provides access to the custom metadata for this container.
-	customValues http.Header
+	customMetadata map[string]string
 }
 
 func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container, error) {
@@ -86,10 +90,12 @@ func (c *openstackContainer) Metadata() (MetadataProvider, error) {
 	return c, nil
 }
 
+// cacheHeaders() takes no action if custom metadata headers have already been retrieved.
+// Otherwise, the container resource is queried for its current set of custom headers.
 func (c *openstackContainer) cacheHeaders() error {
 	osp := c.Provider
 		return osp.context.WithReauth(osp.access, func() error {
-		if c.customValues == nil {
+		if c.customMetadata == nil {
 			// Grab the set of headers attached to this container.
 			// These headers will be keyed off of mixed-case strings.
 			url := osp.endpoint + "/" + c.Name
@@ -108,11 +114,14 @@ func (c *openstackContainer) cacheHeaders() error {
 			// transcribe our headers such that all the keys used to
 			// index them are lower-case.
 			headers := resp.HttpResponse.Header
-			loweredHeaders := make(map[string][]string)
+			loweredHeaders := make(map[string]string)
 			for key, values := range headers {
-				loweredHeaders[strings.ToLower(key)] = values
+				key = strings.ToLower(key)
+				if strings.HasPrefix(key, containerMetaName("")) {
+					loweredHeaders[key[len(ContainerMetadataPrefix):]] = values[0]
+				}
 			}
-			c.customValues = loweredHeaders
+			c.customMetadata = loweredHeaders
 		}
 		return nil
 	})
@@ -124,14 +133,7 @@ func (c *openstackContainer) CustomValues() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	res := map[string]string{}
-	for name, values := range c.customValues {
-		if strings.HasPrefix(name, containerMetaName("")) {
-			res[name] = values[0]
-		}
-	}
-	return res, nil
+	return c.customMetadata, nil
 }
 
 // See MetadataProvider interface for details.
@@ -140,9 +142,11 @@ func (c *openstackContainer) CustomValue(key string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	value := c.customValues[containerMetaName(key)]
+	key = strings.ToLower(key)
+	value := c.customMetadata[key]
+	log.Printf("%s = c.customMetadata[%s]", value, key)
 	if len(value) > 0 {
-		return value[0], nil
+		return value, nil
 	}
 	return "", nil
 }
@@ -165,7 +169,7 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 	
 	// Flush our values cache to make sure our next attempt at getting values always gets the right data.
 	if err == nil {
-		c.customValues = nil
+		c.customMetadata = nil
 	}
 
 	return err
