@@ -41,6 +41,26 @@ type Container interface {
 	// the reference to the container no longer refers to a container hosted by your provider.
 	// Future calls to the container will produce errors.
 	Delete() error
+
+	// Metadata() provides access to a container's set of custom metadata settings.
+	Metadata() (MetadataProvider, error)
+}
+
+// MetadataProvider grants access to custom metadata on some "thing", whatever that thing may be (e.g., containers,
+// files, etc.)
+type MetadataProvider interface {
+	// CustomValue retrieves the value associated with a single custom attribute, if one exists.
+	// Note: It is explicitly not an error if no value is bound to an attribute.
+	// In this case, the value returned will be "".
+	CustomValue(key string) (string, error)
+
+	// CustomValues provides a complete set of metadata settings, in map form.
+	// Try not to use this method unless you need the full batch at once, or unless you find your
+	// code is making repeated CustomValue() calls.
+	CustomValues() (map[string]string, error)
+
+	// SetCustomValue provides a means by which your application may set a custom attribute on an entity.
+	SetCustomValue(key, value string) error
 }
 
 // CloudServersProvider instances encapsulate a Cloud Servers API, should one exist in the service catalog
