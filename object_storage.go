@@ -3,7 +3,6 @@ package gophercloud
 import (
 	"github.com/racker/perigee"
 	"strings"
-	"log"
 )
 
 const (
@@ -40,8 +39,8 @@ type openstackContainer struct {
 	// Provider links the container to an actual provider.
 	Provider *openstackObjectStoreProvider
 
-	// customValues provides access to the custom metadata for this container.
-	customMetadata map[string]string
+	// customMetadata provides access to the custom metadata for this container.
+	customMetadata *cimap
 }
 
 func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container, error) {
@@ -121,7 +120,7 @@ func (c *openstackContainer) cacheHeaders() error {
 					loweredHeaders[key[len(ContainerMetadataPrefix):]] = values[0]
 				}
 			}
-			c.customMetadata = loweredHeaders
+			c.customMetadata = &cimap{m: loweredHeaders}
 		}
 		return nil
 	})
@@ -133,7 +132,7 @@ func (c *openstackContainer) CustomValues() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.customMetadata, nil
+	return c.customMetadata.rawMap(), nil
 }
 
 // See MetadataProvider interface for details.
@@ -143,8 +142,7 @@ func (c *openstackContainer) CustomValue(key string) (string, error) {
 		return "", err
 	}
 	key = strings.ToLower(key)
-	value := c.customMetadata[key]
-	log.Printf("%s = c.customMetadata[%s]", value, key)
+	value, _ := c.customMetadata.get(key)
 	if len(value) > 0 {
 		return value, nil
 	}
