@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"github.com/racker/perigee"
 	"strings"
-	"log"
 )
 
-const (
-	MetadataPrefix = "X-Container-Meta-"
-)
+// containerMetaName takes an unadorned custom metadata key and formats it suitably for map
+// look-up.
+func containerMetaName(s string) string {
+	return strings.ToLower("x-container-meta-" + s)
+}
 
 // The openstackObjectStorageProvider structure provides the implementation for generic OpenStack-compatible
 // object storage interfaces.
@@ -87,8 +88,10 @@ func (c *openstackContainer) Metadata() (MetadataProvider, error) {
 
 func (c *openstackContainer) cacheHeaders() error {
 	osp := c.Provider
-	return osp.context.WithReauth(osp.access, func() error {
+		return osp.context.WithReauth(osp.access, func() error {
 		if c.customValues == nil {
+			// Grab the set of headers attached to this container.
+			// These headers will be keyed off of mixed-case strings.
 			url := osp.endpoint + "/" + c.Name
 			resp, err := perigee.Request("HEAD", url, perigee.Options{
 				CustomClient: osp.context.httpClient,
@@ -101,10 +104,15 @@ func (c *openstackContainer) cacheHeaders() error {
 				return err
 			}
 
-			c.customValues = resp.HttpResponse.Header
-			for key, _ := range c.customValues {
-				log.Printf(key)
+			// To ensure case insensitivity when looking up keys,
+			// transcribe our headers such that all the keys used to
+			// index them are lower-case.
+			headers := resp.HttpResponse.Header
+			loweredHeaders := make(map[string][]string)
+			for key, values := range headers {
+				loweredHeaders[strings.ToLower(key)] = values
 			}
+			c.customValues = loweredHeaders
 		}
 		return nil
 	})
@@ -119,7 +127,7 @@ func (c *openstackContainer) CustomValues() (map[string]string, error) {
 
 	res := map[string]string{}
 	for name, values := range c.customValues {
-		if strings.HasPrefix(name, MetadataPrefix) {
+		if strings.HasPrefix(name, containerMetaName("")) {
 			res[name] = values[0]
 		}
 	}
@@ -132,7 +140,7 @@ func (c *openstackContainer) CustomValue(key string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	value := c.customValues[MetadataPrefix + key]
+	value := c.customValues[containerMetaName(key)]
 	if len(value) > 0 {
 		return value[0], nil
 	}
@@ -148,7 +156,7 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 			CustomClient: osp.context.httpClient,
 			MoreHeaders: map[string]string{
 				"X-Auth-Token": osp.access.AuthToken(),
-				MetadataPrefix + key: value,
+				containerMetaName(key): value,
 			},
 			OkCodes: []int{204},
 		})
