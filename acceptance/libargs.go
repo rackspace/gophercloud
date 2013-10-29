@@ -56,11 +56,11 @@ func aSuitableImage(api gophercloud.CloudServersProvider) string {
 	//
 	// Until then, just return Ubuntu 12.04 LTS.
 	for i := 0; i < len(images); i++ {
-		if images[i].Id == "23b564c9-c3e6-49f9-bc68-86c7a9ab5018" {
+		if images[i].Id == "25de7af5-1668-46fb-bd08-9974b63a4806" {
 			return images[i].Id
 		}
 	}
-	panic("Image 23b564c9-c3e6-49f9-bc68-86c7a9ab5018 (Ubuntu 12.04 LTS) not found.")
+	panic("Image 25de7af5-1668-46fb-bd08-9974b63a4806 (Ubuntu 12.04 LTS) not found.")
 }
 
 // aSuitableFlavor finds the minimum flavor capable of running the test image
