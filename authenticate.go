@@ -195,3 +195,8 @@ func (a *Access) Revoke(tok string) error {
 	})
 	return err
 }
+
+// See AccessProvider interface definition for details.
+func (a *Access) GetServiceCatalog() []CatalogEntry {
+	return a.ServiceCatalog
+}

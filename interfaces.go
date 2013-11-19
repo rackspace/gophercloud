@@ -19,6 +19,9 @@ type AccessProvider interface {
 	// Reauthenticate attempts to acquire a new authentication token, if the feature is enabled by
 	// AuthOptions.AllowReauth.
 	Reauthenticate() error
+
+	// GetServiceCatalog returns the service catalog, an array of endpoints
+	GetServiceCatalog() []CatalogEntry
 }
 
 // CloudServersProvider instances encapsulate a Cloud Servers API, should one exist in the service catalog
