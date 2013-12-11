@@ -22,6 +22,13 @@ func main() {
 				panic(err)
 			}
 
+			log("Listing containers")
+			containers, err := osp.ListContainers()
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("%+v\n", containers)
+
 			log("Deleting container " + containerName)
 			err = container.Delete()
 			if err != nil {

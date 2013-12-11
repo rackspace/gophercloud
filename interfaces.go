@@ -28,6 +28,9 @@ type ObjectStoreProvider interface {
 	// storage infrastructure.
 	CreateContainer(name string) (Container, error)
 
+	// ListContainers returns a slice of ContainerInfo interfaces
+	ListContainers() ([]ContainerInfo, error)
+
 	// DeleteContainer attempts to delete an empty container.
 	// This call WILL fail if the container is not empty.
 	DeleteContainer(name string) error
@@ -44,6 +47,17 @@ type Container interface {
 
 	// Metadata() provides access to a container's set of custom metadata settings.
 	Metadata() (MetadataProvider, error)
+}
+
+// ContainerInfo instances encapsulate information relating to a container. An object implementing the ContainerInfo
+//interface must have methods to accessing the container's name, object count, and size.
+type ContainerInfo interface {
+	// Return the container's name
+	Label() string
+	// Return the number of objects in the container
+	ObjCount() int
+	// Return the size of the container (in bytes)
+	Size() int
 }
 
 // MetadataProvider grants access to custom metadata on some "thing", whatever that thing may be (e.g., containers,
