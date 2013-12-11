@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
 	"github.com/rackspace/gophercloud"
 )
 
@@ -37,7 +37,7 @@ func main() {
 	})
 }
 
-func log(s... interface{}) {
+func log(s ...interface{}) {
 	if !*quiet {
 		fmt.Println(s...)
 	}

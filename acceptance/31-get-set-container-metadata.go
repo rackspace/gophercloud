@@ -52,7 +52,7 @@ func main() {
 				panic(err)
 			}
 			if strings.ToLower(val2) != strings.ToLower(val) {
-				panic("Expected value ("+val2+") to match what we set before ("+val+")")
+				panic("Expected value (" + val2 + ") to match what we set before (" + val + ")")
 			}
 
 			log("Done.")

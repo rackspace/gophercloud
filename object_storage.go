@@ -59,7 +59,7 @@ func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container
 		})
 		if err == nil {
 			container = &openstackContainer{
-				Name: name,
+				Name:     name,
 				Provider: osp,
 			}
 		}
@@ -68,9 +68,9 @@ func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container
 	return container, err
 }
 
-func (osp *openstackObjectStoreProvider) GetContainer(name string) (Container){
+func (osp *openstackObjectStoreProvider) GetContainer(name string) Container {
 	return &openstackContainer{
-		Name: name,
+		Name:     name,
 		Provider: osp,
 	}
 }
@@ -102,7 +102,7 @@ func (c *openstackContainer) Metadata() (MetadataProvider, error) {
 // Otherwise, the container resource is queried for its current set of custom headers.
 func (c *openstackContainer) cacheHeaders() error {
 	osp := c.Provider
-		return osp.context.WithReauth(osp.access, func() error {
+	return osp.context.WithReauth(osp.access, func() error {
 		if c.customMetadata == nil {
 			// Grab the set of headers attached to this container.
 			// These headers will be keyed off of mixed-case strings.
@@ -166,14 +166,14 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 		_, err := perigee.Request("POST", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
 			MoreHeaders: map[string]string{
-				"X-Auth-Token": osp.access.AuthToken(),
+				"X-Auth-Token":         osp.access.AuthToken(),
 				containerMetaName(key): value,
 			},
 			OkCodes: []int{204},
 		})
 		return err
 	})
-	
+
 	// Flush our values cache to make sure our next attempt at getting values always gets the right data.
 	if err == nil {
 		c.customMetadata = nil
@@ -189,31 +189,31 @@ func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (BasicDow
 	err := osp.context.WithReauth(osp.access, func() error {
 		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, objOpts.Name)
 		moreHeaders := map[string]string{
-			"X-Auth-Token":osp.access.AuthToken(),
+			"X-Auth-Token": osp.access.AuthToken(),
 		}
 		offset := objOpts.Offset
 		length := objOpts.Length
 
 		switch {
-			case offset == 0 && length == 0:
-				break
-			case offset < 0 && length > 0:
-				return fmt.Errorf("The provided offset-length combination is not supported: offset:%d, length:%d", offset, length)
-			case offset < 0 && length == 0:
-				moreHeaders["Range"] = fmt.Sprintf("bytes=%d", offset)
-			case offset > 0 && length == 0:
-				moreHeaders["Range"] = fmt.Sprintf("bytes=%d-", offset)
-			default: 
-				moreHeaders["Range"] = fmt.Sprintf("bytes=%d-%d", offset, offset+length)
+		case offset == 0 && length == 0:
+			break
+		case offset < 0 && length > 0:
+			return fmt.Errorf("The provided offset-length combination is not supported: offset:%d, length:%d", offset, length)
+		case offset < 0 && length == 0:
+			moreHeaders["Range"] = fmt.Sprintf("bytes=%d", offset)
+		case offset > 0 && length == 0:
+			moreHeaders["Range"] = fmt.Sprintf("bytes=%d-", offset)
+		default:
+			moreHeaders["Range"] = fmt.Sprintf("bytes=%d-%d", offset, offset+length)
 		}
-		
+
 		var res interface{}
 
 		resp, err := perigee.Request("GET", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
-			Results: &res,
-			MoreHeaders: moreHeaders,
-			OkCodes: []int{200, 206},
+			Results:      &res,
+			MoreHeaders:  moreHeaders,
+			OkCodes:      []int{200, 206},
 		})
 
 		bd.reader = bytes.NewReader(resp.JsonResult)
@@ -234,12 +234,12 @@ func (bd *BasicObjDownloader) Seek(offset int64, whence int) (int64, error) {
 
 func (bd *BasicObjDownloader) Close() error {
 	bd.reader = nil
-	return nil 
+	return nil
 }
 
 type ObjectOpts struct {
 	Length int
-	Name string
+	Name   string
 	Offset int
 }
 

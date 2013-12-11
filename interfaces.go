@@ -33,7 +33,7 @@ type ObjectStoreProvider interface {
 	CreateContainer(name string) (Container, error)
 
 	// GetContainer returns a Container object
-	GetContainer(name string) (Container)
+	GetContainer(name string) Container
 
 	// DeleteContainer attempts to delete an empty container.
 	// This call WILL fail if the container is not empty.
