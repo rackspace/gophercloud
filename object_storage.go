@@ -1,6 +1,8 @@
 package gophercloud
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/racker/perigee"
 	"strings"
 )
@@ -64,6 +66,13 @@ func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container
 		return err
 	})
 	return container, err
+}
+
+func (osp *openstackObjectStoreProvider) GetContainer(name string) (Container){
+	return &openstackContainer{
+		Name: name,
+		Provider: osp,
+	}
 }
 
 func (osp *openstackObjectStoreProvider) DeleteContainer(name string) error {
@@ -171,4 +180,69 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 	}
 
 	return err
+}
+
+func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (BasicDownloader, error) {
+	bd := &BasicObjDownloader{}
+
+	osp := c.Provider
+	err := osp.context.WithReauth(osp.access, func() error {
+		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, objOpts.Name)
+		moreHeaders := map[string]string{
+			"X-Auth-Token":osp.access.AuthToken(),
+		}
+		offset := objOpts.Offset
+		length := objOpts.Length
+
+		switch {
+			case offset == 0 && length == 0:
+				break
+			case offset < 0 && length > 0:
+				return fmt.Errorf("The provided offset-length combination is not supported: offset:%d, length:%d", offset, length)
+			case offset < 0 && length == 0:
+				moreHeaders["Range"] = fmt.Sprintf("bytes=%d", offset)
+			case offset > 0 && length == 0:
+				moreHeaders["Range"] = fmt.Sprintf("bytes=%d-", offset)
+			default: 
+				moreHeaders["Range"] = fmt.Sprintf("bytes=%d-%d", offset, offset+length)
+		}
+		
+		var res interface{}
+
+		resp, err := perigee.Request("GET", url, perigee.Options{
+			CustomClient: osp.context.httpClient,
+			Results: &res,
+			MoreHeaders: moreHeaders,
+			OkCodes: []int{200, 206},
+		})
+
+		bd.reader = bytes.NewReader(resp.JsonResult)
+
+		return err
+	})
+
+	return bd, err
+}
+
+func (bd *BasicObjDownloader) Read(p []byte) (int, error) {
+	return bd.reader.Read(p)
+}
+
+func (bd *BasicObjDownloader) Seek(offset int64, whence int) (int64, error) {
+	return bd.reader.Seek(offset, whence)
+}
+
+func (bd *BasicObjDownloader) Close() error {
+	bd.reader = nil
+	return nil 
+}
+
+type ObjectOpts struct {
+	Length int
+	Name string
+	Offset int
+}
+
+type BasicObjDownloader struct {
+	reader *bytes.Reader
 }
