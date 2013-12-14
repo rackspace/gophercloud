@@ -25,57 +25,11 @@ type AccessProvider interface {
 	Reauthenticate() error
 }
 
-// ObjectStorageProvider instances encapsulate a cloud-based storage API, should one exist in the service catalog
-// for your provider.
-type ObjectStoreProvider interface {
-	// CreateContainer attempts to create a container for objects on the remote provider's cloud
-	// storage infrastructure.
-	CreateContainer(name string) (Container, error)
-
-	// GetContainer returns a Container object
-	GetContainer(name string) Container
-
-	// DeleteContainer attempts to delete an empty container.
-	// This call WILL fail if the container is not empty.
-	DeleteContainer(name string) error
-}
-
-// Container instances more or less correspond to directories or volume table of contents structures in
-// more traditional filesystems.
-type Container interface {
-	// Delete() dispenses with the container.
-	// NOTE: Upon returning from this method call without error,
-	// the reference to the container no longer refers to a container hosted by your provider.
-	// Future calls to the container will produce errors.
-	Delete() error
-
-	// Metadata() provides access to a container's set of custom metadata settings.
-	Metadata() (MetadataProvider, error)
-
-	BasicObjectDownloader(opts ObjectOpts) (BasicDownloader, error)
-}
-
-// MetadataProvider grants access to custom metadata on some "thing", whatever that thing may be (e.g., containers,
-// files, etc.)
-type MetadataProvider interface {
-	// CustomValue retrieves the value associated with a single custom attribute, if one exists.
-	// Note: It is explicitly not an error if no value is bound to an attribute.
-	// In this case, the value returned will be "".
-	CustomValue(key string) (string, error)
-
-	// CustomValues provides a complete set of metadata settings, in map form.
-	// Try not to use this method unless you need the full batch at once, or unless you find your
-	// code is making repeated CustomValue() calls.
-	CustomValues() (map[string]string, error)
-
-	// SetCustomValue provides a means by which your application may set a custom attribute on an entity.
-	SetCustomValue(key, value string) error
-}
-
-type BasicDownloader interface {
-	io.Closer
-	io.Reader
-	io.Seeker
+// ServiceCatalogerIdentityV2 interface provides direct access to the service catalog as offered by the Identity V2 API.
+// We regret we need to fracture the namespace of what should otherwise be a simple concept; however,
+// the OpenStack community saw fit to render V3's service catalog completely incompatible with V2.
+type ServiceCatalogerForIdentityV2 interface {
+	V2ServiceCatalog() []CatalogEntry
 }
 
 // CloudServersProvider instances encapsulate a Cloud Servers API, should one exist in the service catalog
