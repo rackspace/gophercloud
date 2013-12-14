@@ -14,7 +14,7 @@ import (
 var containerName = flag.String("container", "", "The name of the container from which to download the file")
 var fileName = flag.String("file", "", "The name of the file to download")
 
-type p struct {
+type testCase struct {
 	o int
 	l int
 }
@@ -26,14 +26,14 @@ func main() {
 		withObjectStoreApi(auth, func(osp gophercloud.ObjectStoreProvider) {
 			container := osp.GetContainer(*containerName)
 			// You can define more interesting test cases here. The default test {0,0} downloads the whole file.
-			tests := [...]p{{0, 0}}
-			for ind, s := range tests {
+			testCases := [...]testCase{{0, 0}}
+			for ind, test := range testCases {
 				fmt.Println("\n")
-				fmt.Printf("offset:%d, length:%d\n", s.o, s.l)
+				fmt.Printf("offset:%d, length:%d\n", test.o, test.l)
 				reader, err := container.BasicObjectDownloader(gophercloud.ObjectOpts{
 					Name:   *fileName,
-					Offset: s.o,
-					Length: s.l,
+					Offset: test.o,
+					Length: test.l,
 				})
 				if err != nil {
 					fmt.Printf("Error: %v\n", err)
