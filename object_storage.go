@@ -182,9 +182,8 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 	return err
 }
 
-func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (BasicDownloader, error) {
-	bd := &BasicObjDownloader{}
-
+func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDownloader, error) {
+	bd := &BasicDownloader{}
 	osp := c.Provider
 	err := osp.context.WithReauth(osp.access, func() error {
 		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, objOpts.Name)
@@ -208,14 +207,13 @@ func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (BasicDow
 		}
 
 		var res interface{}
-
 		resp, err := perigee.Request("GET", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
-			Results:      &res,
+			Results: &res,
 			MoreHeaders:  moreHeaders,
 			OkCodes:      []int{200, 206},
 		})
-
+		fmt.Printf("resp.JsonResult: %+v\n", resp)
 		bd.reader = bytes.NewReader(resp.JsonResult)
 
 		return err
@@ -224,15 +222,15 @@ func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (BasicDow
 	return bd, err
 }
 
-func (bd *BasicObjDownloader) Read(p []byte) (int, error) {
+func (bd *BasicDownloader) Read(p []byte) (int, error){
 	return bd.reader.Read(p)
 }
 
-func (bd *BasicObjDownloader) Seek(offset int64, whence int) (int64, error) {
+func (bd *BasicDownloader) Seek(offset int64, whence int) (int64, error) {
 	return bd.reader.Seek(offset, whence)
 }
 
-func (bd *BasicObjDownloader) Close() error {
+func (bd *BasicDownloader) Close() error {
 	bd.reader = nil
 	return nil
 }
@@ -243,6 +241,6 @@ type ObjectOpts struct {
 	Offset int
 }
 
-type BasicObjDownloader struct {
+type BasicDownloader struct {
 	reader *bytes.Reader
 }

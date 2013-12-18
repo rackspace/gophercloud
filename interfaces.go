@@ -1,7 +1,7 @@
 package gophercloud
 
 import (
-	"io"
+	//"io"
 )
 
 // AccessProvider instances encapsulate a Keystone authentication interface.
@@ -39,7 +39,8 @@ type ObjectStoreProvider interface {
         // storage infrastructure.
         CreateContainer(name string) (Container, error)
 
-        // GetContainer returns a Container object
+        // GetContainer returns a Container identified by a well-known name. No server interactions occur; 
+	// it assumes you already know the name of an existing container.
         GetContainer(name string) Container
 
         // DeleteContainer attempts to delete an empty container.
@@ -59,7 +60,7 @@ type Container interface {
         // Metadata() provides access to a container's set of custom metadata settings.
         Metadata() (MetadataProvider, error)
 
-        BasicObjectDownloader(opts ObjectOpts) (BasicDownloader, error)
+        BasicObjectDownloader(opts ObjectOpts) (*BasicDownloader, error)
 }
 
 // MetadataProvider grants access to custom metadata on some "thing", whatever that thing may be (e.g., containers,
@@ -79,11 +80,13 @@ type MetadataProvider interface {
         SetCustomValue(key, value string) error
 }
 
+/* 
 type BasicDownloader interface {
         io.Closer
         io.Reader
         io.Seeker
 }
+*/
 
 // CloudServersProvider instances encapsulate a Cloud Servers API, should one exist in the service catalog
 // for your provider.
