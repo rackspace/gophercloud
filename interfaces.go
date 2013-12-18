@@ -1,9 +1,5 @@
 package gophercloud
 
-import (
-	//"io"
-)
-
 // AccessProvider instances encapsulate a Keystone authentication interface.
 type AccessProvider interface {
 	// FirstEndpointUrlByCriteria searches through the service catalog for the first
@@ -35,58 +31,53 @@ type ServiceCatalogerForIdentityV2 interface {
 // ObjectStorageProvider instances encapsulate a cloud-based storage API, should one exist in the service catalog
 // for your provider.
 type ObjectStoreProvider interface {
-        // CreateContainer attempts to create a container for objects on the remote provider's cloud
-        // storage infrastructure.
-        CreateContainer(name string) (Container, error)
+	// CreateContainer attempts to create a container for objects on the remote provider's cloud
+	// storage infrastructure.
+	CreateContainer(name string) (Container, error)
 
-        // GetContainer returns a Container identified by a well-known name. No server interactions occur; 
+	// GetContainer returns a Container identified by a well-known name. No server interactions occur;
 	// it assumes you already know the name of an existing container.
-        GetContainer(name string) Container
+	GetContainer(name string) Container
 
-        // DeleteContainer attempts to delete an empty container.
-        // This call WILL fail if the container is not empty.
-        DeleteContainer(name string) error
+	// DeleteContainer attempts to delete an empty container.
+	// This call WILL fail if the container is not empty.
+	DeleteContainer(name string) error
 }
 
 // Container instances more or less correspond to directories or volume table of contents structures in
 // more traditional filesystems.
 type Container interface {
-        // Delete() dispenses with the container.
-        // NOTE: Upon returning from this method call without error,
-        // the reference to the container no longer refers to a container hosted by your provider.
-        // Future calls to the container will produce errors.
-        Delete() error
+	// Delete() dispenses with the container.
+	// NOTE: Upon returning from this method call without error,
+	// the reference to the container no longer refers to a container hosted by your provider.
+	// Future calls to the container will produce errors.
+	Delete() error
 
-        // Metadata() provides access to a container's set of custom metadata settings.
-        Metadata() (MetadataProvider, error)
+	// Metadata() provides access to a container's set of custom metadata settings.
+	Metadata() (MetadataProvider, error)
 
-        BasicObjectDownloader(opts ObjectOpts) (*BasicDownloader, error)
+	// BasicObectDownloader allows for downloading an object entirely in local memory.
+	// The returned object is a pointer to a BasicDownloader structure. The BasicDownloader structure offers methods
+	// for reading, seeking, and closing (Read, Seek, and Close, respectively).
+	BasicObjectDownloader(opts ObjectOpts) (*BasicDownloader, error)
 }
 
 // MetadataProvider grants access to custom metadata on some "thing", whatever that thing may be (e.g., containers,
 // files, etc.)
 type MetadataProvider interface {
-        // CustomValue retrieves the value associated with a single custom attribute, if one exists.
-        // Note: It is explicitly not an error if no value is bound to an attribute.
-        // In this case, the value returned will be "".
-        CustomValue(key string) (string, error)
+	// CustomValue retrieves the value associated with a single custom attribute, if one exists.
+	// Note: It is explicitly not an error if no value is bound to an attribute.
+	// In this case, the value returned will be "".
+	CustomValue(key string) (string, error)
 
-        // CustomValues provides a complete set of metadata settings, in map form.
-        // Try not to use this method unless you need the full batch at once, or unless you find your
-        // code is making repeated CustomValue() calls.
-        CustomValues() (map[string]string, error)
+	// CustomValues provides a complete set of metadata settings, in map form.
+	// Try not to use this method unless you need the full batch at once, or unless you find your
+	// code is making repeated CustomValue() calls.
+	CustomValues() (map[string]string, error)
 
-        // SetCustomValue provides a means by which your application may set a custom attribute on an entity.
-        SetCustomValue(key, value string) error
+	// SetCustomValue provides a means by which your application may set a custom attribute on an entity.
+	SetCustomValue(key, value string) error
 }
-
-/* 
-type BasicDownloader interface {
-        io.Closer
-        io.Reader
-        io.Seeker
-}
-*/
 
 // CloudServersProvider instances encapsulate a Cloud Servers API, should one exist in the service catalog
 // for your provider.

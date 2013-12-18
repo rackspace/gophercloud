@@ -68,6 +68,7 @@ func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container
 	return container, err
 }
 
+// See Container interface for details.
 func (osp *openstackObjectStoreProvider) GetContainer(name string) Container {
 	return &openstackContainer{
 		Name:     name,
@@ -182,6 +183,7 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 	return err
 }
 
+// See Container interface for details.
 func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDownloader, error) {
 	bd := &BasicDownloader{}
 	osp := c.Provider
@@ -209,7 +211,7 @@ func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDo
 		var res interface{}
 		resp, err := perigee.Request("GET", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
-			Results: &res,
+			Results:      &res,
 			MoreHeaders:  moreHeaders,
 			OkCodes:      []int{200, 206},
 		})
@@ -222,25 +224,31 @@ func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDo
 	return bd, err
 }
 
-func (bd *BasicDownloader) Read(p []byte) (int, error){
+// *BasicDownloader.Read uses the *bytes.Reader.Read method
+func (bd *BasicDownloader) Read(p []byte) (int, error) {
 	return bd.reader.Read(p)
 }
 
+// *BasicDownloader.Seek uses the *bytes.Reader.Seek method
 func (bd *BasicDownloader) Seek(offset int64, whence int) (int64, error) {
 	return bd.reader.Seek(offset, whence)
 }
 
+// *BasicDownloader.Close nil the reader, effectively "closing" it
 func (bd *BasicDownloader) Close() error {
 	bd.reader = nil
 	return nil
 }
 
+// ObjectOpts is a structure containing relevant parameters when creating an uploader or downloader.
 type ObjectOpts struct {
 	Length int
 	Name   string
 	Offset int
 }
 
+// BasicDownloader is a structure that embeds the *bytes.Reader structure. We use the Read and Seek methods of
+// the *bytes.Reader for the corresponding BasicDownloader methods.
 type BasicDownloader struct {
 	reader *bytes.Reader
 }
