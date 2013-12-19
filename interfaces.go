@@ -60,6 +60,9 @@ type Container interface {
 	// The returned object is a pointer to a BasicDownloader structure. The BasicDownloader structure offers methods
 	// for reading, seeking, and closing (Read, Seek, and Close, respectively).
 	BasicObjectDownloader(opts ObjectOpts) (*BasicDownloader, error)
+
+	// BasicObjectUploader allows for uploading an object.
+	BasicObjectUploader(opts ObjectOpts) (*BasicUploader, error)
 }
 
 // MetadataProvider grants access to custom metadata on some "thing", whatever that thing may be (e.g., containers,

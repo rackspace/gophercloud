@@ -224,6 +224,16 @@ func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDo
 	return bd, err
 }
 
+func (c *openstackContainer) BasicObjectUploader(objOpts ObjectOpts) (*BasicUploader, error) {
+	b := make([]byte, 0)
+	bu := &BasicUploader{
+		container: c,
+		name: objOpts.Name,
+		buf: bytes.NewBuffer(b),
+	}
+	return bu, nil
+}
+
 // *BasicDownloader.Read uses the *bytes.Reader.Read method
 func (bd *BasicDownloader) Read(p []byte) (int, error) {
 	return bd.reader.Read(p)
@@ -247,8 +257,69 @@ type ObjectOpts struct {
 	Offset int
 }
 
+func (bu *BasicUploader) Commit() error {
+	c := bu.container.(*openstackContainer)
+	osp := c.Provider
+	err := osp.context.WithReauth(osp.access, func() error {
+		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, bu.name)
+		moreHeaders := map[string]string{
+			"X-Auth-Token": osp.access.AuthToken(),
+		}
+
+		fmt.Printf("Length of buffer: %d\n", bu.buf.Len())
+
+		reqBody := make([]byte, bu.buf.Len())
+
+		n, err := bu.buf.Read(reqBody)
+
+		if err != nil{
+			return err
+		}
+
+		fmt.Printf("Number of bytes read: %d\n", n)
+		fmt.Printf("reqBody (bytes): %v\n", reqBody)
+		fmt.Printf("reqBody (string): %s\n", string(reqBody))
+
+		_, err = perigee.Request("PUT", url, perigee.Options{
+			CustomClient: osp.context.httpClient,
+			ReqBody:	reqBody,
+			//ReqBody:	string(reqBody),
+			MoreHeaders:  moreHeaders,
+			DumpReqJson: true,
+			OkCodes:      []int{201},
+		})
+
+		return err
+	})
+
+	return err
+}
+
+func (bu *BasicUploader) Read(p []byte) (int, error) {
+	return bu.buf.Read(p)
+}
+
+func (bu *BasicUploader) Write(p []byte) (int, error) {
+	return bu.buf.Write(p)
+}
+
+func (bu *BasicUploader) Seek(offset int64, whence int) (int64, error){
+	return 0, nil
+}
+
+func (bu *BasicUploader) Close() error {
+	bu.buf = nil
+	return nil
+}
+
 // BasicDownloader is a structure that embeds the *bytes.Reader structure. We use the Read and Seek methods of
 // the *bytes.Reader for the corresponding BasicDownloader methods.
 type BasicDownloader struct {
 	reader *bytes.Reader
+}
+
+type BasicUploader struct {
+	name	string
+	container	Container
+	buf *bytes.Buffer
 }
