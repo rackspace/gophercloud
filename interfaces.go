@@ -56,7 +56,7 @@ type Container interface {
 	// Metadata() provides access to a container's set of custom metadata settings.
 	Metadata() (MetadataProvider, error)
 
-	// BasicObectDownloader allows for downloading an object entirely in local memory.
+	// BasicObjectDownloader allows for downloading an object entirely in local memory.
 	// The returned object is a pointer to a BasicDownloader structure. The BasicDownloader structure offers methods
 	// for reading, seeking, and closing (Read, Seek, and Close, respectively).
 	BasicObjectDownloader(opts ObjectOpts) (*BasicDownloader, error)
