@@ -226,7 +226,7 @@ func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDo
 }
 
 func (c *openstackContainer) BasicObjectUploader() (*BasicUploader, error) {
-	bu := &BasicUploader{bytes.NewBuffer(make([]byte,0))}
+	bu := &BasicUploader{bytes.NewBuffer(make([]byte, 0))}
 	return bu, nil
 }
 
@@ -257,17 +257,17 @@ func (bu *BasicUploader) Commit(objOpts ObjectOpts) error {
 
 		reqBody := make([]byte, bu.Len())
 		_, err := bu.Read(reqBody)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 
 		_, err = perigee.Request("PUT", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
 			//ReqBody:	reqBody,
-			ReqBody:	string(reqBody),
-			MoreHeaders:  moreHeaders,
+			ReqBody:     string(reqBody),
+			MoreHeaders: moreHeaders,
 			DumpReqJson: true,
-			OkCodes:      []int{201},
+			OkCodes:     []int{201},
 		})
 
 		return err
@@ -293,7 +293,7 @@ func (bu *BasicUploader) Seek(offset int64, whence int) (int64, error){
 */
 
 func (bu *BasicUploader) WriteAt(p []byte, off int64) (int, error) {
-	if off > int64(bu.Len()) || off+int64(len(p)) > int64(bu.Len()){
+	if off > int64(bu.Len()) || off+int64(len(p)) > int64(bu.Len()) {
 		return 0, errors.New("Slice bounds out of range.")
 	}
 	curBytes := bu.Bytes()
@@ -324,8 +324,8 @@ type BasicUploader struct {
 
 // ObjectOpts is a structure containing relevant parameters when creating an uploader or downloader.
 type ObjectOpts struct {
-	Length int
-	Name   string
-	Offset int
-	Container Container 
+	Length    int
+	Name      string
+	Offset    int
+	Container Container
 }
