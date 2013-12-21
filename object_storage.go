@@ -185,9 +185,8 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 
 // See Container interface for details.
 func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDownloader, error) {
-	bd := &BasicDownloader{}
 	osp := c.Provider
-	err := osp.context.WithReauth(osp.access, func() error {
+	response, err := osp.context.ResponseWithReauth(osp.access, func() (*perigee.Response, error) {
 		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, objOpts.Name)
 		moreHeaders := map[string]string{
 			"X-Auth-Token": osp.access.AuthToken(),
@@ -199,7 +198,7 @@ func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDo
 		case offset == 0 && length == 0:
 			break
 		case offset < 0 && length > 0:
-			return fmt.Errorf("The provided offset-length combination is not supported: offset:%d, length:%d", offset, length)
+			return nil, fmt.Errorf("The provided offset-length combination is not supported: offset:%d, length:%d", offset, length)
 		case offset < 0 && length == 0:
 			moreHeaders["Range"] = fmt.Sprintf("bytes=%d", offset)
 		case offset > 0 && length == 0:
@@ -209,34 +208,26 @@ func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDo
 		}
 
 		var res interface{}
-		resp, err := perigee.Request("GET", url, perigee.Options{
+		return perigee.Request("GET", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
 			Results:      &res,
 			MoreHeaders:  moreHeaders,
 			OkCodes:      []int{200, 206},
 		})
-		fmt.Printf("resp.JsonResult: %+v\n", resp)
-		bd.reader = bytes.NewReader(resp.JsonResult)
-
-		return err
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	bd := &BasicDownloader{bytes.NewReader(response.JsonResult)}
 
 	return bd, err
 }
 
-// *BasicDownloader.Read uses the *bytes.Reader.Read method
-func (bd *BasicDownloader) Read(p []byte) (int, error) {
-	return bd.reader.Read(p)
-}
-
-// *BasicDownloader.Seek uses the *bytes.Reader.Seek method
-func (bd *BasicDownloader) Seek(offset int64, whence int) (int64, error) {
-	return bd.reader.Seek(offset, whence)
-}
-
 // *BasicDownloader.Close nil the reader, effectively "closing" it
 func (bd *BasicDownloader) Close() error {
-	bd.reader = nil
+	bd = nil
 	return nil
 }
 
@@ -250,5 +241,5 @@ type ObjectOpts struct {
 // BasicDownloader is a structure that embeds the *bytes.Reader structure. We use the Read and Seek methods of
 // the *bytes.Reader for the corresponding BasicDownloader methods.
 type BasicDownloader struct {
-	reader *bytes.Reader
+	*bytes.Reader
 }
