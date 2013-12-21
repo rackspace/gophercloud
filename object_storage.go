@@ -1,6 +1,8 @@
 package gophercloud
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/racker/perigee"
 	"strings"
 )
@@ -57,13 +59,21 @@ func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container
 		})
 		if err == nil {
 			container = &openstackContainer{
-				Name: name,
+				Name:     name,
 				Provider: osp,
 			}
 		}
 		return err
 	})
 	return container, err
+}
+
+// See Container interface for details.
+func (osp *openstackObjectStoreProvider) GetContainer(name string) Container {
+	return &openstackContainer{
+		Name:     name,
+		Provider: osp,
+	}
 }
 
 func (osp *openstackObjectStoreProvider) DeleteContainer(name string) error {
@@ -93,7 +103,7 @@ func (c *openstackContainer) Metadata() (MetadataProvider, error) {
 // Otherwise, the container resource is queried for its current set of custom headers.
 func (c *openstackContainer) cacheHeaders() error {
 	osp := c.Provider
-		return osp.context.WithReauth(osp.access, func() error {
+	return osp.context.WithReauth(osp.access, func() error {
 		if c.customMetadata == nil {
 			// Grab the set of headers attached to this container.
 			// These headers will be keyed off of mixed-case strings.
@@ -157,18 +167,79 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 		_, err := perigee.Request("POST", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
 			MoreHeaders: map[string]string{
-				"X-Auth-Token": osp.access.AuthToken(),
+				"X-Auth-Token":         osp.access.AuthToken(),
 				containerMetaName(key): value,
 			},
 			OkCodes: []int{204},
 		})
 		return err
 	})
-	
+
 	// Flush our values cache to make sure our next attempt at getting values always gets the right data.
 	if err == nil {
 		c.customMetadata = nil
 	}
 
 	return err
+}
+
+// See Container interface for details.
+func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDownloader, error) {
+	osp := c.Provider
+	response, err := osp.context.ResponseWithReauth(osp.access, func() (*perigee.Response, error) {
+		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, objOpts.Name)
+		moreHeaders := map[string]string{
+			"X-Auth-Token": osp.access.AuthToken(),
+		}
+		offset := objOpts.Offset
+		length := objOpts.Length
+
+		switch {
+		case offset == 0 && length == 0:
+			break
+		case offset < 0 && length > 0:
+			return nil, fmt.Errorf("The provided offset-length combination is not supported: offset:%d, length:%d", offset, length)
+		case offset < 0 && length == 0:
+			moreHeaders["Range"] = fmt.Sprintf("bytes=%d", offset)
+		case offset > 0 && length == 0:
+			moreHeaders["Range"] = fmt.Sprintf("bytes=%d-", offset)
+		default:
+			moreHeaders["Range"] = fmt.Sprintf("bytes=%d-%d", offset, offset+length)
+		}
+
+		var res interface{}
+		return perigee.Request("GET", url, perigee.Options{
+			CustomClient: osp.context.httpClient,
+			Results:      &res,
+			MoreHeaders:  moreHeaders,
+			OkCodes:      []int{200, 206},
+		})
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	bd := &BasicDownloader{bytes.NewReader(response.JsonResult)}
+
+	return bd, err
+}
+
+// *BasicDownloader.Close nil the reader, effectively "closing" it
+func (bd *BasicDownloader) Close() error {
+	bd = nil
+	return nil
+}
+
+// ObjectOpts is a structure containing relevant parameters when creating an uploader or downloader.
+type ObjectOpts struct {
+	Length int
+	Name   string
+	Offset int
+}
+
+// BasicDownloader is a structure that embeds the *bytes.Reader structure. We use the Read and Seek methods of
+// the *bytes.Reader for the corresponding BasicDownloader methods.
+type BasicDownloader struct {
+	*bytes.Reader
 }

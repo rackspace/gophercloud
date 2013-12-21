@@ -21,12 +21,23 @@ type AccessProvider interface {
 	Reauthenticate() error
 }
 
+// ServiceCatalogerIdentityV2 interface provides direct access to the service catalog as offered by the Identity V2 API.
+// We regret we need to fracture the namespace of what should otherwise be a simple concept; however,
+// the OpenStack community saw fit to render V3's service catalog completely incompatible with V2.
+type ServiceCatalogerForIdentityV2 interface {
+	V2ServiceCatalog() []CatalogEntry
+}
+
 // ObjectStorageProvider instances encapsulate a cloud-based storage API, should one exist in the service catalog
 // for your provider.
 type ObjectStoreProvider interface {
 	// CreateContainer attempts to create a container for objects on the remote provider's cloud
 	// storage infrastructure.
 	CreateContainer(name string) (Container, error)
+
+	// GetContainer returns a Container identified by a well-known name. No server interactions occur;
+	// it assumes you already know the name of an existing container.
+	GetContainer(name string) Container
 
 	// DeleteContainer attempts to delete an empty container.
 	// This call WILL fail if the container is not empty.
@@ -44,6 +55,11 @@ type Container interface {
 
 	// Metadata() provides access to a container's set of custom metadata settings.
 	Metadata() (MetadataProvider, error)
+
+	// BasicObjectDownloader allows for downloading an object entirely in local memory.
+	// The returned object is a pointer to a BasicDownloader structure. The BasicDownloader structure offers methods
+	// for reading, seeking, and closing (Read, Seek, and Close, respectively).
+	BasicObjectDownloader(opts ObjectOpts) (*BasicDownloader, error)
 }
 
 // MetadataProvider grants access to custom metadata on some "thing", whatever that thing may be (e.g., containers,
