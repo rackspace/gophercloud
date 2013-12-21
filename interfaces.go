@@ -62,7 +62,7 @@ type Container interface {
 	BasicObjectDownloader(opts ObjectOpts) (*BasicDownloader, error)
 
 	// BasicObjectUploader allows for uploading an object.
-	BasicObjectUploader(opts ObjectOpts) (*BasicUploader, error)
+	BasicObjectUploader() (*BasicUploader, error)
 }
 
 // MetadataProvider grants access to custom metadata on some "thing", whatever that thing may be (e.g., containers,

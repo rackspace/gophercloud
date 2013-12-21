@@ -2,6 +2,7 @@ package gophercloud
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/racker/perigee"
 	"strings"
@@ -224,13 +225,8 @@ func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDo
 	return bd, err
 }
 
-func (c *openstackContainer) BasicObjectUploader(objOpts ObjectOpts) (*BasicUploader, error) {
-	b := make([]byte, 0)
-	bu := &BasicUploader{
-		container: c,
-		name: objOpts.Name,
-		buf: bytes.NewBuffer(b),
-	}
+func (c *openstackContainer) BasicObjectUploader() (*BasicUploader, error) {
+	bu := &BasicUploader{bytes.NewBuffer(make([]byte,0))}
 	return bu, nil
 }
 
@@ -250,40 +246,25 @@ func (bd *BasicDownloader) Close() error {
 	return nil
 }
 
-// ObjectOpts is a structure containing relevant parameters when creating an uploader or downloader.
-type ObjectOpts struct {
-	Length int
-	Name   string
-	Offset int
-}
-
-func (bu *BasicUploader) Commit() error {
-	c := bu.container.(*openstackContainer)
+func (bu *BasicUploader) Commit(objOpts ObjectOpts) error {
+	c := objOpts.Container.(*openstackContainer)
 	osp := c.Provider
 	err := osp.context.WithReauth(osp.access, func() error {
-		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, bu.name)
+		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, objOpts.Name)
 		moreHeaders := map[string]string{
 			"X-Auth-Token": osp.access.AuthToken(),
 		}
 
-		fmt.Printf("Length of buffer: %d\n", bu.buf.Len())
-
-		reqBody := make([]byte, bu.buf.Len())
-
-		n, err := bu.buf.Read(reqBody)
-
+		reqBody := make([]byte, bu.Len())
+		_, err := bu.Read(reqBody)
 		if err != nil{
 			return err
 		}
 
-		fmt.Printf("Number of bytes read: %d\n", n)
-		fmt.Printf("reqBody (bytes): %v\n", reqBody)
-		fmt.Printf("reqBody (string): %s\n", string(reqBody))
-
 		_, err = perigee.Request("PUT", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
-			ReqBody:	reqBody,
-			//ReqBody:	string(reqBody),
+			//ReqBody:	reqBody,
+			ReqBody:	string(reqBody),
 			MoreHeaders:  moreHeaders,
 			DumpReqJson: true,
 			OkCodes:      []int{201},
@@ -295,20 +276,38 @@ func (bu *BasicUploader) Commit() error {
 	return err
 }
 
-func (bu *BasicUploader) Read(p []byte) (int, error) {
-	return bu.buf.Read(p)
-}
-
-func (bu *BasicUploader) Write(p []byte) (int, error) {
-	return bu.buf.Write(p)
-}
-
+/*
 func (bu *BasicUploader) Seek(offset int64, whence int) (int64, error){
-	return 0, nil
+	bu.reader = bytes.NewReader(bu.writer.Bytes())
+	n, err := bu.reader.Seek(offset, whence)
+	if err != nil {
+		return n, err
+	}
+	bu.writer = &bytes.Buffer{}
+	_, err = bu.reader.WriteTo(bu.writer)
+	if err != nil {
+		return n, err
+	}
+	return n, nil
+}
+*/
+
+func (bu *BasicUploader) WriteAt(p []byte, off int64) (int, error) {
+	if off > int64(bu.Len()) || off+int64(len(p)) > int64(bu.Len()){
+		return 0, errors.New("Slice bounds out of range.")
+	}
+	curBytes := bu.Bytes()
+	newData := bytes.Replace(curBytes, curBytes[off:off+int64(len(p))], p, 1)
+	bu.Reset()
+	_, err := bu.Write(newData)
+	if err != nil {
+		return 0, err
+	}
+	return len(p), nil
 }
 
 func (bu *BasicUploader) Close() error {
-	bu.buf = nil
+	bu = nil
 	return nil
 }
 
@@ -318,8 +317,15 @@ type BasicDownloader struct {
 	reader *bytes.Reader
 }
 
+// BasicUploader
 type BasicUploader struct {
-	name	string
-	container	Container
-	buf *bytes.Buffer
+	*bytes.Buffer
+}
+
+// ObjectOpts is a structure containing relevant parameters when creating an uploader or downloader.
+type ObjectOpts struct {
+	Length int
+	Name   string
+	Offset int
+	Container Container 
 }
