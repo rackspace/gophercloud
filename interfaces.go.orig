@@ -21,13 +21,7 @@ type AccessProvider interface {
 	Reauthenticate() error
 }
 
-// ServiceCatalogerIdentityV2 interface provides direct access to the service catalog as offered by the Identity V2 API.
-// We regret we need to fracture the namespace of what should otherwise be a simple concept; however,
-// the OpenStack community saw fit to render V3's service catalog completely incompatible with V2.
-type ServiceCatalogerForIdentityV2 interface {
-	V2ServiceCatalog() []CatalogEntry
-}
-
+<<<<<<< HEAD
 // ObjectStorageProvider instances encapsulate a cloud-based storage API, should one exist in the service catalog
 // for your provider.
 type ObjectStoreProvider interface {
@@ -82,6 +76,13 @@ type MetadataProvider interface {
 
 	// SetCustomValue provides a means by which your application may set a custom attribute on an entity.
 	SetCustomValue(key, value string) error
+=======
+// ServiceCatalogerIdentityV2 interface provides direct access to the service catalog as offered by the Identity V2 API.
+// We regret we need to fracture the namespace of what should otherwise be a simple concept; however,
+// the OpenStack community saw fit to render V3's service catalog completely incompatible with V2.
+type ServiceCatalogerForIdentityV2 interface {
+	V2ServiceCatalog() []CatalogEntry
+>>>>>>> origin
 }
 
 // CloudServersProvider instances encapsulate a Cloud Servers API, should one exist in the service catalog
