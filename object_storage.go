@@ -1,7 +1,6 @@
 package gophercloud
 
 import (
-	//	"fmt"
 	"github.com/racker/perigee"
 	"strings"
 )
