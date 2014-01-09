@@ -23,7 +23,9 @@ func main() {
 			}
 
 			log("Listing containers")
-			containers, err := osp.ListContainers()
+			containers, err := osp.ListContainers(gophercloud.ListOpts{
+				Full: true,
+			})
 			if err != nil {
 				panic(err)
 			}
