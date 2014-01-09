@@ -29,7 +29,7 @@ type ObjectStoreProvider interface {
 	CreateContainer(name string) (Container, error)
 
 	// ListContainers returns a slice of ContainerInfo interfaces
-	ListContainers() ([]ContainerInfo, error)
+	ListContainers(listOpts ListOpts) ([]ContainerInfo, error)
 
 	// DeleteContainer attempts to delete an empty container.
 	// This call WILL fail if the container is not empty.

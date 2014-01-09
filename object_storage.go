@@ -1,7 +1,7 @@
 package gophercloud
 
 import (
-	"fmt"
+	//	"fmt"
 	"github.com/racker/perigee"
 	"strings"
 )
@@ -77,30 +77,48 @@ func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container
 	return container, err
 }
 
-func (osp *openstackObjectStoreProvider) ListContainers() ([]ContainerInfo, error) {
-	var osci []openstackContainerInfo
-	var intf []byte
-	err := osp.context.WithReauth(osp.access, func() error {
-		url := osp.endpoint
-		resp, err := perigee.Request("GET", url, perigee.Options{
-			CustomClient: osp.context.httpClient,
-			//Results:      &osci,
-			Results: &intf,
-			MoreHeaders: map[string]string{
-				"X-Auth-Token": osp.access.AuthToken(),
-			},
+func (osp *openstackObjectStoreProvider) ListContainers(listOpts ListOpts) ([]ContainerInfo, error) {
+	returnFull := listOpts.Full
+	if returnFull {
+		var osci []openstackContainerInfo
+		err := osp.context.WithReauth(osp.access, func() error {
+			url := osp.endpoint
+			_, err := perigee.Request("GET", url, perigee.Options{
+				CustomClient: osp.context.httpClient,
+				Results:      &osci,
+				MoreHeaders: map[string]string{
+					"X-Auth-Token": osp.access.AuthToken(),
+				},
+			})
+			return err
 		})
-		fmt.Printf("%+v\n", resp)
-		fmt.Printf("%+v\n", string(resp.JsonResult))
-		return err
-	})
-	
-	fmt.Printf("%+v\n", intf)
-	ci := make([]ContainerInfo, len(osci))
-	for i, val := range osci {
-		ci[i] = val
+		containersInfo := make([]ContainerInfo, len(osci))
+		for i, val := range osci {
+			containersInfo[i] = val
+		}
+		return containersInfo, err
+	} else {
+		response, err := osp.context.ResponseWithReauth(osp.access, func() (*perigee.Response, error) {
+			url := osp.endpoint
+			return perigee.Request("GET", url, perigee.Options{
+				CustomClient: osp.context.httpClient,
+				Results:      true,
+				MoreHeaders: map[string]string{
+					"X-Auth-Token": osp.access.AuthToken(),
+				},
+				Accept: "text/plain",
+			})
+		})
+		rawResult := string(response.JsonResult)
+		containerNames := strings.Split(rawResult[:len(rawResult)-1], "\n")
+		containersInfo := make([]ContainerInfo, len(containerNames))
+		for i, containerName := range containerNames {
+			containersInfo[i] = openstackContainerInfo{
+				Name: containerName,
+			}
+		}
+		return containersInfo, err
 	}
-	return ci, err
 }
 
 func (osp *openstackObjectStoreProvider) DeleteContainer(name string) error {
@@ -223,4 +241,8 @@ func (ci openstackContainerInfo) ObjCount() int {
 // See ContainerInfo interface for details
 func (ci openstackContainerInfo) Size() int {
 	return ci.Bytes
+}
+
+type ListOpts struct {
+	Full bool
 }
