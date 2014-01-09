@@ -43,6 +43,16 @@ type openstackContainer struct {
 	customMetadata *cimap
 }
 
+// openstackContainerInfo holds the information describing a single OpenStack container.
+type openstackContainerInfo struct {
+	// Bytes is the the size of the container.
+	Bytes int
+	// Count is the number of objects in the container.
+	Count int
+	// Name is the label for the container.
+	Name string
+}
+
 func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container, error) {
 	var container Container
 
@@ -57,13 +67,57 @@ func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container
 		})
 		if err == nil {
 			container = &openstackContainer{
-				Name: name,
+				Name:     name,
 				Provider: osp,
 			}
 		}
 		return err
 	})
 	return container, err
+}
+
+func (osp *openstackObjectStoreProvider) ListContainers(listOpts ListOpts) ([]ContainerInfo, error) {
+	returnFull := listOpts.Full
+	if returnFull {
+		var osci []openstackContainerInfo
+		err := osp.context.WithReauth(osp.access, func() error {
+			url := osp.endpoint
+			_, err := perigee.Request("GET", url, perigee.Options{
+				CustomClient: osp.context.httpClient,
+				Results:      &osci,
+				MoreHeaders: map[string]string{
+					"X-Auth-Token": osp.access.AuthToken(),
+				},
+			})
+			return err
+		})
+		containersInfo := make([]ContainerInfo, len(osci))
+		for i, val := range osci {
+			containersInfo[i] = val
+		}
+		return containersInfo, err
+	} else {
+		response, err := osp.context.ResponseWithReauth(osp.access, func() (*perigee.Response, error) {
+			url := osp.endpoint
+			return perigee.Request("GET", url, perigee.Options{
+				CustomClient: osp.context.httpClient,
+				Results:      true,
+				MoreHeaders: map[string]string{
+					"X-Auth-Token": osp.access.AuthToken(),
+				},
+				Accept: "text/plain",
+			})
+		})
+		rawResult := string(response.JsonResult)
+		containerNames := strings.Split(rawResult[:len(rawResult)-1], "\n")
+		containersInfo := make([]ContainerInfo, len(containerNames))
+		for i, containerName := range containerNames {
+			containersInfo[i] = openstackContainerInfo{
+				Name: containerName,
+			}
+		}
+		return containersInfo, err
+	}
 }
 
 func (osp *openstackObjectStoreProvider) DeleteContainer(name string) error {
@@ -93,7 +147,7 @@ func (c *openstackContainer) Metadata() (MetadataProvider, error) {
 // Otherwise, the container resource is queried for its current set of custom headers.
 func (c *openstackContainer) cacheHeaders() error {
 	osp := c.Provider
-		return osp.context.WithReauth(osp.access, func() error {
+	return osp.context.WithReauth(osp.access, func() error {
 		if c.customMetadata == nil {
 			// Grab the set of headers attached to this container.
 			// These headers will be keyed off of mixed-case strings.
@@ -157,18 +211,37 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 		_, err := perigee.Request("POST", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
 			MoreHeaders: map[string]string{
-				"X-Auth-Token": osp.access.AuthToken(),
+				"X-Auth-Token":         osp.access.AuthToken(),
 				containerMetaName(key): value,
 			},
 			OkCodes: []int{204},
 		})
 		return err
 	})
-	
+
 	// Flush our values cache to make sure our next attempt at getting values always gets the right data.
 	if err == nil {
 		c.customMetadata = nil
 	}
 
 	return err
+}
+
+// See ContainerInfo interface for details
+func (ci openstackContainerInfo) Label() string {
+	return ci.Name
+}
+
+// See ContainerInfo interface for details
+func (ci openstackContainerInfo) ObjCount() int {
+	return ci.Count
+}
+
+// See ContainerInfo interface for details
+func (ci openstackContainerInfo) Size() int {
+	return ci.Bytes
+}
+
+type ListOpts struct {
+	Full bool
 }
