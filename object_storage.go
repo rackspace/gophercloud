@@ -46,6 +46,16 @@ type openstackContainer struct {
 	customMetadata *cimap
 }
 
+// openstackContainerInfo holds the information describing a single OpenStack container.
+type openstackContainerInfo struct {
+	// Bytes is the the size of the container.
+	Bytes int
+	// Count is the number of objects in the container.
+	Count int
+	// Name is the label for the container.
+	Name string
+}
+
 func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container, error) {
 	var container Container
 
@@ -67,6 +77,50 @@ func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container
 		return err
 	})
 	return container, err
+}
+
+func (osp *openstackObjectStoreProvider) ListContainers(listOpts ListOpts) ([]ContainerInfo, error) {
+	returnFull := listOpts.Full
+	if returnFull {
+		var osci []openstackContainerInfo
+		err := osp.context.WithReauth(osp.access, func() error {
+			url := osp.endpoint
+			_, err := perigee.Request("GET", url, perigee.Options{
+				CustomClient: osp.context.httpClient,
+				Results:      &osci,
+				MoreHeaders: map[string]string{
+					"X-Auth-Token": osp.access.AuthToken(),
+				},
+			})
+			return err
+		})
+		containersInfo := make([]ContainerInfo, len(osci))
+		for i, val := range osci {
+			containersInfo[i] = val
+		}
+		return containersInfo, err
+	} else {
+		response, err := osp.context.ResponseWithReauth(osp.access, func() (*perigee.Response, error) {
+			url := osp.endpoint
+			return perigee.Request("GET", url, perigee.Options{
+				CustomClient: osp.context.httpClient,
+				Results:      true,
+				MoreHeaders: map[string]string{
+					"X-Auth-Token": osp.access.AuthToken(),
+				},
+				Accept: "text/plain",
+			})
+		})
+		rawResult := string(response.JsonResult)
+		containerNames := strings.Split(rawResult[:len(rawResult)-1], "\n")
+		containersInfo := make([]ContainerInfo, len(containerNames))
+		for i, containerName := range containerNames {
+			containersInfo[i] = openstackContainerInfo{
+				Name: containerName,
+			}
+		}
+		return containersInfo, err
+	}
 }
 
 // See Container interface for details.
@@ -184,68 +238,43 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 	return err
 }
 
+// BasicObjectUploader returns a pointer to a BasicUploader object with an empty buffer
+func (c *openstackContainer) BasicObjectUploader() *BasicUploader {
+	return &BasicUploader{bytes.NewBuffer(make([]byte, 0))}
+}
+
 // See Container interface for details.
-func (c *openstackContainer) BasicObjectDownloader(objOpts ObjectOpts) (*BasicDownloader, error) {
-	bd := &BasicDownloader{}
+func (c *openstackContainer) DeleteObject(name string) error {
 	osp := c.Provider
-	err := osp.context.WithReauth(osp.access, func() error {
-		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, objOpts.Name)
-		moreHeaders := map[string]string{
-			"X-Auth-Token": osp.access.AuthToken(),
-		}
-		offset := objOpts.Offset
-		length := objOpts.Length
-
-		switch {
-		case offset == 0 && length == 0:
-			break
-		case offset < 0 && length > 0:
-			return fmt.Errorf("The provided offset-length combination is not supported: offset:%d, length:%d", offset, length)
-		case offset < 0 && length == 0:
-			moreHeaders["Range"] = fmt.Sprintf("bytes=%d", offset)
-		case offset > 0 && length == 0:
-			moreHeaders["Range"] = fmt.Sprintf("bytes=%d-", offset)
-		default:
-			moreHeaders["Range"] = fmt.Sprintf("bytes=%d-%d", offset, offset+length)
-		}
-
-		var res interface{}
-		resp, err := perigee.Request("GET", url, perigee.Options{
+	return osp.context.WithReauth(osp.access, func() error {
+		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, name)
+		_, err := perigee.Request("DELETE", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
-			Results:      &res,
-			MoreHeaders:  moreHeaders,
-			OkCodes:      []int{200, 206},
+			MoreHeaders: map[string]string{
+				"X-Auth-Token": osp.access.AuthToken(),
+			},
+			OkCodes: []int{204},
 		})
-		fmt.Printf("resp.JsonResult: %+v\n", resp)
-		bd.reader = bytes.NewReader(resp.JsonResult)
-
 		return err
 	})
-
-	return bd, err
 }
 
-func (c *openstackContainer) BasicObjectUploader() (*BasicUploader, error) {
-	bu := &BasicUploader{bytes.NewBuffer(make([]byte, 0))}
-	return bu, nil
+// See ContainerInfo interface for details
+func (ci openstackContainerInfo) Label() string {
+	return ci.Name
 }
 
-// *BasicDownloader.Read uses the *bytes.Reader.Read method
-func (bd *BasicDownloader) Read(p []byte) (int, error) {
-	return bd.reader.Read(p)
+// See ContainerInfo interface for details
+func (ci openstackContainerInfo) ObjCount() int {
+	return ci.Count
 }
 
-// *BasicDownloader.Seek uses the *bytes.Reader.Seek method
-func (bd *BasicDownloader) Seek(offset int64, whence int) (int64, error) {
-	return bd.reader.Seek(offset, whence)
+// See ContainerInfo interface for details
+func (ci openstackContainerInfo) Size() int {
+	return ci.Bytes
 }
 
-// *BasicDownloader.Close nil the reader, effectively "closing" it
-func (bd *BasicDownloader) Close() error {
-	bd.reader = nil
-	return nil
-}
-
+// Commit attempts to upload the object data to the endpoint.
 func (bu *BasicUploader) Commit(objOpts ObjectOpts) error {
 	c := objOpts.Container.(*openstackContainer)
 	osp := c.Provider
@@ -263,11 +292,10 @@ func (bu *BasicUploader) Commit(objOpts ObjectOpts) error {
 
 		_, err = perigee.Request("PUT", url, perigee.Options{
 			CustomClient: osp.context.httpClient,
-			//ReqBody:	reqBody,
-			ReqBody:     string(reqBody),
-			MoreHeaders: moreHeaders,
-			DumpReqJson: true,
-			OkCodes:     []int{201},
+			ReqBody:      reqBody,
+			MoreHeaders:  moreHeaders,
+			DumpReqJson:  true,
+			OkCodes:      []int{201},
 		})
 
 		return err
@@ -276,22 +304,9 @@ func (bu *BasicUploader) Commit(objOpts ObjectOpts) error {
 	return err
 }
 
-/*
-func (bu *BasicUploader) Seek(offset int64, whence int) (int64, error){
-	bu.reader = bytes.NewReader(bu.writer.Bytes())
-	n, err := bu.reader.Seek(offset, whence)
-	if err != nil {
-		return n, err
-	}
-	bu.writer = &bytes.Buffer{}
-	_, err = bu.reader.WriteTo(bu.writer)
-	if err != nil {
-		return n, err
-	}
-	return n, nil
-}
-*/
-
+// *BasicUploader.WriteAt writes a slice of bytes (p) at a particular offset (off).
+// It is used to seek in the buffer. Seeking beyond the bounds of the already-written
+// object results in an error.
 func (bu *BasicUploader) WriteAt(p []byte, off int64) (int, error) {
 	if off > int64(bu.Len()) || off+int64(len(p)) > int64(bu.Len()) {
 		return 0, errors.New("Slice bounds out of range.")
@@ -306,15 +321,10 @@ func (bu *BasicUploader) WriteAt(p []byte, off int64) (int, error) {
 	return len(p), nil
 }
 
+// *BasicUploader.Close 'closes' the BasicUploader by nilling the pointer.
 func (bu *BasicUploader) Close() error {
 	bu = nil
 	return nil
-}
-
-// BasicDownloader is a structure that embeds the *bytes.Reader structure. We use the Read and Seek methods of
-// the *bytes.Reader for the corresponding BasicDownloader methods.
-type BasicDownloader struct {
-	reader *bytes.Reader
 }
 
 // BasicUploader
@@ -328,4 +338,9 @@ type ObjectOpts struct {
 	Name      string
 	Offset    int
 	Container Container
+}
+
+// ListOpts is a structure containing relevant parameters when requesting a list of containers.
+type ListOpts struct {
+	Full bool
 }

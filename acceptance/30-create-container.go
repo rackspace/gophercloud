@@ -22,6 +22,15 @@ func main() {
 				panic(err)
 			}
 
+			log("Listing containers")
+			containers, err := osp.ListContainers(gophercloud.ListOpts{
+				Full: true,
+			})
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("%+v\n", containers)
+
 			log("Deleting container " + containerName)
 			err = container.Delete()
 			if err != nil {

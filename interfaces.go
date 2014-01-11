@@ -35,6 +35,9 @@ type ObjectStoreProvider interface {
 	// storage infrastructure.
 	CreateContainer(name string) (Container, error)
 
+	// ListContainers returns a slice of ContainerInfo interfaces
+	ListContainers(listOpts ListOpts) ([]ContainerInfo, error)
+
 	// GetContainer returns a Container identified by a well-known name. No server interactions occur;
 	// it assumes you already know the name of an existing container.
 	GetContainer(name string) Container
@@ -56,13 +59,22 @@ type Container interface {
 	// Metadata() provides access to a container's set of custom metadata settings.
 	Metadata() (MetadataProvider, error)
 
-	// BasicObjectDownloader allows for downloading an object entirely in local memory.
-	// The returned object is a pointer to a BasicDownloader structure. The BasicDownloader structure offers methods
-	// for reading, seeking, and closing (Read, Seek, and Close, respectively).
-	BasicObjectDownloader(opts ObjectOpts) (*BasicDownloader, error)
-
 	// BasicObjectUploader allows for uploading an object.
-	BasicObjectUploader() (*BasicUploader, error)
+	BasicObjectUploader() *BasicUploader
+
+	// DeleteObject removes an object from the container.
+	DeleteObject(name string) error
+}
+
+// ContainerInfo instances encapsulate information relating to a container. An object implementing the ContainerInfo
+//interface must have methods to accessing the container's name, object count, and size.
+type ContainerInfo interface {
+	// Return the container's name
+	Label() string
+	// Return the number of objects in the container
+	ObjCount() int
+	// Return the size of the container (in bytes)
+	Size() int
 }
 
 // MetadataProvider grants access to custom metadata on some "thing", whatever that thing may be (e.g., containers,
