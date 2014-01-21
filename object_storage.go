@@ -1,6 +1,9 @@
 package gophercloud
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
 	"github.com/racker/perigee"
 	"strings"
 )
@@ -120,6 +123,14 @@ func (osp *openstackObjectStoreProvider) ListContainers(listOpts ListOpts) ([]Co
 	}
 }
 
+// See Container interface for details.
+func (osp *openstackObjectStoreProvider) GetContainer(name string) Container {
+	return &openstackContainer{
+		Name:     name,
+		Provider: osp,
+	}
+}
+
 func (osp *openstackObjectStoreProvider) DeleteContainer(name string) error {
 	err := osp.context.WithReauth(osp.access, func() error {
 		url := osp.endpoint + "/" + name
@@ -227,6 +238,27 @@ func (c *openstackContainer) SetCustomValue(key, value string) error {
 	return err
 }
 
+// BasicObjectUploader returns a pointer to a BasicUploader object with an empty buffer
+func (c *openstackContainer) BasicObjectUploader() *BasicUploader {
+	return &BasicUploader{bytes.NewBuffer(make([]byte, 0))}
+}
+
+// See Container interface for details.
+func (c *openstackContainer) DeleteObject(name string) error {
+	osp := c.Provider
+	return osp.context.WithReauth(osp.access, func() error {
+		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, name)
+		_, err := perigee.Request("DELETE", url, perigee.Options{
+			CustomClient: osp.context.httpClient,
+			MoreHeaders: map[string]string{
+				"X-Auth-Token": osp.access.AuthToken(),
+			},
+			OkCodes: []int{204},
+		})
+		return err
+	})
+}
+
 // See ContainerInfo interface for details
 func (ci openstackContainerInfo) Label() string {
 	return ci.Name
@@ -242,6 +274,73 @@ func (ci openstackContainerInfo) Size() int {
 	return ci.Bytes
 }
 
+// Commit attempts to upload the object data to the endpoint.
+func (bu *BasicUploader) Commit(objOpts ObjectOpts) error {
+	c := objOpts.Container.(*openstackContainer)
+	osp := c.Provider
+	err := osp.context.WithReauth(osp.access, func() error {
+		url := fmt.Sprintf("%s/%s/%s", osp.endpoint, c.Name, objOpts.Name)
+		moreHeaders := map[string]string{
+			"X-Auth-Token": osp.access.AuthToken(),
+		}
+
+		reqBody := make([]byte, bu.Len())
+		_, err := bu.Read(reqBody)
+		if err != nil {
+			return err
+		}
+
+		_, err = perigee.Request("PUT", url, perigee.Options{
+			CustomClient: osp.context.httpClient,
+			ReqBody:      reqBody,
+			MoreHeaders:  moreHeaders,
+			DumpReqJson:  true,
+			OkCodes:      []int{201},
+		})
+
+		return err
+	})
+
+	return err
+}
+
+// *BasicUploader.WriteAt writes a slice of bytes (p) at a particular offset (off).
+// It is used to seek in the buffer. Seeking beyond the bounds of the already-written
+// object results in an error.
+func (bu *BasicUploader) WriteAt(p []byte, off int64) (int, error) {
+	if off > int64(bu.Len()) || off+int64(len(p)) > int64(bu.Len()) {
+		return 0, errors.New("Slice bounds out of range.")
+	}
+	curBytes := bu.Bytes()
+	newData := bytes.Replace(curBytes, curBytes[off:off+int64(len(p))], p, 1)
+	bu.Reset()
+	_, err := bu.Write(newData)
+	if err != nil {
+		return 0, err
+	}
+	return len(p), nil
+}
+
+// *BasicUploader.Close 'closes' the BasicUploader by nilling the pointer.
+func (bu *BasicUploader) Close() error {
+	bu = nil
+	return nil
+}
+
+// BasicUploader
+type BasicUploader struct {
+	*bytes.Buffer
+}
+
+// ObjectOpts is a structure containing relevant parameters when creating an uploader or downloader.
+type ObjectOpts struct {
+	Length    int
+	Name      string
+	Offset    int
+	Container Container
+}
+
+// ListOpts is a structure containing relevant parameters when requesting a list of containers.
 type ListOpts struct {
 	Full bool
 }

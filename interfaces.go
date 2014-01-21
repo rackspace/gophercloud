@@ -38,6 +38,10 @@ type ObjectStoreProvider interface {
 	// ListContainers returns a slice of ContainerInfo interfaces
 	ListContainers(listOpts ListOpts) ([]ContainerInfo, error)
 
+	// GetContainer returns a Container identified by a well-known name. No server interactions occur;
+	// it assumes you already know the name of an existing container.
+	GetContainer(name string) Container
+
 	// DeleteContainer attempts to delete an empty container.
 	// This call WILL fail if the container is not empty.
 	DeleteContainer(name string) error
@@ -54,6 +58,12 @@ type Container interface {
 
 	// Metadata() provides access to a container's set of custom metadata settings.
 	Metadata() (MetadataProvider, error)
+
+	// BasicObjectUploader allows for uploading an object.
+	BasicObjectUploader() *BasicUploader
+
+	// DeleteObject removes an object from the container.
+	DeleteObject(name string) error
 }
 
 // ContainerInfo instances encapsulate information relating to a container. An object implementing the ContainerInfo
