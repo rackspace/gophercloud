@@ -64,6 +64,10 @@ type Container interface {
 
 	// DeleteObject removes an object from the container.
 	DeleteObject(name string) error
+
+	// ListObjects will return objects in the container. The listOpts parameter holds the
+	// options for retreiving the objects.
+	ListObjects(listOpts ListOptions) ([]ObjectInfo, error)
 }
 
 // ContainerInfo instances encapsulate information relating to a container. An object implementing the ContainerInfo
@@ -75,6 +79,38 @@ type ContainerInfo interface {
 	ObjCount() int
 	// Return the size of the container (in bytes)
 	Size() int
+}
+
+// ObjectInfo instances encapsulate information relating to a storage object. The methods associated
+// with an instance of ObjectInfo are for specifying fields that must be present in the implemented
+// structure
+type ObjectInfo interface {
+	// Return the name of the object.
+	GetName() string
+	// Return the object's hash.
+	GetHash() string
+	// Return the size of the object (in bytes).
+	GetSize() int
+	// Return the object's content-type.
+	GetContentType() string
+	// Return (as a string) the most recent date the object was modified.
+	GetLastModified() string
+}
+
+// ListOptions are options for any query that can be 'paged'.
+type ListOptions interface {
+	// Return the desired format. Setting Full to true will retrieve all the information available
+	// for the listed items, whereas false will only retrieve the item names.
+	GetFull() bool
+	// Return the limit. Limit is an integer parameter that represents the maximum number of items
+	// to return.
+	GetLimit() int
+	// Return the marker. Marker is a string parameter that tells the endpoint to return items whose name
+	// is greater in value than the specified marker.
+	GetMarker() string
+	// Return the end marker. EndMarker is a string parameter that tells the endpoint to return items
+	// whose name is lesser in value than the specified end marker.
+	GetEndMarker() string
 }
 
 // MetadataProvider grants access to custom metadata on some "thing", whatever that thing may be (e.g., containers,

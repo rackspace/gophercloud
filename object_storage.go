@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/racker/perigee"
+	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -56,6 +58,16 @@ type openstackContainerInfo struct {
 	Name string
 }
 
+// openstackObjectInfo holds the information describing a single OpenStack object.
+type openstackObjectInfo struct {
+	Name          string
+	Hash          string
+	Bytes         int
+	Content_type  string
+	Last_modified string
+}
+
+// See ObjectStoreProvider interface for details.
 func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container, error) {
 	var container Container
 
@@ -79,6 +91,7 @@ func (osp *openstackObjectStoreProvider) CreateContainer(name string) (Container
 	return container, err
 }
 
+// See ObjectStoreProvider interface for details.
 func (osp *openstackObjectStoreProvider) ListContainers(listOpts ListOpts) ([]ContainerInfo, error) {
 	returnFull := listOpts.Full
 	if returnFull {
@@ -123,7 +136,7 @@ func (osp *openstackObjectStoreProvider) ListContainers(listOpts ListOpts) ([]Co
 	}
 }
 
-// See Container interface for details.
+// See ObjectStoreProvider interface for details.
 func (osp *openstackObjectStoreProvider) GetContainer(name string) Container {
 	return &openstackContainer{
 		Name:     name,
@@ -131,6 +144,7 @@ func (osp *openstackObjectStoreProvider) GetContainer(name string) Container {
 	}
 }
 
+// See ObjectStoreProvider interface for details
 func (osp *openstackObjectStoreProvider) DeleteContainer(name string) error {
 	err := osp.context.WithReauth(osp.access, func() error {
 		url := osp.endpoint + "/" + name
@@ -143,6 +157,85 @@ func (osp *openstackObjectStoreProvider) DeleteContainer(name string) error {
 		})
 	})
 	return err
+}
+
+// See Container interface for details
+func (c *openstackContainer) ListObjects(listOpts ListOptions) ([]ObjectInfo, error) {
+	osListOpts, ok := listOpts.(OpenstackListOpts)
+	if !ok {
+		return nil, errors.New("Error casting from interface ListOptions to structure OpenstackListOpts.")
+	}
+	queryString := "?"
+	l := reflect.ValueOf(&osListOpts).Elem()
+	typeOfL := l.Type()
+	for i := 0; i < l.NumField(); i++ {
+		f := l.Field(i)
+		fName := typeOfL.Field(i).Name
+		fValue := f.Interface()
+		switch f.Kind() {
+		case reflect.String:
+			if fValue.(string) != "" {
+				queryString += fName + "=" + fValue.(string)
+			}
+		case reflect.Int:
+			if fValue.(int) != 0 {
+				queryString += fName + "=" + strconv.Itoa(fValue.(int))
+			}
+		case reflect.Slice:
+			if fValue.([]byte) != nil {
+				queryString += fName + "=" + string(fValue.([]byte))
+			}
+		}
+	}
+	if queryString != "?" {
+		queryString = strings.ToLower(queryString)
+	}
+	osp := c.Provider
+	url := fmt.Sprintf("%s/%s%s", osp.endpoint, c.Name, queryString)
+	returnFull := osListOpts.Full
+	if returnFull {
+		var osoi []openstackObjectInfo
+		err := osp.context.WithReauth(osp.access, func() error {
+			_, err := perigee.Request("GET", url, perigee.Options{
+				CustomClient: osp.context.httpClient,
+				Results:      &osoi,
+				MoreHeaders: map[string]string{
+					"X-Auth-Token": osp.access.AuthToken(),
+				},
+				OkCodes: []int{200, 204},
+			})
+
+			return err
+		})
+		objectsInfo := make([]ObjectInfo, len(osoi))
+		for i, val := range osoi {
+			objectsInfo[i] = val
+		}
+
+		return objectsInfo, err
+	} else {
+		response, err := osp.context.ResponseWithReauth(osp.access, func() (*perigee.Response, error) {
+			return perigee.Request("GET", url, perigee.Options{
+				CustomClient: osp.context.httpClient,
+				Results:      true,
+				MoreHeaders: map[string]string{
+					"X-Auth-Token": osp.access.AuthToken(),
+				},
+				OkCodes: []int{200},
+				Accept:  "text/plain",
+			})
+		})
+		rawResult := string(response.JsonResult)
+		objectNames := strings.Split(rawResult[:len(rawResult)-1], "\n")
+		objectsInfo := make([]ObjectInfo, len(objectNames))
+		for i, objectName := range objectNames {
+			objectsInfo[i] = openstackObjectInfo{
+				Name: objectName,
+			}
+		}
+
+		return objectsInfo, err
+	}
 }
 
 func (c *openstackContainer) Delete() error {
@@ -274,6 +367,26 @@ func (ci openstackContainerInfo) Size() int {
 	return ci.Bytes
 }
 
+func (oi openstackObjectInfo) GetName() string {
+	return oi.Name
+}
+
+func (oi openstackObjectInfo) GetHash() string {
+	return oi.Hash
+}
+
+func (oi openstackObjectInfo) GetSize() int {
+	return oi.Bytes
+}
+
+func (oi openstackObjectInfo) GetContentType() string {
+	return oi.Content_type
+}
+
+func (oi openstackObjectInfo) GetLastModified() string {
+	return oi.Last_modified
+}
+
 // Commit attempts to upload the object data to the endpoint.
 func (bu *BasicUploader) Commit(objOpts ObjectOpts) error {
 	c := objOpts.Container.(*openstackContainer)
@@ -342,5 +455,40 @@ type ObjectOpts struct {
 
 // ListOpts is a structure containing relevant parameters when requesting a list of containers.
 type ListOpts struct {
-	Full bool
+	Full      bool
+	Limit     int
+	Marker    string
+	EndMarker string
+}
+
+// OpenstackListOpts is a structure containing relevant parameters when listing items in OpenStack.
+type OpenstackListOpts struct {
+	Full      bool
+	Limit     int
+	Marker    string
+	EndMarker string
+	Prefix    string
+	Format    string
+	Delimiter []byte
+	Path      string
+}
+
+// See ListOptions interface for details.
+func (lo OpenstackListOpts) GetFull() bool {
+	return lo.Full
+}
+
+// See ListOptions interface for details.
+func (lo OpenstackListOpts) GetLimit() int {
+	return lo.Limit
+}
+
+// See ListOptions interface for details.
+func (lo OpenstackListOpts) GetMarker() string {
+	return lo.Marker
+}
+
+// See ListOptions interface for details.
+func (lo OpenstackListOpts) GetEndMarker() string {
+	return lo.EndMarker
 }
