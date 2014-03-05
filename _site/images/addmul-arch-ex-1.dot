@@ -1,0 +1,16 @@
+digraph {
+	math_in_1 -> muler
+	math_in_2 -> muler
+
+	math_in_1 -> adder
+	math_in_2 -> adder
+
+	muler -> math_out
+	adder -> math_out
+
+	adder [shape=box]
+	muler [shape=box, label="mul'er"]
+
+	label="Figure 1.  Modules using Shared Variables"
+}
+

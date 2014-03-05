@@ -1,0 +1,18 @@
+digraph {
+	subgraph {
+		mul_in_1 -> muler
+		mul_in_2 -> muler
+		muler -> mul_out
+
+		muler [shape=box, label="mul'er"]
+	}
+	subgraph {
+		add_in_1 -> adder
+		add_in_2 -> adder
+		adder -> add_out
+
+		adder [shape=box]
+	}
+	label="Figure 2.  Modules using Independent Variables"
+}
+

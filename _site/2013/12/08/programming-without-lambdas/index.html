@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset='utf-8' />
+		<meta name="description" content="Kestrel : A completely open computer design." />
+		<link rel="stylesheet" type="text/css" media="screen" href="/dist/css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="/css/site.css" />
+		<title>Gophercloud</title>
+	</head>
+
+	<body class="text-justify">
+		<div class="container">
+			<div class="row">
+        <nav class="navbar navbar-default" role="navigation">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <a href="/" class="navbar-brand"><img height="24px" src="images/gophercloud-original.png" />&nbsp;Gophercloud</a>
+            </div>
+            <div class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="community.html">Community and Support</a></li>
+                <li><a href="https://github.com/rackspace/gophercloud/issues">Issues</a></li>
+                <li><a href="#">License</a></li>
+              </ul>
+            </div>
+          </div>
+					<a id="forkme_banner" href="https://github.com/sam-falvo/kestrel">View on GitHub</a>
+        </nav>
+			</div>
+			<div class="row first-content">
+	<h2>Programming Without Lambdas</h2>
+	<p>08 Dec 2013</p>
+
+	<div>
+	<blockquote>
+ <p>
+  That's another aspect of your application where you can save 100% of the code.
+  I remain adament that local variables are not only useless, they're harmful.
+  And, if you're writing code that use them, you're writing . . . non-optimal code?
+ </p>
+ <p>
+  . . .
+ </p>
+ <p>
+  It is necessary to have variables.
+  ColorForth has got a whole slew of, well, system variables for some things . . . that are necessary.
+  And, it is very useful when you're editing something to have the cursor position stored in a variable,
+  so that when you come back to it the cursor is still there, and you can pick up where you left off.
+ </p>
+ <p>
+  Variables are essential.
+  I don't see any use for a small number of variables.
+ </p>
+ <small>Charles H. Moore, 1999, on the topic of local variables in Forth software.  <a href="https://www.youtube.com/watch?v=NK0NwqF8F0k">From a video recording made at iTVc, Inc.</a>, around 52 minutes, 55 seconds into the video.</small>
+</blockquote>
+
+<p>Forth embodies a very libertarian philosophy of program construction.
+You&#39;re free to make software as shoddy or as elegant as you want,
+as carelessly or as meticulously as you desire,
+as aloof or as structured as you care,
+and as informal or as formally proven as you wish.
+Because Forth lacks in-built conventions on how a program should &quot;look&quot;, Forth earned itself a dubious &quot;write-only&quot; reputation.
+Paradoxically, while some languages like Haskell have a reputation for requiring excessive discipline to use well,
+I&#39;ve yet to see a language as dependent on discipline and personal responsibility as I have with Forth.
+I argue, the stronger the type-checker, the less discipline you need to produce reliable, readable software.</p>
+
+<p>A set of programming conventions or patterns helps produce easily maintained software that also satisfies high reliability requirements, while minimizing the cognitive load on the programmer(s).
+About three years ago, I published a &quot;programming pattern&quot; for Forth titled <a href="http://sam-falvo.github.io/2010/02/27/declarative-imperative-then-inquisitive/">Declarative, Imperative, then Inquisitive</a>.
+It served me very well in the years since, and continues to serve me well today.
+However, the DItI pattern assumes a minimum level of capability in the Forth run-time environment which the Kestrel-2&#39;s S16X4 family of processors cannot meet in hardware alone.
+Therefore, I needed to arrive at a new set of programming techniques specifically for more limited environments, such as the S16X4 family of MISC processors.
+In writing out what I&#39;ve learned, I now have a better understanding of what Chuck Moore tried to teach the greater Forth community back around the turn of the century.</p>
+
+<p>This article contains a collection of independent yet related techniques which I&#39;ve developed on my own over the last three years of Kestrel-2 development and enjoyment.
+First, I review the DItI pattern and discuss the slight changes necessary to adapt it to the Kestrel-2.
+If you haven&#39;t read the DItI pattern yet, <a href="http://sam-falvo.github.io/2010/02/27/declarative-imperative-then-inquisitive/">you might benefit from doing so now</a>.
+I then discuss treating software as units of virtual hardware, a modularization technique suitable for Forth in general, but the S16X4 Machine Forth in particular.
+I explain why a preference for global variables exists over locals and record fields, and provide two strategies for overcoming their limitations when working with a plurality of records.
+Finally, I briefly talk about tasks, in the multitasking sense of the word.</p>
+
+<p>I mentioned enjoyment previously.
+Do not underestimate the value of the enjoyment factor:
+I typically have only a few hours per week for actual Kestrel development, so
+it remains in my best interest to balance carefully my desire to document all of my software against minimizing the time taken to see something that works.
+Therefore, any coding pattern must meet two important criteria:
+1) It must apply generally to all classes of software, from application development to low-level systems software development, and,
+2) It must directly support my writing of comment-free code in a manner that allows me to re-acquaint myself with the code no less than a year or two later, after not reading it until then.
+I believe the techniques presented in this article fulfill both criteria at least as well as the DItI pattern.</p>
+
+<h3>Adapting the Declarative, Imperative, then Inquisitive Pattern</h3>
+
+<p>Forth words may take one of several different forms.
+A word may <em>enforce state</em>.
+For instance, when writing a video game, you might find a word <code>-collision</code> which <em>guarantees</em> all subsequent code that a collision between the player and some other object has not yet happened.
+If a collision occurred, then the burden of handling this exceptional case falls, directly or indirectly, on <code>-collision</code>.
+A word may <em>effect state</em>.
+For instance, a word <code>revealed</code> might draw a sprite on the video game display, thus revealing the image if it isn&#39;t already visible.
+A word may <em>unconditionally instruct</em> the computer what to do next.
+For instance, a word <code>cls</code> might clear the screen by zeroing out the video frame buffer, without bothering to check if it&#39;s already zeroed first.
+Finally, a word may <em>ask a question</em>.
+For example, as part of its implementation, <code>-collision</code> might use a word <code>collided?</code> to determine if the player has intersected any other object on the screen.</p>
+
+<p>A simple example, framed in the context of a hypothetical video game, will help illustrate the pattern succinctly:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">: -collision    collided? IF explode  R&gt; DROP THEN ;
+: player-stuff  -collision ...stuff here... ;
+</code></pre></div>
+<p>In this example, <code>-collision</code> fulfills the <em>declarative</em> word role,
+guaranteeing any software it returns to that the player has not collided with anything.
+It works by first invoking <code>collided?</code> (an <em>inquisitive</em> word) to see if a player has collided with another object in a hypothetical video game,
+and if so, to <code>explode</code> (an <em>imperative</em> action) the player.
+Observe that <code>-collision</code> handles the error directly.
+The <code>R&gt; DROP</code> phrase permutes the return stack by discarding the (partial) continuation that invoked <code>-collision</code>.
+This returns not to the caller, but to <em>its</em> caller instead.
+Thus, whatever software <code>-collision</code> returns to is safe in the knowledge that no collision occured; but,
+whatever software called <code>player-stuff</code> may safely assume the player update succeeded, collision or otherwise.
+In effect, this one line of code is equivalent to the following C code:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">void player_stuff() {
+    if(player_collided()) {
+        explode_player();
+        return;
+    }
+    /* ... */
+}
+</code></pre></div>
+<p>However, the S16X4 family lacks a return stack all-together.
+Words that enforce state, then, no longer enjoy the ability to manipulate a return stack to alter control flow.
+Instead, we must use gaurds in front of options to gate whether or not a word executes at run-time.
+We rewrite our example as follows:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">:, +collision       collided? if, explode then, ;,
+:, -collision       collided? -1 #, xor, if, ( stuff here ) then, ;,
+:, player-stuff     +collision -collision ;,
+</code></pre></div>
+<p>Slightly more complex, yet no less declarative in nature.
+<code>+collision</code> and <code>-collision</code> become <em>options</em> in a set of decisions that <code>player-stuff</code> must perform.</p>
+
+<p>The lack of a return stack coupled with only a very shallow data stack forces strict structured-programming approaches to problem solutions,
+where you may enter a block of code at precisely one point,
+and you leave it at precisely one other point.
+Traditional Forth programming styles, used to their comfortable amounts of both return and data stack resources, simply don&#39;t apply to many MISC architectures.</p>
+
+<h3>Software as Logical Hardware</h3>
+
+<p>Write software as if you&#39;re building hardware.
+We must address the computer for what it really is:
+a physical, general-purpose machine which multiplexes its time amongst one or more virtual, purpose-built machines.
+Just as with digital electronics, it pays to design software in a manner that you can connect on some common substrate.
+In the physical domain, these components connect to each other through <em>buses</em> (one or more wires intended to send a value to receivers);
+with software, through variables in memory.
+A variable holds some output of a module, and may serve as an input to another.</p>
+
+<p><a name="ruleofthumb"></a>
+Separate software that implements some important piece of functionality (a <em>module</em>) and software that connects them together (a <em>connection</em> or <em>configuration</em>).
+While a module makes free reference to the variables it needs,
+you should only declare those variables in connection code.
+Avoid, where possible, declaring variables inside components themselves (later, <a href="#modulelocalvariables">I&#39;ll discuss an exception</a> to this rule of thumb).
+A <em>component</em>, as in the physical world, consists of one or more modules inter-connected through some connection logic.</p>
+
+<p>As long as you maintain your components hierarchically,
+you should not fear a proliferation of variables.
+They work exactly the same way as buses in digital electronics design, as the following table illustrates.</p>
+
+<table class="table">
+    <tr>
+        <th>Digital Logic</th>
+        <th>Variables</th>
+    </tr>
+    <tr>
+        <td>One, and only one, driver may assert a value.  If more than one driver asserts concurrently, the bus enters a race condition which at best presents an indeterminant value to other receivers, and at worst, causes hardware to overheat due to the dead shorts it causes, and the hardware suffers damage.</td>
+        <td>One, and only one, module may update a value.  If more than one module updates the same variable, a race condition occurs.  At best, small amounts of information may disappear into the ether, while at worst, the software will crash hard enough to warrant a restart of the process.</td>
+    </tr>
+    <tr>
+        <td>The threat of bus contention implies that buses offer a one-to-many information distribution model.</td>
+        <td>A single module might hold responsibility for setting a variable; however, that variable often contains material of interest to a plurality of other modules.  Thus, variables, particularly in functional environments, similarly offer a one-to-many distribution model for the information it provides.</td>
+    </tr>
+    <tr>
+        <td>An engineer remains fully aware of every bus in the system, <i>at the appropriate level of abstraction.</i>  A block diagram of a digital electronics subsystem typically shows only a subset of the buses comprising the actual hardware.  However, undisclosed buses rarely transcend a single functional unit's boundaries.</td>
+        <td>Through the hierarchical composition of components, a software engineer remains fully aware of every variable used at that level of the design hierarchy.  Though a variable might sit in global memory as far as the programming language cares, a programmer stipulates that some variables make sense only at certain levels of abstraction.</td>
+    </tr>
+    <tr>
+        <td>Buses exist <i>outside</i> of the components that rely on them.  A speaker doesn't care if you use lamp cord or 24-karat gold-plated Monster cable to hook up your sound system with.  A CMOS transistor doesn't care if the fabricator uses aluminum or copper metalization layer.  Etc.</td>
+        <td>With module/connection separation, the programmer allocates storage for variables <i>outside</i> of the units he configures to use them with.  A module relies on a logical name identifying a storage location.  The programmer determines how that name maps to actual memory for his application.</td>
+    </tr>
+</table>
+
+<p>Take, for example, two programs which add and multiply two values, respectively.
+It turns out we can deploy these programs in a larger system in several different ways.
+The following figures illustrates two approaches.</p>
+
+<div class="row">
+    <div class="col-md-6 img-responsive" style="text-align: center"><img src="/images/addmul-arch-ex-1.dot.svg" /></div>
+    <div class="col-md-6 img-responsive" style="text-align: center"><img src="/images/addmul-arch-ex-2.dot.svg" /></div>
+</div>
+
+<p>The first figure shows how both modules may draw their inputs from a shared set of variables, and deposits their results similarly into a shared output variable.
+The second figure shows complete isolation of the respective modules.</p>
+
+<p>In Forth, the adder and multiplier might well look like the following example listings:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ file: adder.fs
+
+: add               add_in_1 @  add_in_2 @  +  add_out ! ;
+</code></pre></div>
+<p>&nbsp;</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ file: muler.fs
+
+: mul               mul_in_1 @  mul_in_2 @  *  mul_out ! ;
+</code></pre></div>
+<p>Observe how neither <code>adder.fs</code> nor <code>muler.fs</code>, in any way, care about the other module.
+From their own points of view, <code>add</code> and <code>mul</code> work exclusively with their own set of variables.
+How the adder and multiplier work together depends entirely on how these two modules &quot;connect&quot; together.
+We define a set of configuration modules, which exist only to configure how these modules interact with each other.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ file: connections-fig-1.fs
+
+variable math_in_1
+variable math_in_2
+variable math_out
+
+: add_in_1      math_in_1 ;
+: add_in_2      math_in_2 ;
+: add_out       math_out ;
+include adder.fs
+
+: mul_in_1      math_in_1 ;
+: mul_in_2      math_in_2 ;
+: mul_out       math_out ;
+include muler.fs
+</code></pre></div>
+<p>&nbsp;</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ file: connections-fig-2.fs
+
+variable add_in_1
+variable add_in_2
+variable add_out
+
+variable mul_in_1
+variable mul_in_2
+variable mul_out
+
+include adder.fs
+include muler.fs
+</code></pre></div>
+<p>For those who&#39;ve read Leo Brodie&#39;s <a href="http://thinking-forth.sourceforge.net">Thinking Forth</a>, these configuration modules correspond closely to &quot;load blocks.&quot;
+For those who have experience programming FPGAs or <a href="http://www.greenarraychips.com">GreenArrays chips</a>, these configuration modules resemble floorplanning.
+The differences lie in dimensionality; memory exposes only a single dimension (address), and you place modules relative to each other.</p>
+
+<h3>Prefer Global Variables over Local Variables or Records</h3>
+
+<p>Common wisdom suggests avoiding global variables at all costs.
+This wisdom certainly applies to common lambda-based programming techniques,
+for they fail to explicitly address the clean separation of components and how to connect them.
+Only recently has the greater software engineering community attempted to catalog techniques for the latter,
+resulting in patterns such as <a href="http://en.wikipedia.org/wiki/Dependency_injection">Dependency Injection</a>.</p>
+
+<p>However, fundamental assumptions that work for contemporary CPUs don&#39;t hold for MISC architectures.
+In particular, global variable access often consumes significantly less time than fields relative to a base pointer.
+Particularly for MISC CPUs, they also require substantially fewer words of memory to access as well.</p>
+
+<p>While contemporary RISC(-derived) processors pipeline the math necessary to compute the addresses of local variables and record fields so that they run as fast as global variable access,
+cache effects notwithstanding,
+classical CISC and MISC architectures do not.
+An engineer using global variables may witness more drastic performance gains with MISC architectures, as the following table illustrates.</p>
+
+<table class="table table-responsive table-striped">
+    <caption>
+        Table 1.  Single-beat versus read/modify/write cycles for the S16X4, S16X4A, F18A, and eP64 MISC cores, and the MC68000 and W65C816 CISC processors.
+    </caption>
+    <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th colspan="2">S16X4(A)</th>
+            <th colspan="2">F18A</th>
+            <th colspan="2">eP64</th>
+            <th colspan="2">MC68000</th>
+            <th colspan="2">WD65C816 (native)</th>
+        </tr>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Local</th>
+            <th>Global</th>
+            <th>Local</th>
+            <th>Global</th>
+            <th>Local</th>
+            <th>Global</th>
+            <th>Local</th>
+            <th>Global</th>
+            <th>Local</th>
+            <th>Global</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Single</th>
+            <td>7</td>
+            <td>2-3</td>
+            <td>11</td>
+            <td>4</td>
+            <td>8-9</td>
+            <td>3-4</td>
+            <td>12</td>
+            <td>16</td>
+            <td>5</td>
+            <td>5</td>
+        </tr>
+        <tr>
+            <th>R-M-W</th>
+            <td>14</td>
+            <td>8</td>
+            <td>15</td>
+            <td>8</td>
+            <td>12</td>
+            <td>7</td>
+            <td>20</td>
+            <td>24</td>
+            <td>8<sup>1</sup></td>
+            <td>8</td>
+        </tr>
+    </tbody>
+</table>
+
+<p class="small"><sup>1</sup>  If, and only if, the direct page register points to the activation frame on the processor stack.</p>
+
+<p>The following code fragments illustrate why.</p>
+
+<table class="table table-responsive table-striped">
+    <caption>
+        Table 2.  Code fragments for global vs. local/record accesses.  <b>B</b> and <b>V</b> represent <tt>base</tt> and <tt>var</tt> variables.  <b>O</b> represents a numeric offset.
+    </caption>
+    <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th colspan="2">S16X4(A)</th>
+            <th colspan="2">F18A</th>
+            <th colspan="2">eP64</th>
+            <th colspan="2">MC68000</th>
+            <th colspan="2">WD65C816 (native)</th>
+        </tr>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Local</th>
+            <th>Global</th>
+            <th>Local</th>
+            <th>Global</th>
+            <th>Local</th>
+            <th>Global</th>
+            <th>Local</th>
+            <th>Global</th>
+            <th>Local</th>
+            <th>Global</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Single</th>
+            <td><pre><b>B</b> @
+<b>O</b> #
++ @</pre></td>
+            <td><pre><b>V</b> @</pre></td>
+            <td><pre><b>B</b> a! @a
+<b>O</b> #
+nop +
+a! @a</pre></td>
+            <td><pre><b>V</b> a! @a</pre></td>
+            <td><pre><b>B</b> x! @x
+<b>O</b> # +
+x! @x</pre></td>
+            <td><pre><b>V</b> x! @x</pre></td>
+            <td><pre>MOVE.W  123(A4),D5</pre></td>
+            <td><pre>MOVE.W  <b>V</b>,D5</pre></td>
+            <td><pre>LDA <b>O</b>,S</pre></td>
+            <td><pre>LDA <b>V</b></pre></td>
+        </tr>
+        <tr>
+            <th>R-M-W</th>
+            <td><pre><b>B</b> @
+<b>O</b> #
++ @
+1 # xor
+<b>B</b> @
+<b>O</b> #
++ !</pre></td>
+            <td><pre><b>V</b> @
+1 # xor
+<b>V</b> !</pre></td>
+            <td><pre><b>B</b> a! @a
+<b>O</b> #
+nop +
+a! @a
+1 # xor
+!a</pre></td>
+            <td><pre><b>V</b> a! @a
+1 # xor
+!a</pre></td>
+            <td><pre><b>B</b> x! @x
+<b>O</b> # +
+x! @x
+1 # xor
+!x</pre></td>
+            <td><pre><b>V</b> x! @x
+1 # xor
+!x</pre></td>
+            <td><pre>BSET D5,123(A4)</pre></td>
+            <td><pre>BSET D5,<b>V</b></pre></td>
+            <td><pre>INC <b>O</b><sup>1</sup></pre></td>
+            <td><pre>INC <b>V</b></pre></td>
+        </tr>
+    </tbody>
+</table>
+
+<p class="small"><sup>1</sup>  If, and only if, the direct page register points to the activation frame on the processor stack.</p>
+
+<p>Another advantage from looking at table 2 reveals itself through the instruction counts.
+Contemporary processors rely on complex addressing modes or pipelines to hide the cost of effective address calculations.
+MISC architectures expose these costs directly.
+Thus, the more sophisticated the addressing mode, the more instructions necessary to calculate them.
+Considering MISC&#39;s average instruction density, this may consume considerable memory resources.</p>
+
+<p>Thus, on MISC architectures, globals hold a distinct advantage over local or structured field variables.
+They remain considerably faster to access, and the accessing code consumes considerably fewer memory resources.</p>
+
+<h3>Working with Multiple Objects</h3>
+
+<p>With a single set of variables declared in a configuration, a software developer may invoke a module to work with a single set of state.
+This surprisingly rarely poses a problem in actual practice.
+Nonetheless, the value of some programs derives from its facility with handling multiple instances of some object of interest.
+Consider, for example, a text editor application.
+Few text editors on the market today, open-source or commercial, present the user with a single-buffer limitation.</p>
+
+<p>Let&#39;s start with a simple gap-buffer implementation.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ File: gap-buffer.fs
+
+: head?         bs @ gs @ U&lt; ;
+: tail?         ge @ be @ U&lt; ;
+: +space        gs @ ge @ U&lt; 0= IF R&gt; DROP THEN ;
+: +tail         tail? 0= IF R&gt; DROP THEN ;
+: +head         head? 0= IF R&gt; DROP THEN ;
+
+: ins           +space  gs @ c!  1 gs +! ;
+: del           +tail  1 ge +! ;
+: -&gt;            +tail  ge @ c@  gs @ c!  1 gs +!  1 ge +! ;
+: &lt;-            +head  -1 ge +!  -1 gs +!  gs @ c@  ge @ c! ;
+: end           BEGIN tail? WHILE -&gt; REPEAT ;
+: home          BEGIN head? WHILE &lt;- REPEAT ;
+</code></pre></div>
+<p>To keep things as simple as possible, we&#39;ll start with a single gap buffer instance.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ File: config-gap-buffer.fs
+
+VARIABLE bs ( buffer start )
+VARIABLE gs ( gap start )
+VARIABLE ge ( gap end )
+VARIABLE be ( buffer end )
+
+INCLUDE gap-buffer.fs
+</code></pre></div>
+<p>To support multiple gap buffers, we may take one of two approaches.
+The first approach introduces a pointer which points to the real gap buffer state.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ File: config-gap-buffer-ptr.fs
+
+VARIABLE current-buffer
+
+: bs            current-buffer @ ;
+: gs            current-buffer @ CELL+ ;
+: ge            current-buffer @ [ 2 CELLS ] + ;
+: be            current-buffer @ [ 3 CELLS ] + ;
+
+INCLUDE gap-buffer.fs
+</code></pre></div>
+<p>This works quite well in practice; however, notice that we perform effective address calculations on every field reference.
+This explains why, in table 1 above, so-called local variable references take so much longer than global references.</p>
+
+<p>If dereferencing through a pointer proves unattractive for your needs, you may rely instead on field <em>caching</em>.
+We continue to rely on global variables to hold our state; however, introduce additional functionality to switch between different instances.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ File: config-gap-buffer-cached.fs
+
+VARIABLE bs ( buffer start )
+VARIABLE gs ( gap start )
+VARIABLE ge ( gap end )
+VARIABLE be ( buffer end )
+
+INCLUDE gap-buffer.fs
+
+VARIABLE old    0 old !
+VARIABLE new    0 new !
+
+: writeback     old @ IF gs @  old @ CELL+ !   ge @ old @ [ 2 CELLS ] + ! THEN ;
+: fetch         new @ @ bs !  new @ CELL+ @ gs !
+                new @ [ 2 CELLS ] + @ ge !  new @ [ 3 CELLS ] + @ be ! ;
+: switch        new @ old ! ;
+: select-buf    old @ new @ XOR IF writeback fetch switch THEN ;
+</code></pre></div>
+<p>The observant reader might notice that the write-back operation only affects the gap pointers.
+Since a buffer&#39;s address and extent will not differ during normal operation, no reason exists to waste time writing those fields back.
+However, we must reload all four fields from our new gap-buffer instance.</p>
+
+<p>From a performance consideration, each reference to <code>bs</code>, <code>gs</code>, <code>ge</code>, and <code>be</code> includes the amortized cost of the most recent cache fill.
+Thus, caching works best with relatively small objects which do not change often.
+However, dereferencing through a pointer also incurs a constant overhead with each field reference.
+If performance generally doesn&#39;t matter, choose the approach which enhances program <em>maintenance</em>.
+Otherwise, make sure to profile your application to determine which is best for your needs.</p>
+
+<p><a name="modulelocalvariables"></a></p>
+
+<h3>Module-Local Variables</h3>
+
+<p><a href="#ruleofthumb">Earlier</a>, I mentioned you should strive to not define variables inside the component logic of your software.
+Of course, for pragmatic reasons, I exempt variables essential to the internal operation of a module but for which aren&#39;t otherwise relevent to a module&#39;s public interface.
+For example, a module to fill memory with an arbitrary value will require a starting address <code>start</code>, an ending address <code>end</code>, and the value <code>fillValue</code> to fill with.
+However, unless the author designs the filler to support interruption, most external software won&#39;t care about the the current pointer, which ranges between the start and final addresses.
+The author may safely declare the current pointer variable within the filler module.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ file: simple-filler.fs
+
+int, p
+:, word             fillValue @, p @, !,  p @, 2 #, +, p !, ;,
+:, fill             p @, end @, xor, if, word again, then, ;,
+:, fillMem          start @, p !,  fill ;,
+</code></pre></div>
+<p>The topic of deciding when it&#39;s safe to declare module-local variables raises an interesting point of discussion.
+When you make use of an internal variable, you&#39;ll often find a reusable sub-module that might benefit from isolation.
+Let&#39;s reconsider our memory filler example above, but in a contrived, time-sensitive application, such as a video game.
+Since the amount of time <code>fillMem</code> takes to complete its task depends on how much memory we want to fill,
+the author might desire something with more predictable timing characteristics to help ensure timing of, e.g., audio or video effects.
+Suppose, just to pick a number, we wish to guarantee interruption after the filler moves 256 words.
+We may write our filler like so:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ file: interruptable-filler.fs
+
+:, word             fillValue @, p @, !,  p @, 2 #, +, p !,  ctr @, -1 #, +, ctr !, ;,
+:, fill             p @, end @, xor, if,  ctr @, if,  word again, then, then, ;,
+</code></pre></div>
+<p>In this case, <code>fill</code> becomes our entrypoint, but requires a bit more initialization on the front-end.
+We need to set <code>start</code>, <code>end</code>, <code>fillValue</code>, <code>p</code>, and <code>ctr</code> appropriately.
+Once we initialize this state, we can invoke <code>fill</code> as many times as necessary provided <code>p</code> remains unequal to <code>end</code>.
+Just make sure to reset the <code>ctr</code> variable prior to invoking <code>fill</code>, so as to maintain desired timing.
+Observe the key point, however: <code>p</code>, once an internal variable, now stands with <code>start</code> and <code>end</code> as a first-class interface member.</p>
+
+<p>These niggley details illustrates that truly re-usable code often costs greater complexity.
+To automate the process of using <code>fill</code> for simpler use-cases, particularly those where we just don&#39;t care how long it takes,
+we re-institute <code>fillMem</code>, but in terms of our now interruptable filler.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ file: simple-filler.fs
+
+int, p
+int, ctr
+
+include interruptable-filler.fs
+
+:, (fillMem)        p @, end @, xor, if,  256 #, ctr !,  fill  again, then, ;,
+:, fillMem          start @, p !, (fillMem) ;,
+</code></pre></div>
+<p>This version takes care of <code>p</code> and <code>ctr</code> for us, preserving our original interface to <code>fillMem</code> from above, but which relies on the interruptable version of <code>fill</code>.
+If your software relied on both <code>fillMem</code> and <code>fill</code>, then we&#39;d need to move the <code>p</code> and <code>ctr</code> declarations to a connector file:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">\ file: toc.fs
+
+( ... )
+int, p
+int, ctr
+( ... )
+include interruptable-filler.fs
+include simple-filler.fs
+( ... )
+</code></pre></div>
+<p>I cannot think of any firm guidelines on when a sub-module and its dependent variables <em>should</em> be refactored into connectors and includable modules.
+Knowing when to perform this transformation comes with experience and per-project contextual knowledge.</p>
+
+<h3>Tasks and Program Inversion</h3>
+
+<p>Tasks represent a special class of imperative functionality:
+it potentially may perform a different operation on each activation.
+Philosophically, tasks view <em>returning</em> as a kind of system call operation,
+while invoking the task word implies <em>resuming</em> from where the task left off when it last returned.
+Put another way, a return instruction relinguishes the task&#39;s claim on the CPU, while
+a program which invokes it again &quot;schedules&quot; it.
+For those familiar with Jackson Structured Programming, you may recognize this as &quot;program inversion.&quot;</p>
+
+<p>A task&#39;s <em>variables</em> defines its entire state.
+Put another way, a task regularly updates its variables for later resumption prior to returning.
+Unlike more traditional threading,
+CPU state plays no role in defining the task&#39;s current state.
+You call a task to schedule CPU time to the task, and it returns when it volunteers to relinguish it.</p>
+
+<h3>Conclusion</h3>
+
+<p>I discussed several techniques which, used collectively, enable me to write reliable software for the Kestrel at its lowest level.
+Developed out of necessity, these techniques resonate well with what Chuck Moore advocated throughout the years.
+Many in the Forth community dismissed his contributions as unnecessarily controversial.
+Hopefully, this documentation will help other interested Forth programmers get a better understanding on the best practices long thought so controversial.</p>
+
+	</div>
+</div>
+
+			<div class="row">
+				<div class="col-md-12">
+					<footer class="inner small">
+            <p class="copyright">
+              Gophercloud maintained by <a href="https://github.com/sam-falvo">sam-falvo</a>.
+              The Gophercloud logo was designed by Patrick Deuley.
+              See more credits.
+            </p>
+					</footer>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+
