@@ -26,7 +26,7 @@
     background: url("../images/sprite_download.png") no-repeat scroll right top transparent;
 }
 
-.text-justify {text-align: justify;}
+/* .text-justify {text-align: justify;} */
 
 .zip_download_link {
     display: block;
