@@ -45,7 +45,7 @@ func init() {
 //
 // For Identity V2 API requirements, you must provide at least the Username and Password
 // options.  The TenantId field is optional, and defaults to "".
-func Authenticate(provider string, options AuthOptions) (*Access, error) {
+func Authenticate(provider string, options XAuthOptions) (*Access, error) {
 	return globalContext.Authenticate(provider, options)
 }
 
@@ -59,7 +59,7 @@ func ServersApi(acc AccessProvider, criteria ApiCriteria) (CloudServersProvider,
 func ActualResponseCode(e error) (int, error) {
 	if err, typeOk := e.(*perigee.UnexpectedResponseCodeError); typeOk {
 		return err.Actual, nil
-	} else if err, typeOk := e.(*AuthError); typeOk{
+	} else if err, typeOk := e.(*AuthError); typeOk {
 		return err.StatusCode, nil
 	}
 

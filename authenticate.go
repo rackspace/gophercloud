@@ -2,14 +2,15 @@ package gophercloud
 
 import (
 	"fmt"
+
 	"github.com/racker/perigee"
 )
 
-// AuthOptions lets anyone calling Authenticate() supply the required access credentials.
+// XAuthOptions lets anyone calling Authenticate() supply the required access credentials.
 // At present, only Identity V2 API support exists; therefore, only Username, Password,
 // and optionally, TenantId are provided.  If future Identity API versions become available,
 // alternative fields unique to those versions may appear here.
-type AuthOptions struct {
+type XAuthOptions struct {
 	// Username and Password are required if using Identity V2 API.
 	// Consult with your provider's control panel to discover your
 	// account's username and password.
@@ -65,9 +66,9 @@ type Access struct {
 	Token          Token
 	ServiceCatalog []CatalogEntry
 	User           User
-	provider       Provider    `json:"-"`
-	options        AuthOptions `json:"-"`
-	context        *Context    `json:"-"`
+	provider       Provider     `json:"-"`
+	options        XAuthOptions `json:"-"`
+	context        *Context     `json:"-"`
 }
 
 // Token encapsulates an authentication token and when it expires.  It also includes
@@ -124,7 +125,7 @@ func (ae *AuthError) Error() string {
 }
 
 //
-func getAuthCredentials(options AuthOptions) Auth {
+func getAuthCredentials(options XAuthOptions) Auth {
 	if options.ApiKey == "" {
 		return Auth{
 			PasswordCredentials: &PasswordCredentials{
@@ -150,7 +151,7 @@ func getAuthCredentials(options AuthOptions) Auth {
 // The name, obviously a joke on the process of authentication, was chosen because
 // of how many other entities exist in the program containing the word Auth or Authorization.
 // I didn't need another one.
-func (c *Context) papersPlease(p Provider, options AuthOptions) (*Access, error) {
+func (c *Context) papersPlease(p Provider, options XAuthOptions) (*Access, error) {
 	var access *Access
 	access = new(Access)
 
@@ -178,7 +179,7 @@ func (c *Context) papersPlease(p Provider, options AuthOptions) (*Access, error)
 			access.context = c
 
 		default:
-			err = &AuthError {
+			err = &AuthError{
 				StatusCode: resp.StatusCode,
 			}
 		}
@@ -199,7 +200,7 @@ func (c *Context) papersPlease(p Provider, options AuthOptions) (*Access, error)
 //
 // For Identity V2 API requirements, you must provide at least the Username and Password
 // options.  The TenantId field is optional, and defaults to "".
-func (c *Context) Authenticate(provider string, options AuthOptions) (*Access, error) {
+func (c *Context) Authenticate(provider string, options XAuthOptions) (*Access, error) {
 	p, err := c.ProviderByName(provider)
 	if err != nil {
 		return nil, err
