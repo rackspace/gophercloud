@@ -6,6 +6,45 @@ import (
 	"github.com/rackspace/gophercloud/pagination"
 )
 
+type endpointResult struct {
+	gophercloud.CommonResult
+}
+
+func (r endpointResult) Extract() (*Endpoint, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+
+	var response struct {
+		Endpoint `mapstructure:"endpoint"`
+	}
+
+	err := mapstructure.Decode(r.Resp, &response)
+	return &response.Endpoint, err
+}
+
+// CreateResult is the uninterpreted response from a Create call.
+// Use the Extract() method, or an Extract function from an extension package, to interpret it.
+type CreateResult struct {
+	endpointResult
+}
+
+// createResultErr returns a CreateResult that contains only an error.
+func createResultErr(err error) CreateResult {
+	return CreateResult{endpointResult{gophercloud.CommonResult{Err: err}}}
+}
+
+// UpdateResult is the uninterpreted response from am Update call.
+// Use the Extract() method, or an Extract function from an extension package, to interpret it.
+type UpdateResult struct {
+	endpointResult
+}
+
+// updateResultErr returns an UpdateResult that contains only an error.
+func updateResultErr(err error) UpdateResult {
+	return UpdateResult{endpointResult{gophercloud.CommonResult{Err: err}}}
+}
+
 // Endpoint describes the entry point for another service's API.
 type Endpoint struct {
 	ID           string                   `mapstructure:"id" json:"id"`

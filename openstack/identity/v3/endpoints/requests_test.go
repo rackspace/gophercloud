@@ -65,7 +65,7 @@ func TestCreateSuccessful(t *testing.T) {
 		Region:       "underground",
 		URL:          "https://1.2.3.4:9000/",
 		ServiceID:    "asdfasdfasdfasdf",
-	})
+	}).Extract()
 	if err != nil {
 		t.Fatalf("Unable to create an endpoint: %v", err)
 	}
