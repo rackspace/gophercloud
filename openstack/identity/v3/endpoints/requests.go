@@ -28,7 +28,7 @@ type EndpointOpts struct {
 
 // Create inserts a new Endpoint into the service catalog.
 // Within EndpointOpts, Region may be omitted by being left as "", but all other fields are required.
-func Create(client *gophercloud.ServiceClient, opts EndpointOpts) (*Endpoint, error) {
+func Create(client *gophercloud.ServiceClient, opts EndpointOpts) CreateResult {
 	// Redefined so that Region can be re-typed as a *string, which can be omitted from the JSON output.
 	type endpoint struct {
 		Interface string  `json:"interface"`
@@ -48,16 +48,16 @@ func Create(client *gophercloud.ServiceClient, opts EndpointOpts) (*Endpoint, er
 
 	// Ensure that EndpointOpts is fully populated.
 	if opts.Availability == "" {
-		return nil, ErrAvailabilityRequired
+		return createResultErr(ErrAvailabilityRequired)
 	}
 	if opts.Name == "" {
-		return nil, ErrNameRequired
+		return createResultErr(ErrNameRequired)
 	}
 	if opts.URL == "" {
-		return nil, ErrURLRequired
+		return createResultErr(ErrURLRequired)
 	}
 	if opts.ServiceID == "" {
-		return nil, ErrServiceIDRequired
+		return createResultErr(ErrServiceIDRequired)
 	}
 
 	// Populate the request body.
@@ -71,18 +71,11 @@ func Create(client *gophercloud.ServiceClient, opts EndpointOpts) (*Endpoint, er
 	}
 	reqBody.Endpoint.Region = maybeString(opts.Region)
 
-	var respBody response
-	_, err := perigee.Request("POST", getListURL(client), perigee.Options{
-		MoreHeaders: client.Provider.AuthenticatedHeaders(),
-		ReqBody:     &reqBody,
-		Results:     &respBody,
-		OkCodes:     []int{201},
+	result := client.Request("POST", getListURL(client), gophercloud.RequestOptions{
+		ReqBody: &reqBody,
+		OkCodes: []int{201},
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &respBody.Endpoint, nil
+	return CreateResult{endpointResult{result}}
 }
 
 // ListOpts allows finer control over the the endpoints returned by a List call.
