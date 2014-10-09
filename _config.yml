@@ -1,6 +1,0 @@
-name: Gophercloud
-markdown: redcarpet
-pygments: true
-permalink: /:year/:month/:day/:title
-baseurl: http://gophercloud.io
-
