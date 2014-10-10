@@ -3,25 +3,24 @@ layout: page
 title: Getting Started with Object Storage
 ---
 
+* [Setup](#setup)
 * [Containers](#containers)
 * [Objects](#objects)
 * [Account](#account)
 
-## Setup
+## <a name="setup"></a>Setup
 
 ```go
-import "github.com/rackspace/gophercloud/openstack"
-
 authOpts, err := utils.AuthOptions()
 
 provider, err := openstack.AuthenticatedClient(authOpts)
 
 client, err := openstack.NewStorageV1(provider, gophercloud.EndpointOpts{
-  Region: "RegionOne",
+	Region: "RegionOne",
 })
 ```
 
-## Containers
+## <a name="containers"></a>Containers
 
 A container is a storage compartment that provides a way for you to organize
 your objects. It is analogous to a Linux directory or Windows folder, with the
@@ -34,8 +33,8 @@ import "github.com/rackspace/gophercloud/openstack/objectstorage/v1/containers"
 
 // We have the option of passing in configuration options for our new container
 opts := containers.CreateOpts{
-  ContainerSyncTo: "backup_container",
-  Metadata:        map[string]string{"author": "emily dickinson"},
+	ContainerSyncTo: "backup_container",
+	Metadata:        map[string]string{"author": "emily dickinson"},
 }
 
 res := containers.Create(client, "container_name", opts)
@@ -59,17 +58,17 @@ pager := containers.List(client, opts)
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
 
-  // Get a slice of containers.Container structs
+	// Get a slice of containers.Container structs
 	containerList, err := containers.ExtractInfo(page)
 	for _, c := range containerList {
-    // ...
+		// ...
 	}
 
-  // Get a slice of strings, i.e. container names
-  containerNames, err := containers.ExtractNames(page)
-  for _, n := range containerNames {
-    // ...
-  }
+	// Get a slice of strings, i.e. container names
+	containerNames, err := containers.ExtractNames(page)
+	for _, n := range containerNames {
+		// ...
+	}
 
 	return true, nil
 })
@@ -84,7 +83,7 @@ metadata, err := containers.Get(client, "container_name").ExtractMetadata()
 
 // Iterate over the map[string]string
 for key, val := range metadata {
-  // ...
+	// ...
 }
 ```
 
@@ -95,7 +94,7 @@ To update a container's metadata:
 // keys that already exist will be overriden. Keys that are not included in
 // this struct will be deleted.
 opts := &containers.UpdateOpts{
-  Metadata: map[string]string{"new_key": "new_value"},
+	Metadata: map[string]string{"new_key": "new_value"},
 }
 
 result := containers.Update(client, "container_name", opts)
@@ -110,7 +109,7 @@ response := containers.Delete(client, "container_name")
 headers, err := response.ExtractHeaders()
 ```
 
-## Objects
+## <a name="objects"></a>Objects
 
 An object stores data content, such as documents, images, and so on. Another way
 to think about it is that it's like a traditional file on a local filesystem
@@ -153,10 +152,12 @@ content := bytes.NewReader(bytes)
 Once you have your content in the form of a reader, you can create your object:
 
 ```go
+import "github.com/rackspace/gophercloud/openstack/objectstorage/v1/objects"
+
 // You have the option of specifying additional configuration options.
 opts := objects.CreateOpts{
-  ContentDisposition: `attachment; filename="foo_bar.pdf"`,
-  DeleteAfter: 3600,
+	ContentDisposition: `attachment; filename="foo_bar.pdf"`,
+	DeleteAfter: 3600,
 }
 
 // Now execute the upload
@@ -180,19 +181,19 @@ pager := objects.List(client, "container_name", opts)
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
 
-  // Get a slice of objects.Object structs
-  objectList, err := objects.ExtractInfo(page)
+	// Get a slice of objects.Object structs
+	objectList, err := objects.ExtractInfo(page)
   for _, o := range objectList {
-    // ...
-  }
+		// ...
+	}
 
-  // Get a slice of strings, i.e. object names
-  objectNames, err := containers.ExtractNames(page)
-  for _, n := range objectNames {
-    // ...
-  }
+	// Get a slice of strings, i.e. object names
+	objectNames, err := containers.ExtractNames(page)
+	for _, n := range objectNames {
+		// ...
+	}
 
-  return true, nil
+	return true, nil
 })
 ```
 
@@ -217,7 +218,17 @@ headers, err := result.ExtractHeaders()
 ### Download object
 
 ```go
+// Configure options
+opts := objects.DownloadOpts{IfUnmodifiedSince: "date"}
 
+// Download everything into a DownloadResult struct
+res := objects.Download(client, "container_name", "object_name", opts)
+
+// Extract a slice of bytes
+bytes, err := res.ExtractContent()
+
+// Extract headers
+header, err := res.ExtractHeaders()
 ```
 
 ### Retrieve and update metadata
@@ -239,7 +250,7 @@ bytes, err := result.ExtractContent()
 result := objects.Delete(client, "container_name", "object_name")
 ```
 
-## Account
+## <a name="account"></a>Account
 
 An account represents the very top-level namespace of the resource hierarchy -
 containers belong to accounts, and objects belong to containers. Normally your
@@ -250,11 +261,34 @@ the OpenStack environment, account is synonymous with a project or a tenant.
 ### Retrieve metadata
 
 ```go
+import "github.com/rackspace/gophercloud/openstack/objectstorage/v1/accounts"
 
+// Get information from the API
+res := accounts.Get(client, GetOpts{})
+
+// Extract metadata out of it
+metadata := res.ExtractMetadata()
+
+for k, v := range metadata {
+	// ...
+}
 ```
 
 ### Update metadata
 
 ```go
+// Set new metadata
+opts := accounts.UpdateOpts{
+	Metadata: map[string]string{"foo": "bar"}
+}
 
+// Send to API
+res := accounts.Update(client, opts)
+
+// Extract metadata out of it
+metadata := res.ExtractMetadata()
+
+for k, v := range metadata {
+	// ...
+}
 ```
