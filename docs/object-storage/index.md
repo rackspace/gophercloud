@@ -3,9 +3,23 @@ layout: page
 title: Getting Started with Object Storage
 ---
 
-[Containers](#containers)
-[Objects](#objects)
-[Account](#account)
+* [Containers](#containers)
+* [Objects](#objects)
+* [Account](#account)
+
+## Setup
+
+```go
+import "github.com/rackspace/gophercloud/openstack"
+
+authOpts, err := utils.AuthOptions()
+
+provider, err := openstack.AuthenticatedClient(authOpts)
+
+client, err := openstack.NewStorageV1(provider, gophercloud.EndpointOpts{
+  Region: "RegionOne",
+})
+```
 
 ## Containers
 
@@ -16,6 +30,8 @@ exception that you cannot nest containers in other containers like a filesystem.
 ### Create a new container
 
 ```go
+import "github.com/rackspace/gophercloud/openstack/objectstorage/v1/containers"
+
 // We have the option of passing in configuration options for our new container
 opts := containers.CreateOpts{
   ContainerSyncTo: "backup_container",
@@ -32,6 +48,8 @@ headers, err := res.ExtractHeaders()
 ### List containers
 
 ```go
+import "github.com/rackspace/gophercloud/pagination"
+
 // We have the option of filtering containers by their attributes
 opts := &containers.ListOpts{Full: true, Prefix: "backup_"}
 
@@ -59,6 +77,8 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 
 ### View and modify container metadata
 
+To retrieve a container's metadata:
+
 ```go
 metadata, err := containers.Get(client, "container_name").ExtractMetadata()
 
@@ -68,18 +88,36 @@ for key, val := range metadata {
 }
 ```
 
+To update a container's metadata:
+
+```go
+// We need to specify the new metadata. Keys that do not exist will be added,
+// keys that already exist will be overriden. Keys that are not included in
+// this struct will be deleted.
+opts := &containers.UpdateOpts{
+  Metadata: map[string]string{"new_key": "new_value"},
+}
+
+result := containers.Update(client, "container_name", opts)
+```
+
 ### Delete an existing container
 
 ```go
+response := containers.Delete(client, "container_name")
 
+// Like most operations, we can extract headers values too
+headers, err := response.ExtractHeaders()
 ```
 
 ## Objects
 
-An object stores data content, such as documents, images, and so on. So in other
-ways, an object acts like a traditional file on a local filesystem - but with lots
-of additional functionality. For example, you can also store custom metadata on
-an object, compress files, and manage access with CORS and temporary URLs.
+An object stores data content, such as documents, images, and so on. Another way
+to think about it is that it serves like a traditional file on a local
+filesystem but with lots of additional functionality. For example, you can  
+store custom metadata on an object, compress files, manage access with CORS
+and temporary URLs, schedule deletions, and execute batch operations (like
+deleting 10,000 objects at a time).
 
 ### Upload objects
 
