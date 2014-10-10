@@ -10,7 +10,7 @@ title: Getting Started with Object Storage
 
 ## <a name="setup"></a>Setup
 
-```go
+{% highlight go %}
 authOpts, err := utils.AuthOptions()
 
 provider, err := openstack.AuthenticatedClient(authOpts)
@@ -18,7 +18,7 @@ provider, err := openstack.AuthenticatedClient(authOpts)
 client, err := openstack.NewStorageV1(provider, gophercloud.EndpointOpts{
 	Region: "RegionOne",
 })
-```
+{% endhighlight %}
 
 ## <a name="containers"></a>Containers
 
@@ -28,7 +28,7 @@ exception that you cannot nest containers in other containers like a filesystem.
 
 ### Create a new container
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/objectstorage/v1/containers"
 
 // We have the option of passing in configuration options for our new container
@@ -42,11 +42,11 @@ res := containers.Create(client, "container_name", opts)
 // If we want to extract information out from the response headers, we can.
 // The first return value will be http.Header (alias of map[string][]string).
 headers, err := res.ExtractHeaders()
-```
+{% endhighlight %}
 
 ### List containers
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/pagination"
 
 // We have the option of filtering containers by their attributes
@@ -72,24 +72,24 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 
 	return true, nil
 })
-```
+{% endhighlight %}
 
 ### View and modify container metadata
 
 To retrieve a container's metadata:
 
-```go
+{% highlight go %}
 metadata, err := containers.Get(client, "container_name").ExtractMetadata()
 
 // Iterate over the map[string]string
 for key, val := range metadata {
 	// ...
 }
-```
+{% endhighlight %}
 
 To update a container's metadata:
 
-```go
+{% highlight go %}
 // We need to specify the new metadata. Keys that do not exist will be added,
 // keys that already exist will be overriden. Keys that are not included in
 // this struct will be deleted.
@@ -98,16 +98,16 @@ opts := &containers.UpdateOpts{
 }
 
 result := containers.Update(client, "container_name", opts)
-```
+{% endhighlight %}
 
 ### Delete an existing container
 
-```go
+{% highlight go %}
 response := containers.Delete(client, "container_name")
 
 // Like most operations, we can extract headers values too
 headers, err := response.ExtractHeaders()
-```
+{% endhighlight %}
 
 ## <a name="objects"></a>Objects
 
@@ -127,31 +127,31 @@ content of your object - and to do this, you need to use Golang's standard
 
 The first thing you need If you want to upload the contents of a local file:
 
-```go
+{% highlight go %}
 import "os"
 
 content, err := os.Open("/path/to/file")
-```
+{% endhighlight %}
 
 or to use a basic string:
 
-```go
+{% highlight go %}
 import "strings"
 
 content := strings.NewReader("your string")
-```
+{% endhighlight %}
 
 or to use a slice of bytes:
 
-```go
+{% highlight go %}
 import "bytes"
 
 content := bytes.NewReader(bytes)
-```
+{% endhighlight %}
 
 Once you have your content in the form of a reader, you can create your object:
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/objectstorage/v1/objects"
 
 // You have the option of specifying additional configuration options.
@@ -165,11 +165,11 @@ res := objects.Create(client, "container_name", "object_name", content, opts)
 
 // We have the option of extracting the resulting headers from the response
 headers, err := res.ExtractHeaders()
-```
+{% endhighlight %}
 
 ### List objects
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/pagination"
 
 // We have the option of filtering objects by their attributes
@@ -183,7 +183,7 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 
 	// Get a slice of objects.Object structs
 	objectList, err := objects.ExtractInfo(page)
-  for _, o := range objectList {
+	for _, n := range objectNames {
 		// ...
 	}
 
@@ -195,7 +195,7 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 
 	return true, nil
 })
-```
+{% endhighlight %}
 
 ### Copy to new location
 
@@ -204,7 +204,7 @@ This operation always creates a new object. If you use this operation against an
 existing object, you replace the existing object and metadata rather than
 modifying the object.
 
-```go
+{% highlight go %}
 // Define our options
 opts := &objects.CopyOpts{Destination: "backup/wednesday_14th_2014"}
 
@@ -213,11 +213,11 @@ result := objects.Copy(client, "logs", "wednesday_14th", opts)
 
 // Extract response headers
 headers, err := result.ExtractHeaders()
-```
+{% endhighlight %}
 
 ### Download object
 
-```go
+{% highlight go %}
 // Configure options
 opts := objects.DownloadOpts{IfUnmodifiedSince: "date"}
 
@@ -229,11 +229,11 @@ bytes, err := res.ExtractContent()
 
 // Extract headers
 header, err := res.ExtractHeaders()
-```
+{% endhighlight %}
 
 ### Retrieve and update metadata
 
-```go
+{% highlight go %}
 // We can specify additional options (to enable conditional requests for example)
 opts := objects.DownloadOpts{IfMatch: "etag"}
 
@@ -242,13 +242,13 @@ result := objects.Download(client, "container_name", "object_name", opts)
 
 // To extract content out into a slice of bytes, we can use:
 bytes, err := result.ExtractContent()
-```
+{% endhighlight %}
 
 ### Delete object
 
-```go
+{% highlight go %}
 result := objects.Delete(client, "container_name", "object_name")
-```
+{% endhighlight %}
 
 ## <a name="account"></a>Account
 
@@ -260,7 +260,7 @@ the OpenStack environment, account is synonymous with a project or a tenant.
 
 ### Retrieve metadata
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/objectstorage/v1/accounts"
 
 // Get information from the API
@@ -272,11 +272,11 @@ metadata := res.ExtractMetadata()
 for k, v := range metadata {
 	// ...
 }
-```
+{% endhighlight %}
 
 ### Update metadata
 
-```go
+{% highlight go %}
 // Set new metadata
 opts := accounts.UpdateOpts{
 	Metadata: map[string]string{"foo": "bar"}
@@ -291,4 +291,4 @@ metadata := res.ExtractMetadata()
 for k, v := range metadata {
 	// ...
 }
-```
+{% endhighlight %}

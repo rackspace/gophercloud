@@ -10,7 +10,7 @@ title: Getting Started with Networking
 
 ## <a name="setup"></a>Setup
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/openstack"
 
 authOpts, err := utils.AuthOptions()
@@ -21,7 +21,7 @@ client, err := openstack.NewNetworkV2(provider, gophercloud.EndpointOpts{
 	Name:   "neutron",
 	Region: "RegionOne",
 })
-```
+{% endhighlight %}
 
 ## <a name="networks"></a>Networks
 
@@ -34,7 +34,7 @@ packets with other networks through one or more routers.
 
 ### Create a network
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/networking/v2/networks"
 
 // We specify a name and that it should forward packets
@@ -42,11 +42,11 @@ opts := networks.CreateOpts{Name: "main_network", AdminStateUp: networks.Up}
 
 // Execute the operation and get back a networks.Network struct
 network, err := networks.Create(client, opts).Extract()
-```
+{% endhighlight %}
 
 ### List networks
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/pagination"
 
 // We have the option of filtering the network list. If we want the full
@@ -58,37 +58,37 @@ pager := networks.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  networkList, err := networks.ExtractNetworks(page)
+	networkList, err := networks.ExtractNetworks(page)
 
-  for _, n := range networkList {
-    // "n" will be a networks.Network
-  }
+	for _, n := range networkList {
+		// "n" will be a networks.Network
+	}
 })
-```
+{% endhighlight %}
 
 ### Get details for an existing network
 
-```go
+{% highlight go %}
 // We need to know what the UUID of our network is and pass it in as a string
 network, err := networks.Get(client, "id").Extract()
-```
+{% endhighlight %}
 
 ### Update an existing network
 
 You can update a network's name, along with its "shared" or "admin" status:
 
-```go
+{% highlight go %}
 opts := networks.UpdateOpts{Name: "new_name", Shared: true}
 
 // Like Get(), we need the UUID in string form
 network, err := networks.Update(client, "id", opts)
-```
+{% endhighlight %}
 
 ### Delete a network
 
-```go
+{% highlight go %}
 result := networks.Delete(client, "id")
-```
+{% endhighlight %}
 
 ## <a name="subnets"></a>Subnets
 
@@ -100,7 +100,7 @@ and be associated with a network.
 
 ### Create a subnet
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/networking/v2/subnets"
 
 // You must associate a new subnet with an existing network - to do this you
@@ -114,11 +114,11 @@ opts := subnets.CreateOpts{
 
 // Execute the operation and get back a subnets.Subnet struct
 subnet, err := subnets.Create(client, opts).Extract()
-```
+{% endhighlight %}
 
 ### List all subnets
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/pagination"
 
 // We have the option of filtering subnets. For example, we may want to return
@@ -130,36 +130,36 @@ pager := subnets.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  subnetList, err := subnets.ExtractSubnets(page)
+	subnetList, err := subnets.ExtractSubnets(page)
 
-  for _, s := range subnetList {
-    // "s" will be a subnets.Subnet
-  }
+	for _, s := range subnetList {
+		// "s" will be a subnets.Subnet
+	}
 })
-```
+{% endhighlight %}
 
 ### Get details for an existing subnet
 
-```go
+{% highlight go %}
 // We need to know what the UUID of our subnet is and pass it in as a string
 subnet, err := subnets.Get(client, "id").Extract()
-```
+{% endhighlight %}
 
 ### Update an existing subnet
 
 You can edit the name, gateway IP address, DNS nameservers, host routes
 and "enable DHCP" status.
 
-```go
+{% highlight go %}
 opts := subnets.UpdateOpts{Name: "new_subnet_name"}
 subnet, err = subnets.Update(client, "id", opts).Extract()
-```
+{% endhighlight %}
 
 ### Delete a subnet
 
-```go
+{% highlight go %}
 result := subnets.Delete(client, "id")
-```
+{% endhighlight %}
 
 ## <a name="ports"></a>Ports
 
@@ -171,7 +171,7 @@ more information about these terms, read this [related article](http://www.wiseg
 
 ### Create a port
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/networking/v2/ports"
 
 // You must associate a new port with an existing network - to do this you
@@ -179,19 +179,19 @@ import "github.com/rackspace/gophercloud/openstack/networking/v2/ports"
 // either a specific IP to use for this port, or the subnet ID from which a
 // random free IP is selected.
 opts := ports.CreateOpts{
-  NetworkID:    "network_id",
-  Name:         "my_port",
-  AdminStateUp: ports.Up,
-  FixedIPs:     []ports.IP{ports.IP{SubnetID: "subnet_id"}},
+	NetworkID:    "network_id",
+	Name:         "my_port",
+	AdminStateUp: ports.Up,
+	FixedIPs:     []ports.IP{ports.IP{SubnetID: "subnet_id"}},
 }
 
 // Execute the operation and get back a subnets.Subnet struct
 port, err := ports.Create(client, opts).Extract()
-```
+{% endhighlight %}
 
 ### List all ports
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/pagination"
 
 // We have the option of filtering ports. For example, we may want to return
@@ -203,33 +203,33 @@ pager := ports.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  portList, err := ports.ExtractPorts(page)
+	portList, err := ports.ExtractPorts(page)
 
-  for _, s := range portList {
-    // "p" will be a ports.Port
-  }
+	for _, s := range portList {
+		// "p" will be a ports.Port
+	}
 })
-```
+{% endhighlight %}
 
 ### Get details for an existing port
 
-```go
+{% highlight go %}
 // We need to know what the UUID of our port is and pass it in as a string
 port, err := ports.Get(client, "id").Extract()
-```
+{% endhighlight %}
 
 ### Update an existing port
 
 You can edit the name, admin state, fixed IPs, device ID, device owner and
 security groups.
 
-```go
+{% highlight go %}
 opts := ports.UpdateOpts{Name: "new_port_name"}
 port, err = ports.Update(client, "id", opts).Extract()
-```
+{% endhighlight %}
 
 ### Delete a subnet
 
-```go
+{% highlight go %}
 result := ports.Delete(client, "id")
-```
+{% endhighlight %}
