@@ -8,7 +8,7 @@ Before working with OpenStack services like Compute or Object Storage, you must
 first authenticate. The first step is to populate the `gophercloud.AuthOptions`
 struct with your access details, and you can do this in two ways:
 
-```go
+{% highlight go %}
 // Option 1: Pass in the values yourself
 opts := gophercloud.AuthOptions{
   IdentityEndpoint: "https://my-openstack.com:5000/v2.0",
@@ -20,16 +20,16 @@ opts := gophercloud.AuthOptions{
 // Option 2: Use a utility function to retrieve all your environment variables
 import "github.com/rackspace/gophercloud/openstack/utils"
 opts, err := utils.AuthOptions()
-```
+{% endhighlight %}
 
 Once you have an `opts` variable, you can pass it in and get back a
 `ProviderClient` struct:
 
-```go
+{% highlight go %}
 import "github.com/rackspace/gophercloud/openstack"
 
 provider, err := openstack.AuthenticatedClient(opts)
-```
+{% endhighlight %}
 
 The `ProviderClient` is the top-level client that all of your OpenStack services
 derive from. The provider contains all of the authentication details that allow
