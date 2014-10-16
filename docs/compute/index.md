@@ -3,6 +3,39 @@ layout: page
 title: Getting Started with Compute
 ---
 
+* [Setup](#setup)
+* [Flavors](#flavors)
+  * [List flavors]()
+  * [Get flavor]()
+* [Images](#images)
+  * [List images]()
+  * [Get image]()
+  * [Delete image]()
+* [Servers](#servers)
+  * [List servers]()
+  * [Get server]()
+  * [Update server]()
+  * [Delete server]()
+  * [Change admin password]()
+  * [Rebuild]()
+  * [Resize]()
+  * [Confirm resize]()
+  * [Revert resize]()
+
+# Setup
+
+{% highlight go %}
+import "github.com/rackspace/gophercloud/openstack"
+
+authOpts, err := utils.AuthOptions()
+
+provider, err := openstack.AuthenticatedClient(authOpts)
+
+client, err := openstack.NewComputeV2(provider, gophercloud.EndpointOpts{
+  Region: "RegionOne",
+})
+{% endhighlight %}
+
 # Flavors
 
 A flavor is a hardware configuration for a server. Each one has a unique
@@ -10,7 +43,39 @@ combination of disk space, memory capacity and priority for CPU time.
 
 ### List all available flavors
 
+{% highlight go %}
+import (
+  "github.com/rackspace/gophercloud/pagination"
+  "github.com/rackspace/gophercloud/openstack/compute/v2/flavors"
+)
+
+// We have the option of filtering the flavor list. If we want the full
+// collection, leave it as an empty struct
+opts := flavors.ListOpts{ChangesSince: "2014-01-01T01:02:03Z", MinRAM: 4}
+
+// Retrieve a pager (i.e. a paginated collection)
+pager := flavors.List(client, opts)
+
+// Define an anonymous function to be executed on each page's iteration
+err := pager.EachPage(func(page pagination.Page) (bool, error) {
+  flavorList, err := networks.ExtractFlavors(page)
+
+  for _, f := range flavorList {
+    // "f" will be a flavors.Flavor
+  }
+})
+{% endhighlight %}
+
 ### Get details for a specific flavor
+
+In order to retrieve information for a specific flavor, you need its UUID in
+string form. You receive back a `flavors.Flavor` struct with `ID`, `Disk`, `RAM`,
+`Name`, `RxTxFactor`, `Swap` and `VCPUs` fields.
+
+{% highlight go %}
+// Get back a flavors.Flavor struct
+flavor, err := flavors.Get(client, "flavor_id").Extract()
+{% endhighlight %}
 
 # Images
 
@@ -21,9 +86,45 @@ launched.
 
 ### List all available images
 
+{% highlight go %}
+import (
+  "github.com/rackspace/gophercloud/pagination"
+  "github.com/rackspace/gophercloud/openstack/compute/v2/images"
+)
+
+// We have the option of filtering the image list. If we want the full
+// collection, leave it as an empty struct
+opts := images.ListOpts{ChangesSince: "2014-01-01T01:02:03Z", Name: "Ubuntu 12.04"}
+
+// Retrieve a pager (i.e. a paginated collection)
+pager := images.List(client, opts)
+
+// Define an anonymous function to be executed on each page's iteration
+err := pager.EachPage(func(page pagination.Page) (bool, error) {
+  imageList, err := images.ExtractImages(page)
+
+  for _, i := range imageList {
+    // "i" will be a images.Image
+  }
+})
+{% endhighlight %}
+
 ### Get details for a specific image
 
+In order to retrieve information for a specific flavor, you need its UUID in
+string form. You receive back an `images.Image` struct with `ID`, `Created`, `MinDisk`,
+`MinRAM`, `Name`, `Progress`, `Status` and `Updated` fields.
+
+{% highlight go %}
+// Get back a images.Image struct
+image, err := images.Get(client, "image_id").Extract()
+{% endhighlight %}
+
 ### Delete an image
+
+{% highlight go %}
+res := images.Delete(client, "image_id")
+{% endhighlight %}
 
 # Servers
 
@@ -31,22 +132,95 @@ A server is a virtual machine (VM) instance in the compute system.
 
 ### List all available servers
 
+{% highlight go %}
+import (
+  "github.com/rackspace/gophercloud/pagination"
+  "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+)
 
+// We have the option of filtering the server list. If we want the full
+// collection, leave it as an empty struct
+opts := servers.ListOpts{Name: "server_1"}
+
+// Retrieve a pager (i.e. a paginated collection)
+pager := servers.List(client, opts)
+
+// Define an anonymous function to be executed on each page's iteration
+err := pager.EachPage(func(page pagination.Page) (bool, error) {
+  serverList, err := servers.ExtractServers(page)
+
+  for _, s := range serverList {
+    // "s" will be a servers.Server
+  }
+})
+{% endhighlight %}
 
 ### Get details for a server
 
+{% highlight go %}
+// We need the UUID in string form
+server, id := servers.Get(client, "server_id").Extract()
+{% endhighlight %}
+
 ### Update an existing server
+
+{% highlight go %}
+opts := servers.UpdateOpts{Name: "new_name"}
+
+server, err := servers.Update(client, "server_id", opts).Extract()
+{% endhighlight %}
 
 ### Delete an existing server
 
+{% highlight go %}
+result := servers.Delete(client, "server_id")
+{% endhighlight %}
+
 ### Change admin password
+
+{% highlight go %}
+result := servers.ChangeAdminPassword(client, "server_id", "newPassword_&123")
+{% endhighlight %}
 
 ### Reboot a server
 
+There are two different methods for rebooting a VM: soft or hard reboot. A
+soft reboot instructs the operating system to initiate its own restart procedure,
+whereas a hard reboot cuts power (if a physical machine) or teminates the
+instance at the hypervisor level (if a virtual machine).
+
+{% highlight go %}
+// You have a choice of two reboot methods: servers.SoftReboot or servers.HardReboot
+result := servers.Reboot(client, "server_id", servers.SoftReboot)
+{% endhighlight %}
+
 ### Rebuild a server
+
+The rebuild operation removes all data on the server and replaces it with the
+image specified. The server's existing ID and all IP addresses will remain the
+same.
+
+{% highlight go %}
+// You have the option of specifying additional options
+opts := RebuildOpts{Metadata: map[string]string{"owner": "me"}}
+
+result := servers.Rebuild(client, "server_id", "name", "password", "image_id", additional)
+{% endhighlight %}
 
 ### Resize a server
 
+{% highlight go %}
+result := servers.Resize(client, "server_id", "new_flavor_id")
+{% endhighlight %}
+
 ### Confirm a resize operation
 
+{% highlight go %}
+result := servers.ConfirmResize(client, "server_id")
+{% endhighlight %}
+
 ### Revert a resize operation
+
+{% highlight go %}
+result := servers.RevertResize(client, "server_id")
+{% endhighlight %}
