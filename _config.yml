@@ -1,5 +1,5 @@
 # Dependencies
-markdown:         kramdown
+markdown:         redcarpet
 highlighter:      pygments
 
 # Permalinks
@@ -12,7 +12,6 @@ tagline:          'The OpenStack SDK for Go'
 description:      'Gophercloud is an open-source library for working with OpenStack clouds in golang.'
 url:              http://gophercloud.io
 baseurl:          /
-
 paginate:         5
 
 # Custom vars
@@ -20,7 +19,7 @@ version:          0.0.2
 
 links:
   install:        /installation
-  contrib:        /contributing
+  contrib:        https://github.com/rackspace/gophercloud/blob/v0.2.0/CONTRIBUTING.md
   docs:           /docs
   github:         https://github.com/rackspace/gophercloud
   godoc:          http://godoc.org/github.com/rackspace/gophercloud
