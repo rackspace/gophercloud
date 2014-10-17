@@ -5,8 +5,19 @@ title: Getting Started with Object Storage v1
 
 * [Setup](#setup)
 * [Containers](#containers)
+	* [Create container](#create-container)
+	* [List containers](#list-containers)
+	* [Metadata](#container-metadata)
+	* [Delete container](#delete-container)
 * [Objects](#objects)
+	* [Upload objects](#upload-object)
+	* [List objects](#list-objects)
+	* [Copying objects](#copy-object)
+	* [Download objects](#download-object)
+	* [Metadata](#object-metadata)
 * [Account](#account)
+	* [View metadata](#view-account-metadata)
+	* [Update metadata](#update-account-metadata)
 
 ## <a name="setup"></a>Setup
 
@@ -34,7 +45,7 @@ A container is a storage compartment that provides a way for you to organize
 your objects. It is analogous to a Linux directory or Windows folder, with the
 exception that you cannot nest containers in other containers like a filesystem.
 
-### Create a new container
+### <a name="create-container"></a>Create a new container
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/objectstorage/v1/containers"
@@ -52,7 +63,7 @@ res := containers.Create(client, "container_name", opts)
 headers, err := res.ExtractHeaders()
 {% endhighlight %}
 
-### List containers
+### <a name="list-containers"></a>List containers
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/pagination"
@@ -82,7 +93,7 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 })
 {% endhighlight %}
 
-### View and modify container metadata
+### <a name="container-metadata"></a>View and modify container metadata
 
 To retrieve a container's metadata:
 
@@ -108,7 +119,7 @@ opts := &containers.UpdateOpts{
 result := containers.Update(client, "container_name", opts)
 {% endhighlight %}
 
-### Delete an existing container
+### <a name="delete-container"></a>Delete an existing container
 
 {% highlight go %}
 response := containers.Delete(client, "container_name")
@@ -126,7 +137,7 @@ metadata on an object, compress files, manage access with CORS and temporary
 URLs, schedule deletions, and execute batch operations (like deleting 10,000
 objects at a time).
 
-### Upload objects
+### <a name="upload-object"></a>Upload objects
 
 When uploading a new object, you need to the container name you're
 uploading to, and the name of your new object. You also need to provide the
@@ -175,7 +186,7 @@ res := objects.Create(client, "container_name", "object_name", content, opts)
 headers, err := res.ExtractHeaders()
 {% endhighlight %}
 
-### List objects
+### <a name="list-objects"></a>List objects
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/pagination"
@@ -205,7 +216,7 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 })
 {% endhighlight %}
 
-### Copy to new location
+### <a name="copy-object"></a>Copy to new location
 
 Let's say we want to copy `logs/wednesday_14th` to `backup/wednesday_14th_2014`.
 This operation always creates a new object. If you use this operation against an
@@ -223,7 +234,7 @@ result := objects.Copy(client, "logs", "wednesday_14th", opts)
 headers, err := result.ExtractHeaders()
 {% endhighlight %}
 
-### Download object
+### <a name="download-object"></a>Download object
 
 {% highlight go %}
 // Configure options
@@ -239,7 +250,7 @@ bytes, err := res.ExtractContent()
 header, err := res.ExtractHeaders()
 {% endhighlight %}
 
-### Retrieve and update metadata
+### <a name="object-metadata"></a>Retrieve and update metadata
 
 {% highlight go %}
 // We can specify additional options (to enable conditional requests for example)
@@ -252,7 +263,7 @@ result := objects.Download(client, "container_name", "object_name", opts)
 bytes, err := result.ExtractContent()
 {% endhighlight %}
 
-### Delete object
+### <a name="delete-object"></a>Delete object
 
 {% highlight go %}
 result := objects.Delete(client, "container_name", "object_name")
@@ -266,7 +277,7 @@ service provider creates your account and you then own and can control all the
 resources in that account. The account defines a namespace for containers. In
 the OpenStack environment, account is synonymous with a project or a tenant.
 
-### Retrieve metadata
+### <a name="view-account-metadata"></a>Retrieve metadata
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/objectstorage/v1/accounts"
@@ -282,7 +293,7 @@ for k, v := range metadata {
 }
 {% endhighlight %}
 
-### Update metadata
+### <a name="update-account-metadata"></a>Update metadata
 
 {% highlight go %}
 // Set new metadata
