@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Getting Started with Compute
+title: Getting Started with Compute v2
 ---
 
 * [Setup](#setup)
@@ -24,6 +24,11 @@ title: Getting Started with Compute
 
 # <a name="setup"></a>Setup
 
+In order to interact with OpenStack APIs, you must first pass in your auth
+credentials to a `Provider` struct. Once you have this, you then retrieve
+whichever service struct you're interested in - so in our case, we invoke the
+`NewComputeV2` method:
+
 {% highlight go %}
 import "github.com/rackspace/gophercloud/openstack"
 
@@ -35,6 +40,9 @@ client, err := openstack.NewComputeV2(provider, gophercloud.EndpointOpts{
   Region: "RegionOne",
 })
 {% endhighlight %}
+
+If you're unsure about how to retrieve credentials, please read our [introductory
+guide](/docs) which outlines the steps you need to take.
 
 # <a name="flavors"></a>Flavors
 

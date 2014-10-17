@@ -1,14 +1,34 @@
 ---
 layout: docpage
-title: Getting Started with Networking
+title: Getting Started with Networking v2
 ---
 
 * [Setup](#setup)
 * [Networks](#networks)
+	* [Create a network](#create-network)
+	* [List networks](#list-networks)
+	* [Get network details](#get-network)
+	* [Update a network](#update-network)
+	* [Delete a network](#delete-network)
 * [Subnets](#subnets)
+	* [Create a subnet](#create-subnet)
+	* [List subnets](#list-subnets)
+	* [Get subnet details](#get-subnet)
+	* [Update a subnet](#update-subnet)
+	* [Delete a subnet](#delete-subnet)
 * [Ports](#ports)
+	* [Create a port](#create-port)
+	* [List ports](#list-ports)
+	* [Get port details](#get-port)
+	* [Update a port](#update-port)
+	* [Delete a port](#delete-port)
 
 ## <a name="setup"></a>Setup
+
+In order to interact with OpenStack APIs, you must first pass in your auth
+credentials to a `Provider` struct. Once you have this, you then retrieve
+whichever service struct you're interested in - so in our case, we invoke the
+`NewNetworkV2` method:
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/openstack"
@@ -23,6 +43,9 @@ client, err := openstack.NewNetworkV2(provider, gophercloud.EndpointOpts{
 })
 {% endhighlight %}
 
+If you're unsure about how to retrieve credentials, please read our [introductory
+guide](/docs) which outlines the steps you need to take.
+
 ## <a name="networks"></a>Networks
 
 A network is the central resource of the OpenStack Neutron API. If you were to
@@ -32,7 +55,7 @@ inside a larger [layer-2 network](http://en.wikipedia.org/wiki/Data_link_layer).
 Because of this virtualized partitioning, a virtual network can only share
 packets with other networks through one or more routers.
 
-### Create a network
+### <a name="create-network"></a>Create a network
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/networking/v2/networks"
@@ -44,7 +67,7 @@ opts := networks.CreateOpts{Name: "main_network", AdminStateUp: networks.Up}
 network, err := networks.Create(client, opts).Extract()
 {% endhighlight %}
 
-### List networks
+### <a name="list-networks"></a>List networks
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/pagination"
@@ -66,14 +89,14 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 })
 {% endhighlight %}
 
-### Get details for an existing network
+### <a name="get-network"></a>Get details for an existing network
 
 {% highlight go %}
 // We need to know what the UUID of our network is and pass it in as a string
 network, err := networks.Get(client, "id").Extract()
 {% endhighlight %}
 
-### Update an existing network
+### <a name="update-network"></a>Update an existing network
 
 You can update a network's name, along with its "shared" or "admin" status:
 
@@ -84,7 +107,7 @@ opts := networks.UpdateOpts{Name: "new_name", Shared: true}
 network, err := networks.Update(client, "id", opts)
 {% endhighlight %}
 
-### Delete a network
+### <a name="delete-network"></a>Delete a network
 
 {% highlight go %}
 result := networks.Delete(client, "id")
@@ -98,7 +121,7 @@ specifically means a virtual machine (Compute instance). For this reason, each
 subnet must have a [CIDR](http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)
 and be associated with a network.
 
-### Create a subnet
+### <a name="create-subnet"></a>Create a subnet
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/networking/v2/subnets"
@@ -116,7 +139,7 @@ opts := subnets.CreateOpts{
 subnet, err := subnets.Create(client, opts).Extract()
 {% endhighlight %}
 
-### List all subnets
+### <a name="list-subnets"></a>List all subnets
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/pagination"
@@ -138,14 +161,14 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 })
 {% endhighlight %}
 
-### Get details for an existing subnet
+### <a name="get-subnet"></a>Get details for an existing subnet
 
 {% highlight go %}
 // We need to know what the UUID of our subnet is and pass it in as a string
 subnet, err := subnets.Get(client, "id").Extract()
 {% endhighlight %}
 
-### Update an existing subnet
+### <a name="update-subnet"></a>Update an existing subnet
 
 You can edit the name, gateway IP address, DNS nameservers, host routes
 and "enable DHCP" status.
@@ -155,7 +178,7 @@ opts := subnets.UpdateOpts{Name: "new_subnet_name"}
 subnet, err = subnets.Update(client, "id", opts).Extract()
 {% endhighlight %}
 
-### Delete a subnet
+### <a name="delete-subnet"></a>Delete a subnet
 
 {% highlight go %}
 result := subnets.Delete(client, "id")
@@ -169,7 +192,7 @@ different network segments together, and a port is the location where devices
 connect to the switch. A device in our case is usually a virtual machine. For
 more information about these terms, read this [related article](http://www.wisegeek.com/what-is-a-switch-port.htm).
 
-### Create a port
+### <a name="create-port"></a>Create a port
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/openstack/networking/v2/ports"
@@ -189,7 +212,7 @@ opts := ports.CreateOpts{
 port, err := ports.Create(client, opts).Extract()
 {% endhighlight %}
 
-### List all ports
+### <a name="list-ports"></a>List all ports
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/pagination"
@@ -211,14 +234,14 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 })
 {% endhighlight %}
 
-### Get details for an existing port
+### <a name="get-port"></a>Get details for an existing port
 
 {% highlight go %}
 // We need to know what the UUID of our port is and pass it in as a string
 port, err := ports.Get(client, "id").Extract()
 {% endhighlight %}
 
-### Update an existing port
+### <a name="update-port"></a>Update an existing port
 
 You can edit the name, admin state, fixed IPs, device ID, device owner and
 security groups.
@@ -228,7 +251,7 @@ opts := ports.UpdateOpts{Name: "new_port_name"}
 port, err = ports.Update(client, "id", opts).Extract()
 {% endhighlight %}
 
-### Delete a subnet
+### <a name="delete-port"></a>Delete a port
 
 {% highlight go %}
 result := ports.Delete(client, "id")

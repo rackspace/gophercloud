@@ -1,15 +1,55 @@
 ---
 layout: page
-title: Getting Started with Block Storage
+title: Getting Started with Block Storage v1
 ---
 
-## Volume types
+* [Setup](#setup)
+* [Volume types](#volume-types)
+  * [List volume types](#list-types)
+  * [Create volume type](#create-type)
+  * [Show volume type](#show-type)
+  * [Delete volume type](#delete-type)
+* [Volumes](#volumes)
+  * [List volumes](#list-volumes)
+  * [Create volume](#create-volume)
+  * [Show volume details](#show-volume)
+  * [Delete volume](#delete-volume)
+* [Snapshots](#snapshots)
+  * [List snapshots](#list-snapshots)
+  * [Create snapshots](#create-snapshot)
+  * [Show snapshot details](#show-snapshot)
+  * [Delete snapshot](#delete-snapshot)
+  * [Update metadata](#update-snapshot-metadata)
 
-A Volume type is... well... the type of a block storage volume you want. You
+## <a name="setup"></a>Setup
+
+In order to interact with OpenStack APIs, you must first pass in your auth
+credentials to a `Provider` struct. Once you have this, you then retrieve
+whichever service struct you're interested in - so in our case, we invoke the
+`NewBlockStorageV1` method:
+
+{% highlight go %}
+import "github.com/rackspace/gophercloud/openstack"
+
+authOpts, err := utils.AuthOptions()
+
+provider, err := openstack.AuthenticatedClient(authOpts)
+
+client, err := openstack.NewBlockStorageV1(provider, gophercloud.EndpointOpts{
+  Region: "RegionOne",
+})
+{% endhighlight %}
+
+If you're unsure about how to retrieve credentials, please read our [introductory
+guide](/docs) which outlines the steps you need to take.
+
+## <a name="volume-types"></a>Volume types
+
+A volume type is... well... the type of a block storage volume you want. You
 can define whatever types work best for you, such as SATA, SCSCI, SSD, etc.
 These can be customized or defined by the OpenStack admin.
 
-### List volume types
+### <a name="list-types"></a>List volume types
 
 {% highlight go %}
 import (
@@ -30,7 +70,7 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 })
 {% endhighlight %}
 
-### Create volume type
+### <a name="create-type"></a>Create volume type
 
 In order to create a new volume type, you must specify a name.
 
@@ -49,24 +89,24 @@ opts := volumetypes.CreateOpts{Name: "new_type", ExtraSpecs: specs}
 vt, err := volumetypes.Create(client, opts).Extract()
 {% endhighlight %}
 
-### Show volume type details
+### <a name="show-type"></a>Show volume type details
 
 {% highlight go %}
 vt, err := volumetypes.Get(client, "volume_type_id").Extract()
 {% endhighlight %}
 
-### Delete volume type
+### <a name="delete-type"></a>Delete volume type
 
 {% highlight go %}
 err := volumetypes.Delete(client, "volume_type_id")
 {% endhighlight %}
 
-## Volumes
+## <a name="volumes"></a>Volumes
 
 A volume is a detachable block storage device (you can think of it as a USB
 hard drive). It can only be attached to one instance at a time.
 
-### Create volume
+### <a name="create-volume"></a>Create volume
 
 The only required attribute when creating a new volume is its size. All other
 attributes are optional.
@@ -79,7 +119,7 @@ opts := volumes.CreateOpts{Size: 100, Name: "foo_volume", VolumeType: "volume_ty
 vol, err := volumes.Create(client, opts).Extract()
 {% endhighlight %}
 
-### List volumes
+### <a name="list-volumes"></a>List volumes
 
 {% highlight go %}
 import (
@@ -103,13 +143,13 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 })
 {% endhighlight %}
 
-### Show volume details
+### <a name="show-volume"></a>Show volume details
 
 {% highlight go %}
 vol, err := volumes.Get(client, "volume_id").Extract()
 {% endhighlight %}
 
-### Update volume
+### <a name="update-volume"></a>Update volume
 
 {% highlight go %}
 opts := volumes.UpdateOpts{Name: "new_name"}
@@ -117,17 +157,17 @@ opts := volumes.UpdateOpts{Name: "new_name"}
 vol, err := volumes.Update(client, "volume_id", opts).Extract()
 {% endhighlight %}
 
-### Delete volume
+### <a name="delete-volume"></a>Delete volume
 
 {% highlight go %}
 err := volumes.Delete(client, "volume_id")
 {% endhighlight %}
 
-## Snapshots
+## <a name="snapshots"></a>Snapshots
 
 A snapshot is point-in-time copy of the data contained in a volume.
 
-### Create snapshot
+### <a name="create-snapshot"></a>Create snapshot
 
 The only required attribute when creating a new snapshot is the ID of the
 volume you're backing up.
@@ -140,7 +180,7 @@ opts := snapshots.CreateOpts{Name: "2014_oct", VolumeID: "volume_id"}
 snap, err := snapshots.Create(client, opts).Extract()
 {% endhighlight %}
 
-### List snapshots
+### <a name="list-snapshots"></a>List snapshots
 
 {% highlight go %}
 import (
@@ -164,19 +204,19 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 })
 {% endhighlight %}
 
-### Show snapshot details
+### <a name="show-snapshot"></a>Show snapshot details
 
 {% highlight go %}
 snap, err := snapshots.Get(client, "snapshot_id").Extract()
 {% endhighlight %}
 
-### Delete snapshot
+### <a name="delete-snapshot"></a>Delete snapshot
 
 {% highlight go %}
 err := snapshots.Delete(client, "snapshot_id")
 {% endhighlight %}
 
-### Update snapshot metadata
+### <a name="update-snapshot-metadata"></a>Update snapshot metadata
 
 {% highlight go %}
 opts := snapshots.UpdateMetadataOpts{

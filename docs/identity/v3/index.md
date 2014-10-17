@@ -3,7 +3,29 @@ layout: page
 title: Getting Started with Identity v3
 ---
 
-## Setup
+* [Setup](#setup)
+* [Tokens](#tokens)
+  * [Generate token](#create-token)
+  * [Get token](#get-token)
+  * [Validate token](#validate-token)
+  * [Revoke token](#revoke-token)
+* [Service catalog](#services)
+  * [Add service](#create-service)
+  * [List services](#list-services)
+  * [Show service details](#get-service)
+  * [Delete service](#delete-service)
+* [Endpoints](#endpoints)
+  * [Add endpoint](#create-endpoint)
+  * [List endpoints](#list-endpoints)
+  * [Show endpoint details](#get-endpoint)
+  * [Delete endpoint](#delete-endpoint)
+
+## <a name="setup"></a>Setup
+
+In order to interact with OpenStack APIs, you must first pass in your auth
+credentials to a `Provider` struct. Once you have this, you then retrieve
+whichever service struct you're interested in - so in our case, we invoke the
+`NewIdentityV2` method:
 
 {% highlight go %}
 import "github.com/rackspace/gophercloud/openstack"
@@ -17,14 +39,17 @@ client, err := openstack.NewIdentityV2(provider, gophercloud.EndpointOpts{
 })
 {% endhighlight %}
 
-## Tokens
+If you're unsure about how to retrieve credentials, please read our [introductory
+guide](/docs) which outlines the steps you need to take.
+
+## <a name="tokens"></a>Tokens
 
 A token is an arbitrary bit of text that is returned when you authenticate,
 which you subsequently use as to access and control API resources. Each
 token has a scope that describes which resources are accessible with it. A
 token may be revoked at anytime and is valid for a finite duration.
 
-### Generate a token
+### <a name="create-token"></a>Generate a token
 
 The configuration options that you need to pass into `tokens.AuthOptions` will
 mostly depend on your provider: some authenticate with API keys rather than
@@ -54,13 +79,13 @@ scope := tokens.Scope{ProjectName: "tmp_project"}
 token, err := tokens.Create(client, opts, scope).Extract()
 {% endhighlight %}
 
-### Get token
+### <a name="get-token"></a>Get token
 
 {% highlight go %}
 token, err := tokens.Get(client, "token_id").Extract()
 {% endhighlight %}
 
-### Validate token
+### <a name="validate-token"></a>Validate token
 
 To check whether an existing token is still valid (i.e. whether it has expired
   or not), you can validate a token ID and get back a boolean value.
@@ -69,7 +94,7 @@ To check whether an existing token is still valid (i.e. whether it has expired
 valid, err := tokens.Validate(client, "token_id")
 {% endhighlight %}
 
-### Revoke token
+### <a name="revoke-token"></a>Revoke token
 
 Revoking a token will prevent it being used in further API calls.
 
@@ -77,13 +102,13 @@ Revoking a token will prevent it being used in further API calls.
 err := tokens.Revoke(client, "token_id")
 {% endhighlight %}
 
-## Service catalog
+## <a name="services"></a>Service catalog
 
 A service is a RESTful API that controls the functionality of an OpenStack
 service - such as as Compute, Object Storage, etc. It provides one or more
 endpoints through which users can access resources and perform operations.
 
-### Add service
+### <a name="create-service"></a>Add service
 
 The only parameter required when creating a new service is the "type" in string
 form:
@@ -94,7 +119,7 @@ import "github.com/rackspace/gophercloud/openstack/identity/v3/services"
 service, err := services.Create(client, "service_type").Extract()
 {% endhighlight %}
 
-### List services
+### <a name="list-services"></a>List services
 
 {% highlight go %}
 import (
@@ -119,7 +144,7 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 })
 {% endhighlight %}
 
-### Show service details
+### <a name="get-service"></a>Show service details
 
 In order to retrieve the details for a particular service, all you need is its
 UUID in string form:
@@ -128,7 +153,7 @@ UUID in string form:
 service, err := services.Get(client, "service_id").Extract()
 {% endhighlight %}
 
-### Update service
+### <a name="update-service"></a>Update service
 
 The only modifiable attribute for a service is its type. To set a new one:
 
@@ -136,7 +161,7 @@ The only modifiable attribute for a service is its type. To set a new one:
 service, err := services.Update(client, "service_id", "new_type").Extract()
 {% endhighlight %}
 
-### Delete service
+### <a name="delete-service"></a>Delete service
 
 To permanently delete a service from the catalog, just pass in its UUID like so:
 
@@ -145,14 +170,14 @@ err := services.Delete(client, "service_id")
 {% endhighlight %}
 
 
-## Endpoints
+## <a name="endpoints"></a>Endpoints
 
 An endpoint is a network-accessible address, usually described by a URL, where
 a service may be accessed. If using an extension for templates, you can create
 an endpoint template, which represents the templates of all the consumable
 services that are available across the regions.
 
-### Add endpoint
+### <a name="create-endpoint"></a>Add endpoint
 
 {% highlight go %}
 import (
@@ -172,7 +197,7 @@ opts := endpoints.EndpointOpts{
 endpoint, err := endpoints.Create(client, opts).Extract()
 {% endhighlight %}
 
-### List endpoints
+### <a name="list-endpoints"></a>List endpoints
 
 {% highlight go %}
 import (
@@ -197,7 +222,7 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 })
 {% endhighlight %}
 
-### Update endpoint
+### <a name="update-endpoint"></a>Update endpoint
 
 All fields are modifiable and are optional.
 
@@ -212,7 +237,7 @@ opts := endpoints.EndpointOpts{Name: "new_name"}
 endpoint, err := endpoints.Update(client, "endpoint_id", opts).Extract()
 {% endhighlight %}
 
-### Delete endpoint
+### <a name="delete-endpoint"></a>Delete endpoint
 
 {% highlight go %}
 err := endpoints.Delete(client, "endpoint_id")

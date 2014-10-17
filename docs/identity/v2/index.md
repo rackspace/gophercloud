@@ -5,6 +5,11 @@ title: Getting Started with Identity v2
 
 ## Setup
 
+In order to interact with OpenStack APIs, you must first pass in your auth
+credentials to a `Provider` struct. Once you have this, you then retrieve
+whichever service struct you're interested in - so in our case, we invoke the
+`NewIdentityV2` method:
+
 {% highlight go %}
 import "github.com/rackspace/gophercloud/openstack"
 
@@ -16,6 +21,9 @@ client, err := openstack.NewIdentityV2(provider, gophercloud.EndpointOpts{
   Region: "RegionOne",
 })
 {% endhighlight %}
+
+If you're unsure about how to retrieve credentials, please read our [introductory
+guide](/docs) which outlines the steps you need to take.
 
 ## Tokens
 
