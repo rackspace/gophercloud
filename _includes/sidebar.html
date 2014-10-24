@@ -1,0 +1,38 @@
+<div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <img src="http://gophercloud.io/images/gophercloud-original.png" />
+      <h1>
+        <a href="{{ site.baseurl }}">
+          {{ site.title }}
+        </a>
+      </h1>
+      <p class="lead">{{ site.description }}</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item{% if page.url == site.baseurl %} active{% endif %}" href="{{ site.baseurl }}">Home</a>
+
+      <a class="sidebar-nav-item" href="{{ site.links.install }}">Installation</a>
+      <a class="sidebar-nav-item" href="{{ site.links.docs }}">Documentation</a>
+
+      {% if page.url contains "/docs" %}
+        <ul>
+          <li><a href="{{ site.links.docs }}/compute">Compute</a></li>
+          <li><a href="{{ site.links.docs }}/object-storage">Object Storage</a></li>
+          <li><a href="{{ site.links.docs }}/networking">Networking</a></li>
+          <li><a href="{{ site.links.docs }}/block-storage">Block Storage</a></li>
+          <li><a href="{{ site.links.docs }}/identity">Identity</a></li>
+        </ul>
+      {% endif %}
+
+      <a class="sidebar-nav-item" href="{{ site.links.contrib }}" target="_blank">Contributing</a>
+      <a class="sidebar-nav-item" href="{{ site.links.github }}" target="_blank">GitHub</a>
+      <a class="sidebar-nav-item" href="{{ site.links.godoc }}" target="_blank">GoDoc</a>
+    </nav>
+
+    <p>&copy; {{ site.time | date: '%Y' }}. All rights reserved.</p>
+
+    <p>Powered by <a href="{{ site.links.hyde }}" target="_blank">Hyde</a>.</p>
+  </div>
+</div>
