@@ -18,8 +18,8 @@ opts := gophercloud.AuthOptions{
 }
 
 // Option 2: Use a utility function to retrieve all your environment variables
-import "github.com/rackspace/gophercloud/openstack/utils"
-opts, err := utils.AuthOptions()
+import "github.com/rackspace/gophercloud/openstack"
+opts, err := openstack.AuthOptionsFromEnv()
 {% endhighlight %}
 
 Once you have an `opts` variable, you can pass it in and get back a
