@@ -19,7 +19,7 @@ version:          0.0.2
 
 links:
   install:        /installation
-  contrib:        https://github.com/rackspace/gophercloud/blob/v0.2.0/CONTRIBUTING.md
+  contrib:        https://github.com/rackspace/gophercloud/blob/master/CONTRIBUTING.md
   docs:           /docs
   github:         https://github.com/rackspace/gophercloud
   godoc:          http://godoc.org/github.com/rackspace/gophercloud
