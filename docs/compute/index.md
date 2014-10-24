@@ -32,7 +32,7 @@ whichever service struct you're interested in - so in our case, we invoke the
 {% highlight go %}
 import "github.com/rackspace/gophercloud/openstack"
 
-authOpts, err := utils.AuthOptions()
+authOpts, err := openstack.AuthOptionsFromEnv()
 
 provider, err := openstack.AuthenticatedClient(authOpts)
 

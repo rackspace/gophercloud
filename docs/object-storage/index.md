@@ -27,7 +27,7 @@ whichever service struct you're interested in - so in our case, we invoke the
 `NewStorageV1` method:
 
 {% highlight go %}
-authOpts, err := utils.AuthOptions()
+authOpts, err := openstack.AuthOptionsFromEnv()
 
 provider, err := openstack.AuthenticatedClient(authOpts)
 
