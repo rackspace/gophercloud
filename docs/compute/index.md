@@ -136,7 +136,8 @@ res := images.Delete(client, "image_id")
 
 # <a name="servers"></a>Servers
 
-A server is a virtual machine (VM) instance in the compute system.
+A server is either a virtual machine (VM) instance or a physical device
+managed by the compute system.
 
 ### <a name="list-servers"></a>List all available servers
 
