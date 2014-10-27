@@ -60,7 +60,7 @@ res := containers.Create(client, "container_name", opts)
 
 // If we want to extract information out from the response headers, we can.
 // The first return value will be http.Header (alias of map[string][]string).
-headers, err := res.ExtractHeaders()
+headers, err := res.ExtractHeader()
 {% endhighlight %}
 
 ### <a name="list-containers"></a>List containers
@@ -125,7 +125,7 @@ result := containers.Update(client, "container_name", opts)
 response := containers.Delete(client, "container_name")
 
 // Like most operations, we can extract headers values too
-headers, err := response.ExtractHeaders()
+headers, err := response.ExtractHeader()
 {% endhighlight %}
 
 ## <a name="objects"></a>Objects
@@ -183,7 +183,7 @@ opts := objects.CreateOpts{
 res := objects.Create(client, "container_name", "object_name", content, opts)
 
 // We have the option of extracting the resulting headers from the response
-headers, err := res.ExtractHeaders()
+headers, err := res.ExtractHeader()
 {% endhighlight %}
 
 ### <a name="list-objects"></a>List objects
@@ -231,7 +231,7 @@ opts := &objects.CopyOpts{Destination: "backup/wednesday_14th_2014"}
 result := objects.Copy(client, "logs", "wednesday_14th", opts)
 
 // Extract response headers
-headers, err := result.ExtractHeaders()
+headers, err := result.ExtractHeader()
 {% endhighlight %}
 
 ### <a name="download-object"></a>Download object
@@ -247,7 +247,7 @@ res := objects.Download(client, "container_name", "object_name", opts)
 bytes, err := res.ExtractContent()
 
 // Extract headers
-header, err := res.ExtractHeaders()
+header, err := res.ExtractHeader()
 {% endhighlight %}
 
 ### <a name="object-metadata"></a>Retrieve and update metadata
