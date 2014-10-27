@@ -21,6 +21,8 @@ title: Getting Started with Compute v2
   * [Resize](#resize)
   * [Confirm resize](#confirm)
   * [Revert resize](#revert)
+* [Providers](#providers)
+  * [Rackspace](#rackspace)
 
 # <a name="setup"></a>Setup
 
@@ -240,3 +242,10 @@ result := servers.ConfirmResize(client, "server_id")
 {% highlight go %}
 result := servers.RevertResize(client, "server_id")
 {% endhighlight %}
+
+## <a name="providers"></a>Providers
+
+### <a name="rackspace"></a>Rackspace
+
+* [Quickstart for Cloud Servers](https://developer.rackspace.com/docs/cloud-servers/getting-started/?lang=go)
+on the Rackspace Developer portal.

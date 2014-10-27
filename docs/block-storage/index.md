@@ -20,6 +20,8 @@ title: Getting Started with Block Storage v1
   * [Show snapshot details](#show-snapshot)
   * [Delete snapshot](#delete-snapshot)
   * [Update metadata](#update-snapshot-metadata)
+* [Providers](#providers)
+  * [Rackspace](#rackspace)
 
 ## <a name="setup"></a>Setup
 
@@ -234,3 +236,10 @@ snap, err := res.Extract()
 // To extract a metadata map
 metadata, err := res.ExtractMetadata()
 {% endhighlight %}
+
+## <a name="providers"></a>Providers
+
+### <a name="rackspace"></a>Rackspace
+
+* [Quickstart for Cloud Block Storage](https://developer.rackspace.com/docs/cloud-block-storage/getting-started/?lang=go)
+on the Rackspace Developer portal.
