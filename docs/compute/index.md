@@ -37,7 +37,7 @@ authOpts, err := openstack.AuthOptionsFromEnv()
 provider, err := openstack.AuthenticatedClient(authOpts)
 
 client, err := openstack.NewComputeV2(provider, gophercloud.EndpointOpts{
-  Region: "RegionOne",
+	Region: "RegionOne",
 })
 {% endhighlight %}
 
@@ -53,8 +53,8 @@ combination of disk space, memory capacity and priority for CPU time.
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud/pagination"
-  "github.com/rackspace/gophercloud/openstack/compute/v2/flavors"
+	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/flavors"
 )
 
 // We have the option of filtering the flavor list. If we want the full
@@ -66,11 +66,11 @@ pager := flavors.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  flavorList, err := networks.ExtractFlavors(page)
+	flavorList, err := networks.ExtractFlavors(page)
 
-  for _, f := range flavorList {
-    // "f" will be a flavors.Flavor
-  }
+	for _, f := range flavorList {
+		// "f" will be a flavors.Flavor
+	}
 })
 {% endhighlight %}
 
@@ -96,8 +96,8 @@ launched.
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud/pagination"
-  "github.com/rackspace/gophercloud/openstack/compute/v2/images"
+	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/images"
 )
 
 // We have the option of filtering the image list. If we want the full
@@ -109,11 +109,11 @@ pager := images.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  imageList, err := images.ExtractImages(page)
+	imageList, err := images.ExtractImages(page)
 
-  for _, i := range imageList {
-    // "i" will be a images.Image
-  }
+	for _, i := range imageList {
+		// "i" will be a images.Image
+	}
 })
 {% endhighlight %}
 
@@ -142,8 +142,8 @@ A server is a virtual machine (VM) instance in the compute system.
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud/pagination"
-  "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 // We have the option of filtering the server list. If we want the full
@@ -155,11 +155,11 @@ pager := servers.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  serverList, err := servers.ExtractServers(page)
+	serverList, err := servers.ExtractServers(page)
 
-  for _, s := range serverList {
-    // "s" will be a servers.Server
-  }
+	for _, s := range serverList {
+		// "s" will be a servers.Server
+	}
 })
 {% endhighlight %}
 
@@ -211,10 +211,10 @@ same.
 {% highlight go %}
 // You have the option of specifying additional options
 opts := RebuildOpts{
-  Name:      "new_name",
-  AdminPass: "admin_password",
-  ImageID:   "image_id",
-  Metadata:  map[string]string{"owner": "me"},
+	Name:      "new_name",
+	AdminPass: "admin_password",
+	ImageID:   "image_id",
+	Metadata:  map[string]string{"owner": "me"},
 }
 
 result := servers.Rebuild(client, "server_id", opts)

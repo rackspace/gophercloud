@@ -18,7 +18,7 @@ authOpts, err := openstack.AuthOptionsFromEnv()
 provider, err := openstack.AuthenticatedClient(authOpts)
 
 client, err := openstack.NewIdentityV2(provider, gophercloud.EndpointOpts{
-  Region: "RegionOne",
+	Region: "RegionOne",
 })
 {% endhighlight %}
 
@@ -44,10 +44,10 @@ before authenticating.
 import "github.com/rackspace/gophercloud/openstack/identity/v2/tokens"
 
 opts := tokens.AuthOptions{
-  IdentityEndpoint: "{identityEndpoint}",
-  Username: "{username}",
-  Password: "{password}",
-  TenantID: "{tenantID}",
+	IdentityEndpoint: "{identityEndpoint}",
+	Username: "{username}",
+	Password: "{password}",
+	TenantID: "{tenantID}",
 }
 
 token, err := tokens.Create(client, opts).Extract()
@@ -63,8 +63,8 @@ account, organization, or project.
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud/pagination"
-  "github.com/rackspace/gophercloud/openstack/identity/v2/tenants"
+	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud/openstack/identity/v2/tenants"
 )
 
 // We have the option of filtering the tenant list. If we want the full
@@ -76,10 +76,10 @@ pager := tenants.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  tenantList, err := tenants.ExtractTenants(page)
+	tenantList, err := tenants.ExtractTenants(page)
 
-  for _, t := range tenantList {
-    // "t" will be a tenants.Tenant
-  }
+	for _, t := range tenantList {
+		// "t" will be a tenants.Tenant
+	}
 })
 {% endhighlight %}

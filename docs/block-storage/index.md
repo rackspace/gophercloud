@@ -36,7 +36,7 @@ authOpts, err := openstack.AuthOptionsFromEnv()
 provider, err := openstack.AuthenticatedClient(authOpts)
 
 client, err := openstack.NewBlockStorageV1(provider, gophercloud.EndpointOpts{
-  Region: "RegionOne",
+	Region: "RegionOne",
 })
 {% endhighlight %}
 
@@ -53,8 +53,8 @@ These can be customized or defined by the OpenStack admin.
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud/pagination"
-  "github.com/rackspace/gophercloud/openstack/blockstorage/v1/volumetypes"
+	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud/openstack/blockstorage/v1/volumetypes"
 )
 
 // Retrieve a pager (i.e. a paginated collection)
@@ -62,11 +62,11 @@ pager := volumetypes.List(client)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  vtList, err := volumetypes.ExtractVolumeTypes(page)
+	vtList, err := volumetypes.ExtractVolumeTypes(page)
 
-  for _, vt := range vtList {
-    // "vt" will be a volumetypes.VolumeType
-  }
+	for _, vt := range vtList {
+		// "vt" will be a volumetypes.VolumeType
+	}
 })
 {% endhighlight %}
 
@@ -123,8 +123,8 @@ vol, err := volumes.Create(client, opts).Extract()
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud/pagination"
-  "github.com/rackspace/gophercloud/openstack/blockstorage/v1/volumetypes"
+	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud/openstack/blockstorage/v1/volumetypes"
 )
 
 // We can filter by status
@@ -135,11 +135,11 @@ pager := volumes.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  vList, err := volumes.ExtractVolumes(page)
+	vList, err := volumes.ExtractVolumes(page)
 
-  for _, v := range vList {
-    // "v" will be a volumes.Volume
-  }
+	for _, v := range vList {
+		// "v" will be a volumes.Volume
+	}
 })
 {% endhighlight %}
 
@@ -184,8 +184,8 @@ snap, err := snapshots.Create(client, opts).Extract()
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud/pagination"
-  "github.com/rackspace/gophercloud/openstack/blockstorage/v1/snapshots"
+	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud/openstack/blockstorage/v1/snapshots"
 )
 
 // We can filter by status
@@ -196,11 +196,11 @@ pager := snapshots.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  sList, err := snapshots.ExtractSnapshots(page)
+	sList, err := snapshots.ExtractSnapshots(page)
 
-  for _, s := range sList {
-    // "s" will be a snapshots.Snapshot
-  }
+	for _, s := range sList {
+		// "s" will be a snapshots.Snapshot
+	}
 })
 {% endhighlight %}
 
@@ -220,10 +220,10 @@ err := snapshots.Delete(client, "snapshot_id")
 
 {% highlight go %}
 opts := snapshots.UpdateMetadataOpts{
-  Metadata: map[string]interface{}{
-    Foo: "bar",
-    Baz: "foo",
-  }
+	Metadata: map[string]interface{}{
+		Foo: "bar",
+		Baz: "foo",
+	}
 }
 
 res := snapshots.UpdateMetadata(client, "snapshot_id", opts)
