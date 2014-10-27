@@ -34,7 +34,7 @@ authOpts, err := openstack.AuthOptionsFromEnv()
 
 provider, err := openstack.AuthenticatedClient(authOpts)
 
-client, err := openstack.NewIdentityV2(provider, gophercloud.EndpointOpts{
+client, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{
 	Region: "RegionOne",
 })
 {% endhighlight %}
