@@ -11,7 +11,7 @@ import (
 
 type EnabledState os.EnabledState
 
-const (
+var (
 	Enabled  EnabledState = os.Enabled
 	Disabled EnabledState = os.Disabled
 )
