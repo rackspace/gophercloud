@@ -9,6 +9,13 @@ import (
 	"github.com/rackspace/gophercloud/pagination"
 )
 
+type EnabledState os.EnabledState
+
+const (
+	Enabled  EnabledState = os.Enabled
+	Disabled EnabledState = os.Disabled
+)
+
 // List returns a pager that allows traversal over a collection of users.
 func List(client *gophercloud.ServiceClient) pagination.Pager {
 	return os.List(client)
