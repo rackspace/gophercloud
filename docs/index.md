@@ -11,10 +11,10 @@ struct with your access details, and you can do this in two ways:
 {% highlight go %}
 // Option 1: Pass in the values yourself
 opts := gophercloud.AuthOptions{
-  IdentityEndpoint: "https://my-openstack.com:5000/v2.0",
-  Username: "{username}",
-  Password: "{password}",
-  TenantID: "{tenant_id}",
+	IdentityEndpoint: "https://my-openstack.com:5000/v2.0",
+	Username: "{username}",
+	Password: "{password}",
+	TenantID: "{tenant_id}",
 }
 
 // Option 2: Use a utility function to retrieve all your environment variables

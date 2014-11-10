@@ -34,8 +34,8 @@ authOpts, err := openstack.AuthOptionsFromEnv()
 
 provider, err := openstack.AuthenticatedClient(authOpts)
 
-client, err := openstack.NewIdentityV2(provider, gophercloud.EndpointOpts{
-  Region: "RegionOne",
+client, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{
+	Region: "RegionOne",
 })
 {% endhighlight %}
 
@@ -66,10 +66,10 @@ have any explicit scope defined.
 import "github.com/rackspace/gophercloud/openstack/identity/v3/tokens"
 
 opts := tokens.AuthOptions{
-  IdentityEndpoint: "{identityEndpoint}",
-  Username: "{username}",
-  Password: "{password}",
-  TenantID: "{tenantID}",
+	IdentityEndpoint: "{identityEndpoint}",
+	Username: "{username}",
+	Password: "{password}",
+	TenantID: "{tenantID}",
 }
 
 // This is completely optional
@@ -123,8 +123,8 @@ service, err := services.Create(client, "service_type").Extract()
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud/pagination"
-  "github.com/rackspace/gophercloud/openstack/identity/v2/services"
+	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud/openstack/identity/v2/services"
 )
 
 // We have the option of filtering the service list. If we want the full
@@ -136,11 +136,11 @@ pager := services.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  serviceList, err := services.ExtractServices(page)
+	serviceList, err := services.ExtractServices(page)
 
-  for _, s := range serviceList {
-    // "s" will be a services.Service
-  }
+	for _, s := range serviceList {
+		// "s" will be a services.Service
+	}
 })
 {% endhighlight %}
 
@@ -181,17 +181,17 @@ services that are available across the regions.
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud"
-  "github.com/rackspace/gophercloud/openstack/identity/v3/endpoints"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/openstack/identity/v3/endpoints"
 )
 
 // All fields except Region are required
 opts := endpoints.EndpointOpts{
-  Availability: gophercloud.AvailabilityPublic,
-  Name: "backup_endpoint",
-  Region: "Region4",
-  URL: "backup.my-openstack.org",
-  ServiceID: "service_id",
+	Availability: gophercloud.AvailabilityPublic,
+	Name: "backup_endpoint",
+	Region: "Region4",
+	URL: "backup.my-openstack.org",
+	ServiceID: "service_id",
 }
 
 endpoint, err := endpoints.Create(client, opts).Extract()
@@ -201,8 +201,8 @@ endpoint, err := endpoints.Create(client, opts).Extract()
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud/pagination"
-  "github.com/rackspace/gophercloud/openstack/identity/v2/endpoints"
+	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud/openstack/identity/v2/endpoints"
 )
 
 // We have the option of filtering the endpoint list. If we want the full
@@ -214,11 +214,11 @@ pager := endpoints.List(client, opts)
 
 // Define an anonymous function to be executed on each page's iteration
 err := pager.EachPage(func(page pagination.Page) (bool, error) {
-  endpointList, err := endpoints.ExtractEndpoints(page)
+	endpointList, err := endpoints.ExtractEndpoints(page)
 
-  for _, e := range endpointList {
-    // "e" will be a endpoints.Endpoint
-  }
+	for _, e := range endpointList {
+		// "e" will be a endpoints.Endpoint
+	}
 })
 {% endhighlight %}
 
@@ -228,8 +228,8 @@ All fields are modifiable and are optional.
 
 {% highlight go %}
 import (
-  "github.com/rackspace/gophercloud"
-  "github.com/rackspace/gophercloud/openstack/identity/v3/endpoints"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/openstack/identity/v3/endpoints"
 )
 
 opts := endpoints.EndpointOpts{Name: "new_name"}

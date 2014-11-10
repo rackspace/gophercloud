@@ -18,6 +18,8 @@ title: Getting Started with Object Storage v1
 * [Account](#account)
 	* [View metadata](#view-account-metadata)
 	* [Update metadata](#update-account-metadata)
+* [Providers](#providers)
+	* [Rackspace](#rackspace)
 
 ## <a name="setup"></a>Setup
 
@@ -311,3 +313,10 @@ for k, v := range metadata {
 	// ...
 }
 {% endhighlight %}
+
+## <a name="providers"></a>Providers
+
+### <a name="rackspace"></a>Rackspace
+
+* [Quickstart for Cloud Files](https://developer.rackspace.com/docs/cloud-files/getting-started/?lang=go)
+on the Rackspace Developer portal.
