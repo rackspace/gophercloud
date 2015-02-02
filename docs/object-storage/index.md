@@ -26,14 +26,14 @@ title: Getting Started with Object Storage v1
 In order to interact with OpenStack APIs, you must first pass in your auth
 credentials to a `Provider` struct. Once you have this, you then retrieve
 whichever service struct you're interested in - so in our case, we invoke the
-`NewStorageV1` method:
+`NewObjectStorageV1` method:
 
 {% highlight go %}
 authOpts, err := openstack.AuthOptionsFromEnv()
 
 provider, err := openstack.AuthenticatedClient(authOpts)
 
-client, err := openstack.NewStorageV1(provider, gophercloud.EndpointOpts{
+client, err := openstack.NewObjectStorageV1(provider, gophercloud.EndpointOpts{
 	Region: "RegionOne",
 })
 {% endhighlight %}
