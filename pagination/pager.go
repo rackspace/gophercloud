@@ -124,8 +124,6 @@ func (p Pager) EachPage(handler func(Page) (bool, error)) error {
 // AllPages returns all the pages from a `List` operation in a single page,
 // allowing the user to retrieve all the pages at once.
 func (p Pager) AllPages() (Page, error) {
-	// pagesSlice holds all the pages until they get converted into as Page Body.
-	var pagesSlice []interface{}
 	// body will contain the final concatenated Page body.
 	var body reflect.Value
 
@@ -142,6 +140,7 @@ func (p Pager) AllPages() (Page, error) {
 	// `[]byte`, and `[]interface{}`.
 	switch testPage.GetBody().(type) {
 	case map[string]interface{}:
+		var pagesSlice []interface{}
 		// key is the map key for the page body if the body type is `map[string]interface{}`.
 		var key string
 		// Iterate over the pages to concatenate the bodies.
@@ -163,6 +162,7 @@ func (p Pager) AllPages() (Page, error) {
 		body = reflect.MakeMap(reflect.MapOf(reflect.TypeOf(key), reflect.TypeOf(pagesSlice)))
 		body.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf(pagesSlice))
 	case []byte:
+		var pagesSlice []interface{}
 		// Iterate over the pages to concatenate the bodies.
 		err := p.EachPage(func(page Page) (bool, error) {
 			b := page.GetBody().([]byte)
@@ -185,6 +185,7 @@ func (p Pager) AllPages() (Page, error) {
 		body = reflect.New(reflect.TypeOf(b)).Elem()
 		body.SetBytes(b)
 	case []interface{}:
+		var pagesSlice []interface{}
 		// Iterate over the pages to concatenate the bodies.
 		err := p.EachPage(func(page Page) (bool, error) {
 			b := page.GetBody().([]interface{})
@@ -210,7 +211,7 @@ func (p Pager) AllPages() (Page, error) {
 	// pages.
 	page := reflect.New(pageType)
 	// Set the page body to be the concatenated pages.
-	page.Elem().FieldByName("Body").Set(body)
+	page.Elem().FieldByName("Body").Set(reflect.ValueOf(body.Interface()))
 	// Set any additional headers that were pass along. The `objectstorage` pacakge,
 	// for example, passes a Content-Type header.
 	h := make(http.Header)
