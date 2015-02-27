@@ -119,6 +119,21 @@ func NewIdentityV2(client *gophercloud.ProviderClient) *gophercloud.ServiceClien
 	}
 }
 
+// NewComputeV1 creates a ServiceClient that may be used to access the v1 compute service.
+func NewComputeV1(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+	eo.Type = "compute"
+	eo.Name = "cloudServers"
+	url, err := client.EndpointLocator(eo)
+	if err != nil {
+		return nil, err
+	}
+
+	return &gophercloud.ServiceClient{
+		ProviderClient: client,
+		Endpoint:       url,
+	}, nil
+}
+
 // NewComputeV2 creates a ServiceClient that may be used to access the v2 compute service.
 func NewComputeV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
 	eo.ApplyDefaults("compute")
