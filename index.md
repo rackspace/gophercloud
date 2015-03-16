@@ -12,7 +12,7 @@ visit our [documentation](/docs) where you will find guides and code samples.
 
 # Getting help
 
-If you need help, feel free to ping [contact us](https://developer.rackspace.com/support/) or [submit an
+If you need help, feel free to [ping us](https://developer.rackspace.com/support/) or [submit an
 issue](https://github.com/rackspace/gophercloud/issues) on our bug tracker.
 
 # Who is using gophercloud?
