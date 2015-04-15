@@ -651,3 +651,12 @@ func HandleNetworkAddressListSuccessfully(t *testing.T) {
 			}`)
 	})
 }
+
+func HandleCreateServerImageSuccessfully(t *testing.T) {
+	th.Mux.HandleFunc("/servers/asdfasdfasdf/action", func(w http.ResponseWriter, r *http.Request) {
+		th.TestMethod(t, r, "POST")
+		th.TestHeader(t, r, "X-Auth-Token", client.TokenID)
+		w.WriteHeader(http.StatusNoContent)
+	})
+}
+

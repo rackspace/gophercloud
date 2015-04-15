@@ -325,3 +325,12 @@ func TestListAddressesByNetwork(t *testing.T) {
 	th.AssertNoErr(t, err)
 	th.CheckEquals(t, 1, pages)
 }
+
+func TestCreateServerImage(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+	HandleCreateServerImageSuccessfully(t)
+	
+	err := CreateServerImage(client.ServiceClient(), "1234asdf", CreateServerImageOpts{Name: "test"}).ExtractErr()
+	th.AssertNoErr(t, err)
+}
