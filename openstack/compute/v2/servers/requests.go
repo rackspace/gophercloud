@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/rackspace/gophercloud"
 	"github.com/rackspace/gophercloud/pagination"
@@ -728,6 +729,24 @@ func (opts CreateServerImageOpts) ToCreateServerImageMap() (map[string]interface
 	return createImage, err
 }
 
+func (res CreateServerImageResult) ExtractImageID() (string, error) {
+	var err error
+	if res.Err != nil {
+		return "", res.Err
+	}
+	// Get the image id from the header
+	rawUrl := res.Header.Get("Location")
+	if rawUrl != "" {
+		split := strings.Split(rawUrl, "/")
+		if len(split) > 0 {
+			id := split[len(split)-1]
+			return id, nil
+		}
+	}
+	err = fmt.Errorf("Failed to parse the ID of newly created image")
+	return "", err
+}
+
 // CreateServerImage makes a request against the nova API to schedule an image to be created of the server
 func CreateServerImage(client *gophercloud.ServiceClient, serverId string, opts CreateServerImageOptsBuilder) CreateServerImageResult {
 	var res CreateServerImageResult
@@ -736,6 +755,12 @@ func CreateServerImage(client *gophercloud.ServiceClient, serverId string, opts 
 		res.Err = err
 		return res
 	}
-	_, res.Err = client.Post(actionURL(client, serverId), reqBody, &res.Body, nil)
-	return res
+	response, err := client.Post(actionURL(client, serverId), reqBody, nil, &gophercloud.RequestOpts{
+		OkCodes: []int{202},
+	})
+	res.Err = err
+	if err == nil {
+		res.Header = response.Header
+	}
+	return res	
 }
