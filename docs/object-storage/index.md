@@ -144,7 +144,7 @@ objects at a time).
 When uploading a new object, you need to the container name you're
 uploading to, and the name of your new object. You also need to provide the
 content of your object - and to do this, you need to use Golang's standard
-[`io.Reader`](http://golang.org/pkg/io/#Reader) interface.
+[`io.ReadSeeker`](http://golang.org/pkg/io/#ReadSeeker) interface.
 
 The first thing you need If you want to upload the contents of a local file:
 
