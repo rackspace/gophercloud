@@ -28,5 +28,9 @@ func (client *ServiceClient) ResourceBaseURL() string {
 
 // ServiceURL constructs a URL for a resource belonging to this provider.
 func (client *ServiceClient) ServiceURL(parts ...string) string {
-	return client.ResourceBaseURL() + strings.Join(parts, "/")
+	url := client.ResourceBaseURL()
+	if !strings.HasSuffix(client.ResourceBaseURL(), "/") {
+		url += "/"
+	}
+	return  url + strings.Join(parts, "/")
 }
