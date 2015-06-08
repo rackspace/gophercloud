@@ -301,3 +301,21 @@ func (client *ProviderClient) Delete(url string, opts *RequestOpts) (*http.Respo
 
 	return client.Request("DELETE", url, *opts)
 }
+
+func (client *ProviderClient) Patch(url string, JSONBody interface{}, JSONResponse *interface{}, opts *RequestOpts) (*http.Response, error) {
+	if opts == nil {
+		opts = &RequestOpts{}
+	}
+
+	if v, ok := (JSONBody).(io.ReadSeeker); ok {
+		opts.RawBody = v
+	} else if JSONBody != nil {
+		opts.JSONBody = JSONBody
+	}
+
+	if JSONResponse != nil {
+		opts.JSONResponse = JSONResponse
+	}
+
+	return client.Request("PATCH", url, *opts)
+}
