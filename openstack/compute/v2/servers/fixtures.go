@@ -446,6 +446,19 @@ func HandleRebootSuccessfully(t *testing.T) {
 	})
 }
 
+// HandleVncSuccessfully sets up the test server to respond to a VNC request with success.
+func HandleVncSuccessfully(t *testing.T) {
+	th.Mux.HandleFunc("/servers/1234asdf/action", func(w http.ResponseWriter, r *http.Request) {
+		th.TestMethod(t, r, "POST")
+		th.TestHeader(t, r, "X-Auth-Token", client.TokenID)
+		th.TestJSONRequest(t, r, `{ "os-getVNCConsole": { "type": "novnc" } }`)
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Add("Content-Type", "application/json")
+		w.Write([]byte(`{ "console": { "type": "novnc", "url": "http://example.com/vnc_auto.html?token=f9906a48-b71e-4f18-baca-c987da3ebdb3" } }`))
+	})
+}
+
 // HandleRebuildSuccessfully sets up the test server to respond to a rebuild request with success.
 func HandleRebuildSuccessfully(t *testing.T, response string) {
 	th.Mux.HandleFunc("/servers/1234asdf/action", func(w http.ResponseWriter, r *http.Request) {
