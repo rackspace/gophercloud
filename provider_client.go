@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/Sirupsen/logrus"
 )
 
 // DefaultUserAgent is the default User-Agent string set in the request header.
@@ -68,6 +70,10 @@ type ProviderClient struct {
 	// fails with a 401 HTTP response code. This a needed because there may be multiple
 	// authentication functions for different Identity service versions.
 	ReauthFunc func() error
+
+	// Logger is an option for logging information from a request that may be useful
+	// for debugging purposes.
+	Logger *logrus.Logger
 }
 
 // AuthenticatedHeaders returns a map of HTTP headers that are common for all
@@ -127,6 +133,13 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 	var body io.ReadSeeker
 	var contentType *string
 
+	client.Logger.Debugf("Identity Endpoint: %s", client.IdentityEndpoint)
+	debugInfo, err := json.MarshalIndent(options, "", "  ")
+	if err != nil {
+		client.Logger.Debugf(fmt.Sprintf("Error logging request options: %s", err))
+	}
+	client.Logger.Debugf("Request Options: %s", string(debugInfo))
+
 	// Derive the content body by either encoding an arbitrary object as JSON, or by taking a provided
 	// io.ReadSeeker as-is. Default the content-type to application/json.
 	if options.JSONBody != nil {
@@ -177,11 +190,23 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 		}
 	}
 
+	if client.Logger.Level == logrus.DebugLevel {
+		debugInfo, err := json.MarshalIndent(req, "", "  ")
+		if err != nil {
+			client.Logger.Debugf(fmt.Sprintf("Error logging request: %s", err))
+		}
+		client.Logger.Debugf("Request: %s", string(debugInfo))
+	}
+
+	client.Logger.Infof("Request URL: %s", req.URL)
+
 	// Issue the request.
 	resp, err := client.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
+
+	client.Logger.Infof("Response Headers: %+v", resp.Header)
 
 	if resp.StatusCode == http.StatusUnauthorized {
 		if client.ReauthFunc != nil {
