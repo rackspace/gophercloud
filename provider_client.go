@@ -133,12 +133,14 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 	var body io.ReadSeeker
 	var contentType *string
 
-	client.Logger.Debugf("Identity Endpoint: %s", client.IdentityEndpoint)
-	debugInfo, err := json.MarshalIndent(options, "", "  ")
-	if err != nil {
-		client.Logger.Debugf(fmt.Sprintf("Error logging request options: %s", err))
+	if client.Logger != nil {
+		client.Logger.Debugf("Identity Endpoint: %s", client.IdentityEndpoint)
+		debugInfo, err := json.MarshalIndent(options, "", "  ")
+		if err != nil {
+			client.Logger.Debugf(fmt.Sprintf("Error logging request options: %s", err))
+		}
+		client.Logger.Debugf("Request Options: %s", string(debugInfo))
 	}
-	client.Logger.Debugf("Request Options: %s", string(debugInfo))
 
 	// Derive the content body by either encoding an arbitrary object as JSON, or by taking a provided
 	// io.ReadSeeker as-is. Default the content-type to application/json.
@@ -190,15 +192,17 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 		}
 	}
 
-	if client.Logger.Level == logrus.DebugLevel {
-		debugInfo, err := json.MarshalIndent(req, "", "  ")
-		if err != nil {
-			client.Logger.Debugf(fmt.Sprintf("Error logging request: %s", err))
+	if client.Logger != nil {
+		if client.Logger.Level == logrus.DebugLevel {
+			debugInfo, err := json.MarshalIndent(req, "", "  ")
+			if err != nil {
+				client.Logger.Debugf(fmt.Sprintf("Error logging request: %s", err))
+			}
+			client.Logger.Debugf("Request: %s", string(debugInfo))
 		}
-		client.Logger.Debugf("Request: %s", string(debugInfo))
-	}
 
-	client.Logger.Infof("Request URL: %s", req.URL)
+		client.Logger.Infof("Request URL: %s", req.URL)
+	}
 
 	// Issue the request.
 	resp, err := client.HTTPClient.Do(req)
@@ -206,7 +210,9 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 		return nil, err
 	}
 
-	client.Logger.Infof("Response Headers: %+v", resp.Header)
+	if client.Logger != nil {
+		client.Logger.Infof("Response Headers: %+v", resp.Header)
+	}
 
 	if resp.StatusCode == http.StatusUnauthorized {
 		if client.ReauthFunc != nil {
