@@ -34,12 +34,9 @@ func NewClient(endpoint string) (*gophercloud.ProviderClient, error) {
 
 	pc := &gophercloud.ProviderClient{
 		IdentityEndpoint: endpoint,
-	}
-
-	if pc.Logger == nil {
-		pc.Logger = &logrus.Logger{
+		Logger: &logrus.Logger{
 			Formatter: &logrus.TextFormatter{},
-		}
+		},
 	}
 
 	if hadPath {
