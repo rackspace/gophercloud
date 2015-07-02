@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/rackspace/gophercloud"
 	tokens2 "github.com/rackspace/gophercloud/openstack/identity/v2/tokens"
 	tokens3 "github.com/rackspace/gophercloud/openstack/identity/v3/tokens"
@@ -31,17 +32,21 @@ func NewClient(endpoint string) (*gophercloud.ProviderClient, error) {
 	endpoint = gophercloud.NormalizeURL(endpoint)
 	base = gophercloud.NormalizeURL(base)
 
-	if hadPath {
-		return &gophercloud.ProviderClient{
-			IdentityBase:     base,
-			IdentityEndpoint: endpoint,
-		}, nil
+	pc := &gophercloud.ProviderClient{
+		IdentityBase: base,
+		Logger: &logrus.Logger{
+			Formatter: &logrus.TextFormatter{},
+		},
 	}
 
-	return &gophercloud.ProviderClient{
-		IdentityBase:     base,
-		IdentityEndpoint: "",
-	}, nil
+	if hadPath {
+		pc.IdentityEndpoint = endpoint
+		return pc, nil
+	}
+
+	pc.IdentityEndpoint = ""
+	return pc, nil
+
 }
 
 // AuthenticatedClient logs in to an OpenStack cloud found at the identity endpoint specified by options, acquires a token, and
