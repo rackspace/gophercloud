@@ -33,7 +33,7 @@ func NewClient(endpoint string) (*gophercloud.ProviderClient, error) {
 	base = gophercloud.NormalizeURL(base)
 
 	pc := &gophercloud.ProviderClient{
-		IdentityEndpoint: endpoint,
+		IdentityBase: base,
 		Logger: &logrus.Logger{
 			Formatter: &logrus.TextFormatter{},
 		},
