@@ -211,7 +211,11 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 	}
 
 	if client.Logger != nil {
-		client.Logger.Infof("Response Headers: %+v", resp.Header)
+		info, err := json.MarshalIndent(resp.Header, "", "  ")
+		if err != nil {
+			client.Logger.Debugf(fmt.Sprintf("Error logging request: %s", err))
+		}
+		client.Logger.Infof("Response Headers: %+v", string(info))
 	}
 
 	if resp.StatusCode == http.StatusUnauthorized {
