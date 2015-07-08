@@ -313,17 +313,31 @@ func CheckJSONEquals(t *testing.T, expectedJSON string, actual interface{}) {
 	}
 }
 
+// AssertErr ensures that the provided value is really an error and not `nil'
+func AssertErr(t *testing.T, e error) {
+	if e == nil {
+		logFatal(t, fmt.Sprintf("An error was expected %s", yellow(e.Error())))
+	}
+}
+
 // AssertNoErr is a convenience function for checking whether an error value is
 // an actual error
 func AssertNoErr(t *testing.T, e error) {
 	if e != nil {
-		logFatal(t, fmt.Sprintf("unexpected error %s", yellow(e.Error())))
+		logFatal(t, fmt.Sprintf("Unexpected error %s", yellow(e.Error())))
+	}
+}
+
+// CheckErr ensures that the provided value is really an error and not `nil'
+func CheckErr(t *testing.T, e error) {
+	if e == nil {
+		logError(t, fmt.Sprintf("An error was expected %s", yellow(e.Error())))
 	}
 }
 
 // CheckNoErr is similar to AssertNoErr, except with a non-fatal error
 func CheckNoErr(t *testing.T, e error) {
 	if e != nil {
-		logError(t, fmt.Sprintf("unexpected error %s", yellow(e.Error())))
+		logError(t, fmt.Sprintf("Unexpected error %s", yellow(e.Error())))
 	}
 }
