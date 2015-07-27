@@ -306,8 +306,14 @@ func Delete(client *gophercloud.ServiceClient, id string) DeleteResult {
 // Get requests details on a single server, by ID.
 func Get(client *gophercloud.ServiceClient, id string) GetResult {
 	var result GetResult
+
+	serverError := &ServerError{
+		id: id,
+	}
+
 	_, result.Err = client.Get(getURL(client, id), &result.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200, 203},
+		OkCodes:   []int{200, 203},
+		ErrorType: serverError,
 	})
 	return result
 }
@@ -343,6 +349,7 @@ func (opts UpdateOpts) ToServerUpdateMap() map[string]interface{} {
 	if opts.AccessIPv6 != "" {
 		server["accessIPv6"] = opts.AccessIPv6
 	}
+
 	return map[string]interface{}{"server": server}
 }
 
@@ -350,8 +357,14 @@ func (opts UpdateOpts) ToServerUpdateMap() map[string]interface{} {
 func Update(client *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder) UpdateResult {
 	var result UpdateResult
 	reqBody := opts.ToServerUpdateMap()
+
+	serverError := &ServerError{
+		id: id,
+	}
+
 	_, result.Err = client.Put(updateURL(client, id), reqBody, &result.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200},
+		OkCodes:   []int{200},
+		ErrorType: serverError,
 	})
 	return result
 }

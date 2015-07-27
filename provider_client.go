@@ -88,18 +88,19 @@ type RequestOpts struct {
 	// RawBody contains an io.ReadSeeker that will be consumed by the request directly. No content-type
 	// will be set unless one is provided explicitly by MoreHeaders.
 	RawBody io.ReadSeeker
-
 	// JSONResponse, if provided, will be populated with the contents of the response body parsed as
 	// JSON.
 	JSONResponse interface{}
 	// OkCodes contains a list of numeric HTTP status codes that should be interpreted as success. If
 	// the response has a different code, an error will be returned.
 	OkCodes []int
-
 	// MoreHeaders specifies additional HTTP headers to be provide on the request. If a header is
 	// provided with a blank value (""), that header will be *omitted* instead: use this to suppress
 	// the default Accept header or an inferred Content-Type, for example.
 	MoreHeaders map[string]string
+	// ErrorType specifies the resource error type to return if an error is encountered.
+	// This lets resources override default error messages based on the response status code.
+	ErrorType error
 }
 
 // UnexpectedResponseCodeError is returned by the Request method when a response code other than
@@ -183,22 +184,6 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 		return nil, err
 	}
 
-	if resp.StatusCode == http.StatusUnauthorized {
-		if client.ReauthFunc != nil {
-			err = client.ReauthFunc()
-			if err != nil {
-				return nil, fmt.Errorf("Error trying to re-authenticate: %s", err)
-			}
-			if options.RawBody != nil {
-				options.RawBody.Seek(0, 0)
-			}
-			resp, err = client.Request(method, url, options)
-			if err != nil {
-				return nil, fmt.Errorf("Successfully re-authenticated, but got error executing request: %s", err)
-			}
-		}
-	}
-
 	// Allow default OkCodes if none explicitly set
 	if options.OkCodes == nil {
 		options.OkCodes = defaultOkCodes(method)
@@ -215,13 +200,47 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 	if !ok {
 		body, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
-		return resp, &UnexpectedResponseCodeError{
+		respErr := &UnexpectedResponseCodeError{
 			URL:      url,
 			Method:   method,
 			Expected: options.OkCodes,
 			Actual:   resp.StatusCode,
 			Body:     body,
 		}
+
+		errType := options.ErrorType
+		switch resp.StatusCode {
+		case http.StatusUnauthorized:
+			if client.ReauthFunc != nil {
+				err = client.ReauthFunc()
+				if err != nil {
+					return nil, fmt.Errorf("Error trying to re-authenticate: %s", err)
+				}
+				if options.RawBody != nil {
+					options.RawBody.Seek(0, 0)
+				}
+				resp, err = client.Request(method, url, options)
+				if err != nil {
+					return nil, fmt.Errorf("Successfully re-authenticated, but got error executing request: %s", err)
+				}
+			}
+			err = defaultError401{}
+			if _, ok := errType.(Error401er); ok {
+				err = errType.(Error401er).Error401(respErr)
+			}
+		case http.StatusNotFound:
+			err = defaultError404{}
+			if _, ok := errType.(Error404er); ok {
+				err = errType.(Error404er).Error404(respErr)
+			}
+		case http.StatusMethodNotAllowed:
+			err = defaultError405{}
+			if _, ok := errType.(Error405er); ok {
+				err = errType.(Error405er).Error405(respErr)
+			}
+		}
+
+		return resp, err
 	}
 
 	// Parse the response body as JSON, if requested to do so.
