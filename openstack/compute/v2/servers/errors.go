@@ -19,7 +19,6 @@ func (snfe *ServerNotFoundError) Error() string {
 
 // ServerError is a generic error type for servers.
 type ServerError struct {
-	gophercloud.BaseError
 	id string
 }
 
