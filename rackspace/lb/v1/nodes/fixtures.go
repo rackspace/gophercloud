@@ -107,6 +107,8 @@ func mockCreateResponse(t *testing.T, lbID int) {
 	})
 }
 
+// temporarily commenting out this test while we create error types
+/*
 func mockCreateErrResponse(t *testing.T, lbID int) {
 	th.Mux.HandleFunc(_rootURL(lbID), func(w http.ResponseWriter, r *http.Request) {
 		th.TestMethod(t, r, "POST")
@@ -142,6 +144,7 @@ func mockCreateErrResponse(t *testing.T, lbID int) {
   `, lbID)
 	})
 }
+*/
 
 func mockBatchDeleteResponse(t *testing.T, lbID int, ids []int) {
 	th.Mux.HandleFunc(_rootURL(lbID), func(w http.ResponseWriter, r *http.Request) {
