@@ -1,6 +1,15 @@
 package gophercloud
 
-type BaseError error
+type BaseError struct {
+	Function string
+	Argument string
+	Value    interface{}
+	Message  string
+}
+
+func (e *BaseError) Error() string {
+	return e.Message
+}
 
 type defaultError401 struct {
 	*UnexpectedResponseCodeError

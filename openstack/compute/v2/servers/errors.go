@@ -13,8 +13,8 @@ type ServerNotFoundError struct {
 	id string
 }
 
-func (snfe *ServerNotFoundError) Error() string {
-	return fmt.Sprintf("I couldn't find server [%s]", snfe.id)
+func (e *ServerNotFoundError) Error() string {
+	return fmt.Sprintf("I couldn't find server [%s]", e.id)
 }
 
 // ServerError is a generic error type for servers.
