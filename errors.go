@@ -1,5 +1,6 @@
 package gophercloud
 
+// InvalidInputError is an error type used for most non-HTTP Gophercloud errors.
 type InvalidInputError struct {
 	Function string
 	Argument string
