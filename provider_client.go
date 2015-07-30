@@ -103,23 +103,6 @@ type RequestOpts struct {
 	ErrorContext error
 }
 
-// UnexpectedResponseCodeError is returned by the Request method when a response code other than
-// those listed in OkCodes is encountered.
-type UnexpectedResponseCodeError struct {
-	URL      string
-	Method   string
-	Expected []int
-	Actual   int
-	Body     []byte
-}
-
-func (err *UnexpectedResponseCodeError) Error() string {
-	return fmt.Sprintf(
-		"Expected HTTP response code %v when accessing [%s %s], but got %d instead\n%s",
-		err.Expected, err.Method, err.URL, err.Actual, err.Body,
-	)
-}
-
 var applicationJSON = "application/json"
 
 // Request performs an HTTP request using the ProviderClient's current HTTPClient. An authentication

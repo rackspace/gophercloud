@@ -1,15 +1,40 @@
 package gophercloud
 
+import "fmt"
+
+// BaseError is an error type that all other error types embed.
+type BaseError struct {
+	Message string
+}
+
 // InvalidInputError is an error type used for most non-HTTP Gophercloud errors.
 type InvalidInputError struct {
+	BaseError
 	Function string
 	Argument string
 	Value    interface{}
-	Message  string
 }
 
 func (e *InvalidInputError) Error() string {
 	return e.Message
+}
+
+// UnexpectedResponseCodeError is returned by the Request method when a response code other than
+// those listed in OkCodes is encountered.
+type UnexpectedResponseCodeError struct {
+	BaseError
+	URL      string
+	Method   string
+	Expected []int
+	Actual   int
+	Body     []byte
+}
+
+func (err *UnexpectedResponseCodeError) Error() string {
+	return fmt.Sprintf(
+		"Expected HTTP response code %v when accessing [%s %s], but got %d instead\n%s",
+		err.Expected, err.Method, err.URL, err.Actual, err.Body,
+	)
 }
 
 type defaultError401 struct {

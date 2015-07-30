@@ -264,10 +264,10 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateRes
 	if reqBody["server"].(map[string]interface{})["imageRef"].(string) == "" {
 		imageName := reqBody["server"].(map[string]interface{})["imageName"].(string)
 		if imageName == "" {
-			res.Err = &gophercloud.BaseError{
-				Function: "servers.Create",
-				Argument: "ImageRef/ImageName",
-				Message:  "One and only one of the image ID and the image name must be provided.",
+			res.Err = &gophercloud.InvalidInputError{
+				BaseError: gophercloud.BaseError{Message: ErrNeitherImageIDNorImageNameProvided},
+				Function:  "servers.Create",
+				Argument:  "ImageRef/ImageName",
 			}
 			return res
 		}
@@ -284,10 +284,10 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateRes
 	if reqBody["server"].(map[string]interface{})["flavorRef"].(string) == "" {
 		flavorName := reqBody["server"].(map[string]interface{})["flavorName"].(string)
 		if flavorName == "" {
-			res.Err = &gophercloud.BaseError{
-				Function: "servers.Create",
-				Argument: "FlavorRef/FlavorName",
-				Message:  "One and only one of the flavor ID and the flavor name must be provided.",
+			res.Err = &gophercloud.InvalidInputError{
+				BaseError: gophercloud.BaseError{Message: ErrNeitherImageIDNorImageNameProvided},
+				Function:  "servers.Create",
+				Argument:  "FlavorRef/FlavorName",
 			}
 			return res
 		}
@@ -438,11 +438,11 @@ func Reboot(client *gophercloud.ServiceClient, id string, how RebootMethod) Acti
 
 	if (how != SoftReboot) && (how != HardReboot) {
 
-		res.Err = &gophercloud.BaseError{
-			Function: "servers.Reboot",
-			Argument: "how",
-			Value:    how,
-			Message:  fmt.Sprintf("Unknown argument %v for 'how' parameter", how),
+		res.Err = &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{Message: ErrInvalidHowParameterProvided},
+			Function:  "servers.Reboot",
+			Argument:  "how",
+			Value:     how,
 		}
 		return res
 	}
@@ -497,20 +497,18 @@ func (opts RebuildOpts) ToServerRebuildMap() (map[string]interface{}, error) {
 	server := make(map[string]interface{})
 
 	if opts.AdminPass == "" {
-		err = &gophercloud.BaseError{
-			Function: "servers.Rebuild",
-			Argument: "AdminPass",
-			Value:    "",
-			Message:  fmt.Sprintf("You must provide an administrative password"),
+		err = &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{Message: ErrNoAdminPassProvided},
+			Function:  "servers.Rebuild",
+			Argument:  "AdminPass",
 		}
 	}
 
 	if opts.ImageID == "" {
-		err = &gophercloud.BaseError{
-			Function: "servers.Rebuild",
-			Argument: "ImageID",
-			Value:    "",
-			Message:  fmt.Sprintf("You must provide an image ID"),
+		err = &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{Message: ErrNoImageIDProvided},
+			Function:  "servers.Rebuild",
+			Argument:  "ImageID",
 		}
 	}
 
@@ -547,7 +545,11 @@ func Rebuild(client *gophercloud.ServiceClient, id string, opts RebuildOptsBuild
 	var result RebuildResult
 
 	if id == "" {
-		result.Err = fmt.Errorf("ID is required")
+		result.Err = &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{Message: ErrNoIDProvided},
+			Function:  "servers.Rebuild",
+			Argument:  "id",
+		}
 		return result
 	}
 
@@ -659,11 +661,10 @@ func Rescue(client *gophercloud.ServiceClient, id string, opts RescueOptsBuilder
 	var result RescueResult
 
 	if id == "" {
-		result.Err = &gophercloud.BaseError{
-			Function: "servers.Rescue",
-			Argument: "id",
-			Value:    "",
-			Message:  fmt.Sprintf("You must provide the server ID"),
+		result.Err = &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{Message: ErrNoIDProvided},
+			Function:  "servers.Rescue",
+			Argument:  "id",
 		}
 		return result
 	}
