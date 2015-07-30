@@ -100,7 +100,7 @@ type RequestOpts struct {
 	MoreHeaders map[string]string
 	// ErrorType specifies the resource error type to return if an error is encountered.
 	// This lets resources override default error messages based on the response status code.
-	ErrorType error
+	ErrorContext error
 }
 
 // UnexpectedResponseCodeError is returned by the Request method when a response code other than
@@ -208,7 +208,7 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 			Body:     body,
 		}
 
-		errType := options.ErrorType
+		errType := options.ErrorContext
 		switch resp.StatusCode {
 		case http.StatusUnauthorized:
 			if client.ReauthFunc != nil {
@@ -225,18 +225,18 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 				}
 			}
 			err = defaultError401{}
-			if _, ok := errType.(Error401er); ok {
-				err = errType.(Error401er).Error401(respErr)
+			if error401er, ok := errType.(Error401er); ok {
+				err = error401er.Error401(respErr)
 			}
 		case http.StatusNotFound:
 			err = defaultError404{}
-			if _, ok := errType.(Error404er); ok {
-				err = errType.(Error404er).Error404(respErr)
+			if error404er, ok := errType.(Error404er); ok {
+				err = error404er.Error404(respErr)
 			}
 		case http.StatusMethodNotAllowed:
 			err = defaultError405{}
-			if _, ok := errType.(Error405er); ok {
-				err = errType.(Error405er).Error405(respErr)
+			if error405er, ok := errType.(Error405er); ok {
+				err = error405er.Error405(respErr)
 			}
 		}
 

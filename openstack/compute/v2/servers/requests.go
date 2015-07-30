@@ -301,7 +301,7 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateRes
 	delete(reqBody["server"].(map[string]interface{}), "flavorName")
 
 	_, res.Err = client.Post(listURL(client), reqBody, &res.Body, &gophercloud.RequestOpts{
-		ErrorType: &ServerError{},
+		ErrorContext: &ServerError{},
 	})
 	return res
 }
@@ -310,7 +310,7 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateRes
 func Delete(client *gophercloud.ServiceClient, id string) DeleteResult {
 	var res DeleteResult
 	_, res.Err = client.Delete(deleteURL(client, id), &gophercloud.RequestOpts{
-		ErrorType: &ServerError{id: id},
+		ErrorContext: &ServerError{id: id},
 	})
 	return res
 }
@@ -319,8 +319,8 @@ func Delete(client *gophercloud.ServiceClient, id string) DeleteResult {
 func Get(client *gophercloud.ServiceClient, id string) GetResult {
 	var result GetResult
 	_, result.Err = client.Get(getURL(client, id), &result.Body, &gophercloud.RequestOpts{
-		OkCodes:   []int{200, 203},
-		ErrorType: &ServerError{id: id},
+		OkCodes:      []int{200, 203},
+		ErrorContext: &ServerError{id: id},
 	})
 	return result
 }
@@ -362,8 +362,8 @@ func Update(client *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder
 	var result UpdateResult
 	reqBody := opts.ToServerUpdateMap()
 	_, result.Err = client.Put(updateURL(client, id), reqBody, &result.Body, &gophercloud.RequestOpts{
-		OkCodes:   []int{200},
-		ErrorType: &ServerError{id: id},
+		OkCodes:      []int{200},
+		ErrorContext: &ServerError{id: id},
 	})
 	return result
 }
@@ -380,7 +380,7 @@ func ChangeAdminPassword(client *gophercloud.ServiceClient, id, newPassword stri
 
 	var res ActionResult
 	_, res.Err = client.Post(actionURL(client, id), req, nil, &gophercloud.RequestOpts{
-		ErrorType: &ServerError{id: id},
+		ErrorContext: &ServerError{id: id},
 	})
 	return res
 }
@@ -454,7 +454,7 @@ func Reboot(client *gophercloud.ServiceClient, id string, how RebootMethod) Acti
 	}
 
 	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
-		ErrorType: &ServerError{id: id},
+		ErrorContext: &ServerError{id: id},
 	})
 	return res
 }
@@ -558,7 +558,7 @@ func Rebuild(client *gophercloud.ServiceClient, id string, opts RebuildOptsBuild
 	}
 
 	_, result.Err = client.Post(actionURL(client, id), reqBody, &result.Body, &gophercloud.RequestOpts{
-		ErrorType: &ServerError{id: id},
+		ErrorContext: &ServerError{id: id},
 	})
 	return result
 }
@@ -601,7 +601,7 @@ func Resize(client *gophercloud.ServiceClient, id string, opts ResizeOptsBuilder
 	}
 
 	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
-		ErrorType: &ServerError{id: id},
+		ErrorContext: &ServerError{id: id},
 	})
 	return res
 }
@@ -613,8 +613,8 @@ func ConfirmResize(client *gophercloud.ServiceClient, id string) ActionResult {
 
 	reqBody := map[string]interface{}{"confirmResize": nil}
 	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
-		OkCodes:   []int{201, 202, 204},
-		ErrorType: &ServerError{id: id},
+		OkCodes:      []int{201, 202, 204},
+		ErrorContext: &ServerError{id: id},
 	})
 	return res
 }
@@ -625,7 +625,7 @@ func RevertResize(client *gophercloud.ServiceClient, id string) ActionResult {
 	var res ActionResult
 	reqBody := map[string]interface{}{"revertResize": nil}
 	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
-		ErrorType: &ServerError{id: id},
+		ErrorContext: &ServerError{id: id},
 	})
 	return res
 }
@@ -674,8 +674,8 @@ func Rescue(client *gophercloud.ServiceClient, id string, opts RescueOptsBuilder
 	}
 
 	_, result.Err = client.Post(actionURL(client, id), reqBody, &result.Body, &gophercloud.RequestOpts{
-		OkCodes:   []int{200},
-		ErrorType: &ServerError{id: id},
+		OkCodes:      []int{200},
+		ErrorContext: &ServerError{id: id},
 	})
 
 	return result
