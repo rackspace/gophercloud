@@ -193,6 +193,11 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 
 		errType := options.ErrorContext
 		switch resp.StatusCode {
+		case http.StatusBadRequest:
+			err = defaultError400{respErr}
+			if error400er, ok := errType.(Error400er); ok {
+				err = error400er.Error400(respErr)
+			}
 		case http.StatusUnauthorized:
 			if client.ReauthFunc != nil {
 				err = client.ReauthFunc()
@@ -220,6 +225,16 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 			err = defaultError405{respErr}
 			if error405er, ok := errType.(Error405er); ok {
 				err = error405er.Error405(respErr)
+			}
+		case http.StatusRequestTimeout:
+			err = defaultError408{respErr}
+			if error408er, ok := errType.(Error408er); ok {
+				err = error408er.Error408(respErr)
+			}
+		case 429:
+			err = defaultError429{respErr}
+			if error429er, ok := errType.(Error429er); ok {
+				err = error429er.Error429(respErr)
 			}
 		}
 

@@ -40,6 +40,9 @@ func (err *UnexpectedResponseCodeError) Error() string {
 	)
 }
 
+type defaultError400 struct {
+	*UnexpectedResponseCodeError
+}
 type defaultError401 struct {
 	*UnexpectedResponseCodeError
 }
@@ -49,7 +52,16 @@ type defaultError404 struct {
 type defaultError405 struct {
 	*UnexpectedResponseCodeError
 }
+type defaultError408 struct {
+	*UnexpectedResponseCodeError
+}
+type defaultError429 struct {
+	*UnexpectedResponseCodeError
+}
 
+func (e defaultError400) Error() string {
+	return "Invalid request due to incorrect syntax or missing required parameters."
+}
 func (e defaultError401) Error() string {
 	return "Authentication failed"
 }
@@ -58,6 +70,18 @@ func (e defaultError404) Error() string {
 }
 func (e defaultError405) Error() string {
 	return "Method not allowed"
+}
+func (e defaultError408) Error() string {
+	return "The server timed out waiting for the request"
+}
+func (e defaultError429) Error() string {
+	return "Too many requests have been sent in a given amount of time. Pause requests, wait up to one minute, and try again."
+}
+
+// Error400er is the interface resource error types implement to override the error message
+// from a 400 error.
+type Error400er interface {
+	Error400(*UnexpectedResponseCodeError) error
 }
 
 // Error401er is the interface resource error types implement to override the error message
@@ -76,6 +100,18 @@ type Error404er interface {
 // from a 405 error.
 type Error405er interface {
 	Error405(*UnexpectedResponseCodeError) error
+}
+
+// Error408er is the interface resource error types implement to override the error message
+// from a 408 error.
+type Error408er interface {
+	Error408(*UnexpectedResponseCodeError) error
+}
+
+// Error429er is the interface resource error types implement to override the error message
+// from a 429 error.
+type Error429er interface {
+	Error429(*UnexpectedResponseCodeError) error
 }
 
 type ErrTimeOut struct {
