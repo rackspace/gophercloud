@@ -114,10 +114,26 @@ type Error429er interface {
 	Error429(*UnexpectedResponseCodeError) error
 }
 
-type ErrTimeOut struct {
-	*BaseError
-}
+type ErrTimeOut struct{ *BaseError }
 
 func (e *ErrTimeOut) Error() string {
 	return "A time out occurred"
+}
+
+type ErrUnableToReauthenticate struct {
+	*BaseError
+	OriginalError error
+}
+
+func (e *ErrUnableToReauthenticate) Error() string {
+	return fmt.Sprintf("Unable to re-authenticate: %s", e.OriginalError)
+}
+
+type ErrErrorAfterReauthentication struct {
+	*BaseError
+	OriginalError error
+}
+
+func (e *ErrErrorAfterReauthentication) Error() string {
+	return fmt.Sprintf("Successfully re-authenticated, but got error executing request: %s", e.OriginalError)
 }

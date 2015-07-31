@@ -3,11 +3,12 @@ package gophercloud
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/rackspace/gophercloud"
 )
 
 // DefaultUserAgent is the default User-Agent string set in the request header.
@@ -202,14 +203,24 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 			if client.ReauthFunc != nil {
 				err = client.ReauthFunc()
 				if err != nil {
-					return nil, fmt.Errorf("Error trying to re-authenticate: %s", err)
+					return nil, &ErrUnableToReauthenticate{
+						BaseError: &gophercloud.BaseError{
+							Function: "*ProviderClient.Request",
+						},
+						OriginalError: err,
+					}
 				}
 				if options.RawBody != nil {
 					options.RawBody.Seek(0, 0)
 				}
 				resp, err = client.Request(method, url, options)
 				if err != nil {
-					return nil, fmt.Errorf("Successfully re-authenticated, but got error executing request: %s", err)
+					return nil, &ErrErrorAfterReauthentication{
+						BaseError: &gophercloud.BaseError{
+							Function: "*ProviderClient.Request",
+						},
+						OriginalError: err,
+					}
 				}
 			}
 			err = defaultError401{respErr}
