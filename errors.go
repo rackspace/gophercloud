@@ -1,11 +1,12 @@
 package gophercloud
 
-import (
-	"errors"
-	"fmt"
-)
+import "fmt"
 
-var ErrTimeOut = errors.New("A time out occurred")
+type ErrTimeOut struct{}
+
+func (e *ErrTimeOut) Error() string {
+	return "A time out occurred"
+}
 
 // BaseError is an error type that all other error types embed.
 type BaseError struct {
