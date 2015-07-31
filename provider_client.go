@@ -207,17 +207,17 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 					return nil, fmt.Errorf("Successfully re-authenticated, but got error executing request: %s", err)
 				}
 			}
-			err = defaultError401{}
+			err = defaultError401{respErr}
 			if error401er, ok := errType.(Error401er); ok {
 				err = error401er.Error401(respErr)
 			}
 		case http.StatusNotFound:
-			err = defaultError404{}
+			err = defaultError404{respErr}
 			if error404er, ok := errType.(Error404er); ok {
 				err = error404er.Error404(respErr)
 			}
 		case http.StatusMethodNotAllowed:
-			err = defaultError405{}
+			err = defaultError405{respErr}
 			if error405er, ok := errType.(Error405er); ok {
 				err = error405er.Error405(respErr)
 			}
