@@ -19,7 +19,7 @@ type InvalidInputError struct {
 }
 
 func (e *InvalidInputError) Error() string {
-	return "Invalid Input Provided"
+	return fmt.Sprintf("Invalid input provided for argument [%s]: [%+v]", e.Argument, e.Value)
 }
 
 // UnexpectedResponseCodeError is returned by the Request method when a response code other than
