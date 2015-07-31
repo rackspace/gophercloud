@@ -7,8 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-
-	"github.com/rackspace/gophercloud"
 )
 
 // DefaultUserAgent is the default User-Agent string set in the request header.
@@ -204,7 +202,7 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 				err = client.ReauthFunc()
 				if err != nil {
 					return nil, &ErrUnableToReauthenticate{
-						BaseError: &gophercloud.BaseError{
+						BaseError: &BaseError{
 							Function: "*ProviderClient.Request",
 						},
 						OriginalError: err,
@@ -216,7 +214,7 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 				resp, err = client.Request(method, url, options)
 				if err != nil {
 					return nil, &ErrErrorAfterReauthentication{
-						BaseError: &gophercloud.BaseError{
+						BaseError: &BaseError{
 							Function: "*ProviderClient.Request",
 						},
 						OriginalError: err,
