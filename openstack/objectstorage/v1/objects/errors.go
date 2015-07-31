@@ -14,7 +14,7 @@ type ObjectError struct {
 }
 
 func (oe *ObjectError) Error() string {
-	return fmt.Sprintf("Error while executing HTTP request for object [%s]", oe.name)
+	return fmt.Sprintf("Error while executing HTTP request for object [%s] in container [%s]", oe.name, oe.container)
 }
 
 // Error404 overrides the generic 404 error message.

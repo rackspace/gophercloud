@@ -6,37 +6,37 @@ import (
 	"github.com/rackspace/gophercloud"
 )
 
-type ErrNeitherImageIDNorImageNameProvided struct{}
+type ErrNeitherImageIDNorImageNameProvided struct{ *gophercloud.InvalidInputError }
 
 func (e ErrNeitherImageIDNorImageNameProvided) Error() string {
 	return "One and only one of the image ID and the image name must be provided."
 }
 
-type ErrNeitherFlavorIDNorFlavorNameProvided struct{}
+type ErrNeitherFlavorIDNorFlavorNameProvided struct{ *gophercloud.InvalidInputError }
 
 func (e ErrNeitherFlavorIDNorFlavorNameProvided) Error() string {
 	return "One and only one of the flavor ID and the flavor name must be provided."
 }
 
-type ErrInvalidHowParameterProvided struct{}
+type ErrInvalidHowParameterProvided struct{ *gophercloud.InvalidInputError }
 
 func (e ErrInvalidHowParameterProvided) Error() string {
 	return "Unknown argument for 'how' parameter."
 }
 
-type ErrNoAdminPassProvided struct{}
+type ErrNoAdminPassProvided struct{ *gophercloud.InvalidInputError }
 
 func (e ErrNoAdminPassProvided) Error() string {
 	return "You must provide an administrative password."
 }
 
-type ErrNoImageIDProvided struct{}
+type ErrNoImageIDProvided struct{ *gophercloud.InvalidInputError }
 
 func (e ErrNoImageIDProvided) Error() string {
 	return "You must provide an image ID."
 }
 
-type ErrNoIDProvided struct{}
+type ErrNoIDProvided struct{ *gophercloud.InvalidInputError }
 
 func (e ErrNoIDProvided) Error() string {
 	return "You must provide a server ID."

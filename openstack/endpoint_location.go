@@ -27,11 +27,11 @@ func V2EndpointURL(catalog *tokens2.ServiceCatalog, opts gophercloud.EndpointOpt
 
 	// Report an error if the options were ambiguous.
 	if len(endpoints) > 1 {
-		return "", &gophercloud.BaseError{
-			Type: &ErrMultipleMatchingEndpointsV2{
-				endpoints: endpoints,
+		return "", &ErrMultipleMatchingEndpointsV2{
+			endpoints: endpoints,
+			BaseError: &gophercloud.BaseError{
+				Function: "openstack.V2EndpointURL",
 			},
-			Function: "openstack.V2EndpointURL",
 		}
 	}
 
@@ -45,21 +45,23 @@ func V2EndpointURL(catalog *tokens2.ServiceCatalog, opts gophercloud.EndpointOpt
 		case gophercloud.AvailabilityAdmin:
 			return gophercloud.NormalizeURL(endpoint.AdminURL), nil
 		default:
-			return "", &gophercloud.InvalidInputError{
-				BaseError: gophercloud.BaseError{
-					Type:     ErrInvalidAvailabilityProvided{},
-					Function: "openstack.V2EndpointURL",
+			return "", &ErrInvalidAvailabilityProvided{
+				&gophercloud.InvalidInputError{
+					BaseError: gophercloud.BaseError{
+						Function: "openstack.V2EndpointURL",
+					},
+					Argument: "Availability",
+					Value:    opts.Availability,
 				},
-				Argument: "Availability",
-				Value:    opts.Availability,
 			}
 		}
 	}
 
 	// Report an error if there were no matching endpoints.
-	return "", &gophercloud.BaseError{
-		Type:     ErrEndpointNotFound{},
-		Function: "openstack.V2EndpointURL",
+	return "", &ErrEndpointNotFound{
+		BaseError: &gophercloud.BaseError{
+			Function: "openstack.V2EndpointURL",
+		},
 	}
 }
 
@@ -79,13 +81,14 @@ func V3EndpointURL(catalog *tokens3.ServiceCatalog, opts gophercloud.EndpointOpt
 				if opts.Availability != gophercloud.AvailabilityAdmin &&
 					opts.Availability != gophercloud.AvailabilityPublic &&
 					opts.Availability != gophercloud.AvailabilityInternal {
-					return "", &gophercloud.InvalidInputError{
-						BaseError: gophercloud.BaseError{
-							Type:     ErrInvalidAvailabilityProvided{},
-							Function: "openstack.V3EndpointURL",
+					return "", &ErrInvalidAvailabilityProvided{
+						&gophercloud.InvalidInputError{
+							BaseError: gophercloud.BaseError{
+								Function: "openstack.V3EndpointURL",
+							},
+							Argument: "Availability",
+							Value:    opts.Availability,
 						},
-						Argument: "Availability",
-						Value:    opts.Availability,
 					}
 				}
 				if (opts.Availability == gophercloud.Availability(endpoint.Interface)) &&
@@ -98,11 +101,11 @@ func V3EndpointURL(catalog *tokens3.ServiceCatalog, opts gophercloud.EndpointOpt
 
 	// Report an error if the options were ambiguous.
 	if len(endpoints) > 1 {
-		return "", &gophercloud.BaseError{
-			Type: &ErrMultipleMatchingEndpointsV3{
-				endpoints: endpoints,
+		return "", &ErrMultipleMatchingEndpointsV3{
+			endpoints: endpoints,
+			BaseError: &gophercloud.BaseError{
+				Function: "openstack.V3EndpointURL",
 			},
-			Function: "openstack.V3EndpointURL",
 		}
 	}
 
@@ -112,8 +115,9 @@ func V3EndpointURL(catalog *tokens3.ServiceCatalog, opts gophercloud.EndpointOpt
 	}
 
 	// Report an error if there were no matching endpoints.
-	return "", &gophercloud.BaseError{
-		Type:     ErrEndpointNotFound{},
-		Function: "openstack.V3EndpointURL",
+	return "", &ErrEndpointNotFound{
+		BaseError: &gophercloud.BaseError{
+			Function: "openstack.V2EndpointURL",
+		},
 	}
 }

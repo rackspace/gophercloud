@@ -84,7 +84,7 @@ func TestV2EndpointNone(t *testing.T) {
 		Type:         "nope",
 		Availability: gophercloud.AvailabilityPublic,
 	})
-	th.CheckEquals(t, ErrEndpointNotFound{}, err.(*gophercloud.BaseError).Type)
+	th.CheckEquals(t, ErrEndpointNotFound{}.Error(), err.Error())
 }
 
 func TestV2EndpointMultiple(t *testing.T) {
@@ -105,7 +105,7 @@ func TestV2EndpointBadAvailability(t *testing.T) {
 		Region:       "same",
 		Availability: "wat",
 	})
-	th.CheckEquals(t, "Unexpected availability in endpoint query", err.(*gophercloud.InvalidInputError).Type.Error())
+	th.CheckEquals(t, "Unexpected availability in endpoint query", err.Error())
 }
 
 var catalog3 = tokens3.ServiceCatalog{
@@ -203,7 +203,7 @@ func TestV3EndpointNone(t *testing.T) {
 		Type:         "nope",
 		Availability: gophercloud.AvailabilityPublic,
 	})
-	th.CheckEquals(t, ErrEndpointNotFound{}, err.(*gophercloud.BaseError).Type)
+	th.CheckEquals(t, ErrEndpointNotFound{}.Error(), err.Error())
 }
 
 func TestV3EndpointMultiple(t *testing.T) {

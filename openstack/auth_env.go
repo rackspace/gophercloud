@@ -1,21 +1,12 @@
 package openstack
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/rackspace/gophercloud"
 )
 
 var nilOptions = gophercloud.AuthOptions{}
-
-// ErrNoAuthUrl, ErrNoUsername, and ErrNoPassword errors indicate of the required OS_AUTH_URL, OS_USERNAME, or OS_PASSWORD
-// environment variables, respectively, remain undefined.  See the AuthOptions() function for more details.
-var (
-	ErrNoAuthURL  = fmt.Errorf("Environment variable OS_AUTH_URL needs to be set.")
-	ErrNoUsername = fmt.Errorf("Environment variable OS_USERNAME needs to be set.")
-	ErrNoPassword = fmt.Errorf("Environment variable OS_PASSWORD needs to be set.")
-)
 
 // AuthOptionsFromEnv fills out an identity.AuthOptions structure with the settings found on the various OpenStack
 // OS_* environment variables.  The following variables provide sources of truth: OS_AUTH_URL, OS_USERNAME,
@@ -32,32 +23,35 @@ func AuthOptionsFromEnv() (gophercloud.AuthOptions, error) {
 	domainName := os.Getenv("OS_DOMAIN_NAME")
 
 	if authURL == "" {
-		return nilOptions, &gophercloud.InvalidInputError{
-			BaseError: gophercloud.BaseError{
-				Type:     ErrNoAuthURL,
-				Function: "openstack.AuthOptionsFromEnv",
+		return nilOptions, &ErrNoAuthURL{
+			&gophercloud.InvalidInputError{
+				BaseError: gophercloud.BaseError{
+					Function: "openstack.AuthOptionsFromEnv",
+				},
+				Argument: "authURL",
 			},
-			Argument: "authURL",
 		}
 	}
 
 	if username == "" && userID == "" {
-		return nilOptions, &gophercloud.InvalidInputError{
-			BaseError: gophercloud.BaseError{
-				Type:     ErrNoUsername,
-				Function: "openstack.AuthOptionsFromEnv",
+		return nilOptions, &ErrNoUsername{
+			&gophercloud.InvalidInputError{
+				BaseError: gophercloud.BaseError{
+					Function: "openstack.AuthOptionsFromEnv",
+				},
+				Argument: "username",
 			},
-			Argument: "username",
 		}
 	}
 
 	if password == "" {
-		return nilOptions, &gophercloud.InvalidInputError{
-			BaseError: gophercloud.BaseError{
-				Type:     ErrNoPassword,
-				Function: "openstack.AuthOptionsFromEnv",
+		return nilOptions, &ErrNoPassword{
+			&gophercloud.InvalidInputError{
+				BaseError: gophercloud.BaseError{
+					Function: "openstack.AuthOptionsFromEnv",
+				},
+				Argument: "password",
 			},
-			Argument: "password",
 		}
 	}
 

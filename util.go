@@ -17,9 +17,10 @@ func WaitFor(timeout int, predicate func() (bool, error)) error {
 
 		// If a timeout is set, and that's been exceeded, shut it down
 		if timeout >= 0 && time.Now().Second()-start >= timeout {
-			return &BaseError{
-				Type:     &ErrTimeOut{},
-				Function: "gophercloud.WaitFor",
+			return &ErrTimeOut{
+				&BaseError{
+					Function: "gophercloud.WaitFor",
+				},
 			}
 		}
 
