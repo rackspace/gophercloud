@@ -6,15 +6,45 @@ import (
 	"github.com/rackspace/gophercloud"
 )
 
-const ErrNeitherImageIDNorImageNameProvided = "One and only one of the image ID and the image name must be provided."
-const ErrNeitherFlavorIDNorFlavorNameProvided = "One and only one of the flavor ID and the flavor name must be provided."
-const ErrInvalidHowParameterProvided = "Unknown argument for 'how' parameter"
-const ErrNoAdminPassProvided = "You must provide an administrative password"
-const ErrNoImageIDProvided = "You must provide an image ID"
-const ErrNoIDProvided = "You must provide a server ID"
+type ErrNeitherImageIDNorImageNameProvided struct{}
+
+func (e ErrNeitherImageIDNorImageNameProvided) Error() string {
+	return "One and only one of the image ID and the image name must be provided."
+}
+
+type ErrNeitherFlavorIDNorFlavorNameProvided struct{}
+
+func (e ErrNeitherFlavorIDNorFlavorNameProvided) Error() string {
+	return "One and only one of the flavor ID and the flavor name must be provided."
+}
+
+type ErrInvalidHowParameterProvided struct{}
+
+func (e ErrInvalidHowParameterProvided) Error() string {
+	return "Unknown argument for 'how' parameter."
+}
+
+type ErrNoAdminPassProvided struct{}
+
+func (e ErrNoAdminPassProvided) Error() string {
+	return "You must provide an administrative password."
+}
+
+type ErrNoImageIDProvided struct{}
+
+func (e ErrNoImageIDProvided) Error() string {
+	return "You must provide an image ID."
+}
+
+type ErrNoIDProvided struct{}
+
+func (e ErrNoIDProvided) Error() string {
+	return "You must provide a server ID."
+}
 
 // ServerError is a generic error type for servers.
 type ServerError struct {
+	*gophercloud.UnexpectedResponseCodeError
 	id string
 }
 
@@ -24,17 +54,16 @@ func (se *ServerError) Error() string {
 
 // Error404 overrides the generic 404 error message.
 func (se *ServerError) Error404(e *gophercloud.UnexpectedResponseCodeError) error {
+	se.UnexpectedResponseCodeError = e
 	return &ServerNotFoundError{
-		e,
-		se.id,
+		se,
 	}
 }
 
 // ServerNotFoundError is an error type returned when a 404 is received during
 // server HTTP operations.
 type ServerNotFoundError struct {
-	*gophercloud.UnexpectedResponseCodeError
-	id string
+	*ServerError
 }
 
 func (e *ServerNotFoundError) Error() string {
