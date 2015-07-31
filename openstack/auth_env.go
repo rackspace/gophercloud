@@ -17,7 +17,7 @@ var (
 	ErrNoPassword = fmt.Errorf("Environment variable OS_PASSWORD needs to be set.")
 )
 
-// AuthOptions fills out an identity.AuthOptions structure with the settings found on the various OpenStack
+// AuthOptionsFromEnv fills out an identity.AuthOptions structure with the settings found on the various OpenStack
 // OS_* environment variables.  The following variables provide sources of truth: OS_AUTH_URL, OS_USERNAME,
 // OS_PASSWORD, OS_TENANT_ID, and OS_TENANT_NAME.  Of these, OS_USERNAME, OS_PASSWORD, and OS_AUTH_URL must
 // have settings, or an error will result.  OS_TENANT_ID and OS_TENANT_NAME are optional.
@@ -32,15 +32,33 @@ func AuthOptionsFromEnv() (gophercloud.AuthOptions, error) {
 	domainName := os.Getenv("OS_DOMAIN_NAME")
 
 	if authURL == "" {
-		return nilOptions, ErrNoAuthURL
+		return nilOptions, &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{
+				Type:     ErrNoAuthURL,
+				Function: "openstack.AuthOptionsFromEnv",
+			},
+			Argument: "authURL",
+		}
 	}
 
 	if username == "" && userID == "" {
-		return nilOptions, ErrNoUsername
+		return nilOptions, &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{
+				Type:     ErrNoUsername,
+				Function: "openstack.AuthOptionsFromEnv",
+			},
+			Argument: "username",
+		}
 	}
 
 	if password == "" {
-		return nilOptions, ErrNoPassword
+		return nilOptions, &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{
+				Type:     ErrNoPassword,
+				Function: "openstack.AuthOptionsFromEnv",
+			},
+			Argument: "password",
+		}
 	}
 
 	ao := gophercloud.AuthOptions{

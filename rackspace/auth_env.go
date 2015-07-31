@@ -35,15 +35,33 @@ func AuthOptionsFromEnv() (gophercloud.AuthOptions, error) {
 	apiKey := prefixedEnv("API_KEY")
 
 	if authURL == "" {
-		return nilOptions, ErrNoAuthURL
+		return nilOptions, &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{
+				Type:     ErrNoAuthURL,
+				Function: "rackspace.AuthOptionsFromEnv",
+			},
+			Argument: "authURL",
+		}
 	}
 
 	if username == "" {
-		return nilOptions, ErrNoUsername
+		return nilOptions, &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{
+				Type:     ErrNoUsername,
+				Function: "rackspace.AuthOptionsFromEnv",
+			},
+			Argument: "username",
+		}
 	}
 
 	if password == "" && apiKey == "" {
-		return nilOptions, ErrNoPassword
+		return nilOptions, &gophercloud.InvalidInputError{
+			BaseError: gophercloud.BaseError{
+				Type:     ErrNoPassword,
+				Function: "rackspace.AuthOptionsFromEnv",
+			},
+			Argument: "password",
+		}
 	}
 
 	ao := gophercloud.AuthOptions{

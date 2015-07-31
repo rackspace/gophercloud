@@ -1,22 +1,31 @@
 package gophercloud
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var ErrTimeOut = errors.New("A time out occurred")
 
 // BaseError is an error type that all other error types embed.
 type BaseError struct {
-	Message string
+	Type     error
+	Function string
+}
+
+func (e *BaseError) Error() string {
+	return e.Type.Error()
 }
 
 // InvalidInputError is an error type used for most non-HTTP Gophercloud errors.
 type InvalidInputError struct {
 	BaseError
-	Function string
 	Argument string
 	Value    interface{}
 }
 
 func (e *InvalidInputError) Error() string {
-	return e.Message
+	return e.Type.Error()
 }
 
 // UnexpectedResponseCodeError is returned by the Request method when a response code other than
