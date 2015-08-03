@@ -1,10 +1,6 @@
 package tokens
 
-import (
-	"fmt"
-
-	"github.com/rackspace/gophercloud"
-)
+import "github.com/rackspace/gophercloud"
 
 // AuthOptionsBuilder describes any argument that may be passed to the Create call.
 type AuthOptionsBuilder interface {
@@ -59,7 +55,11 @@ func (auth AuthOptions) ToTokenCreateMap() (map[string]interface{}, error) {
 			"id": auth.TokenID,
 		}
 	} else {
-		return nil, fmt.Errorf("You must provide either username/password or tenantID/token values.")
+		return nil, &ErrUsernameOrTenantIDRequired{
+			BaseError: &gophercloud.BaseError{
+				Function: "AuthOptions.ToTokenCreateMap",
+			},
+		}
 	}
 
 	if auth.TenantID != "" {

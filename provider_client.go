@@ -183,6 +183,9 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 		body, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		respErr := &UnexpectedResponseCodeError{
+			BaseError: BaseError{
+				Function: "*ProviderClient.Request",
+			},
 			URL:      url,
 			Method:   method,
 			Expected: options.OkCodes,

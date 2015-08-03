@@ -3,6 +3,8 @@ package tokens
 import (
 	"errors"
 	"fmt"
+
+	"github.com/rackspace/gophercloud"
 )
 
 var (
@@ -27,4 +29,10 @@ var (
 
 func unacceptedAttributeErr(attribute string) error {
 	return fmt.Errorf("The base Identity V2 API does not accept authentication by %s", attribute)
+}
+
+type ErrUsernameOrTenantIDRequired struct{ *gophercloud.BaseError }
+
+func (e *ErrUsernameOrTenantIDRequired) Error() string {
+	return "You must provide either username/password or tenantID/token values."
 }
