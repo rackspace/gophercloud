@@ -58,6 +58,12 @@ type defaultError408 struct {
 type defaultError429 struct {
 	*UnexpectedResponseCodeError
 }
+type defaultError500 struct {
+	*UnexpectedResponseCodeError
+}
+type defaultError503 struct {
+	*UnexpectedResponseCodeError
+}
 
 func (e defaultError400) Error() string {
 	return "Invalid request due to incorrect syntax or missing required parameters."
@@ -76,6 +82,12 @@ func (e defaultError408) Error() string {
 }
 func (e defaultError429) Error() string {
 	return "Too many requests have been sent in a given amount of time. Pause requests, wait up to one minute, and try again."
+}
+func (e defaultError500) Error() string {
+	return "Internal Server Error"
+}
+func (e defaultError503) Error() string {
+	return "The service is currently unable to handle the request due to a temporary overloading or maintenance. This is a temporary condition. Try again later."
 }
 
 // Error400er is the interface resource error types implement to override the error message
@@ -112,6 +124,18 @@ type Error408er interface {
 // from a 429 error.
 type Error429er interface {
 	Error429(*UnexpectedResponseCodeError) error
+}
+
+// Error500er is the interface resource error types implement to override the error message
+// from a 500 error.
+type Error500er interface {
+	Error500(*UnexpectedResponseCodeError) error
+}
+
+// Error503er is the interface resource error types implement to override the error message
+// from a 503 error.
+type Error503er interface {
+	Error503(*UnexpectedResponseCodeError) error
 }
 
 type ErrTimeOut struct{ *BaseError }

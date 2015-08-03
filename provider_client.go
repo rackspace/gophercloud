@@ -245,6 +245,20 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 			if error429er, ok := errType.(Error429er); ok {
 				err = error429er.Error429(respErr)
 			}
+		case http.StatusInternalServerError:
+			err = defaultError500{respErr}
+			if error500er, ok := errType.(Error500er); ok {
+				err = error500er.Error500(respErr)
+			}
+		case http.StatusServiceUnavailable:
+			err = defaultError503{respErr}
+			if error503er, ok := errType.(Error503er); ok {
+				err = error503er.Error503(respErr)
+			}
+		}
+
+		if err == nil {
+			err = respErr
 		}
 
 		return resp, err
