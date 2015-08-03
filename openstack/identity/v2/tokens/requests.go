@@ -48,7 +48,11 @@ func (auth AuthOptions) ToTokenCreateMap() (map[string]interface{}, error) {
 				"password": auth.Password,
 			}
 		} else {
-			return nil, ErrPasswordRequired
+			return nil, &ErrNoPassword{
+				BaseError: &gophercloud.BaseError{
+					Function: "AuthOptions.ToTokenCreateMap",
+				},
+			}
 		}
 	} else if auth.TokenID != "" {
 		authMap["token"] = map[string]interface{}{
