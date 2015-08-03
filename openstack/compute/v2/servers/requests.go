@@ -287,7 +287,7 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateRes
 	if reqBody["server"].(map[string]interface{})["flavorRef"].(string) == "" {
 		flavorName := reqBody["server"].(map[string]interface{})["flavorName"].(string)
 		if flavorName == "" {
-			res.Err = &ErrNeitherImageIDNorImageNameProvided{
+			res.Err = &ErrNeitherFlavorIDNorFlavorNameProvided{
 				&gophercloud.InvalidInputError{
 					BaseError: gophercloud.BaseError{
 						Function: "servers.Create",
