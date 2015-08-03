@@ -36,3 +36,9 @@ type ErrUsernameOrTenantIDRequired struct{ *gophercloud.BaseError }
 func (e *ErrUsernameOrTenantIDRequired) Error() string {
 	return "You must provide either username/password or tenantID/token values."
 }
+
+type ErrNoPassword struct{ *gophercloud.BaseError }
+
+func (e *ErrNoPassword) Error() string {
+	return "Please supply a Password in your AuthOptions."
+}
