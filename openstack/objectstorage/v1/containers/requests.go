@@ -126,7 +126,7 @@ func Create(c *gophercloud.ServiceClient, containerName string, opts CreateOptsB
 func Delete(c *gophercloud.ServiceClient, containerName string) DeleteResult {
 	var res DeleteResult
 	_, res.Err = c.Delete(deleteURL(c, containerName), &gophercloud.RequestOpts{
-		ErrorContext: &ContainerError{},
+		ErrorContext: &ContainerError{name: containerName},
 	})
 	return res
 }
@@ -184,7 +184,7 @@ func Update(c *gophercloud.ServiceClient, containerName string, opts UpdateOptsB
 	resp, err := c.Request("POST", updateURL(c, containerName), gophercloud.RequestOpts{
 		MoreHeaders:  h,
 		OkCodes:      []int{201, 202, 204},
-		ErrorContext: &ContainerError{},
+		ErrorContext: &ContainerError{name: containerName},
 	})
 	if resp != nil {
 		res.Header = resp.Header
@@ -200,7 +200,7 @@ func Get(c *gophercloud.ServiceClient, containerName string) GetResult {
 	var res GetResult
 	resp, err := c.Request("HEAD", getURL(c, containerName), gophercloud.RequestOpts{
 		OkCodes:      []int{200, 204},
-		ErrorContext: &ContainerError{},
+		ErrorContext: &ContainerError{name: containerName},
 	})
 	if resp != nil {
 		res.Header = resp.Header
