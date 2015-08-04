@@ -223,6 +223,7 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 						OriginalError: err,
 					}
 				}
+				return resp, nil
 			}
 			err = defaultError401{respErr}
 			if error401er, ok := errType.(Error401er); ok {
