@@ -14,6 +14,7 @@ type project struct {
 	Description string `json:"description"`
 }
 
+// ProjectOpts Options for project create & update
 type ProjectOpts struct {
 	DomainID    string
 	ParentID    string
@@ -22,6 +23,7 @@ type ProjectOpts struct {
 	Description string
 }
 
+// Create Creates project
 func Create(client *gophercloud.ServiceClient, opts ProjectOpts) CreateResult {
 	type request struct {
 		Project project `json:"project"`
@@ -46,6 +48,7 @@ func Create(client *gophercloud.ServiceClient, opts ProjectOpts) CreateResult {
 	return result
 }
 
+// ListOpts Options for listing projects
 type ListOpts struct {
 	DomainID string `q:"domain_id"`
 	ParentID string `q:"parent_id"`
@@ -55,6 +58,7 @@ type ListOpts struct {
 	PerPage  int    `q:"per_page"`
 }
 
+// List Lists projects
 func List(client *gophercloud.ServiceClient, opts ListOpts) pagination.Pager {
 	url := listURL(client)
 	query, err := gophercloud.BuildQueryString(opts)
@@ -70,6 +74,7 @@ func List(client *gophercloud.ServiceClient, opts ListOpts) pagination.Pager {
 	return pagination.NewPager(client, url, createPage)
 }
 
+// Get Shows project details
 func Get(client *gophercloud.ServiceClient, projectID string) GetResult {
 	var result GetResult
 	_, result.Err = perigee.Request("GET", projectURL(client, projectID), perigee.Options{
@@ -80,6 +85,7 @@ func Get(client *gophercloud.ServiceClient, projectID string) GetResult {
 	return result
 }
 
+// Update Updates project information
 func Update(client *gophercloud.ServiceClient, projectID string, opts ProjectOpts) UpdateResult {
 	type request struct {
 		Project project `json:"project"`
@@ -104,6 +110,7 @@ func Update(client *gophercloud.ServiceClient, projectID string, opts ProjectOpt
 	return result
 }
 
+// Delete Deletes project
 func Delete(client *gophercloud.ServiceClient, projectID string) DeleteResult {
 	var result DeleteResult
 	_, result.Err = perigee.Request("DELETE", projectURL(client, projectID), perigee.Options{

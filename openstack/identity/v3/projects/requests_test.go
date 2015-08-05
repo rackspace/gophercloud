@@ -64,7 +64,7 @@ func TestCreateSuccessful(t *testing.T) {
 		t.Errorf("Project parent_id was unexpected [%s]", result.ParentID)
 	}
 	if !result.Enabled {
-		t.Errorf("Project enabled was unexpected [%s]", result.Enabled)
+		t.Errorf("Project enabled was unexpected [%v]", result.Enabled)
 	}
 	if result.Name != "Test Group" {
 		t.Errorf("Project name was unexpected [%s]", result.Name)
@@ -248,7 +248,7 @@ func TestUpdateSuccessful(t *testing.T) {
 		t.Errorf("Project parent_id was unexpected [%s]", result.ParentID)
 	}
 	if !result.Enabled {
-		t.Errorf("Project enabled was unexpected [%s]", result.Enabled)
+		t.Errorf("Project enabled was unexpected [%v]", result.Enabled)
 	}
 	if result.Name != "Test Group" {
 		t.Errorf("Project name was unexpected [%s]", result.Name)

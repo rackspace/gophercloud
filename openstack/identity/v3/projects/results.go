@@ -24,22 +24,27 @@ func (r commonResult) Extract() (*Project, error) {
 	return &response.Project, err
 }
 
+// CreateResult Project create result
 type CreateResult struct {
 	commonResult
 }
 
+// GetResult Project details result
 type GetResult struct {
 	commonResult
 }
 
+// UpdateResult Project update result
 type UpdateResult struct {
 	commonResult
 }
 
+// DeleteResult Project delete result
 type DeleteResult struct {
 	commonResult
 }
 
+// Project Project struct
 type Project struct {
 	DomainID    string `mapstructure:"domain_id" json:"domain_id"`
 	ParentID    string `mapstructure:"parent_id" json:"parent_id"`
@@ -49,10 +54,12 @@ type Project struct {
 	Description string `mapstructure:"description" json:"description"`
 }
 
+// ProjectPage Page containing projects
 type ProjectPage struct {
 	pagination.LinkedPageBase
 }
 
+// IsEmpty checks if projects page is empty
 func (p ProjectPage) IsEmpty() (bool, error) {
 	projects, err := ExtractProjects(p)
 	if err != nil {
@@ -61,6 +68,7 @@ func (p ProjectPage) IsEmpty() (bool, error) {
 	return len(projects) == 0, nil
 }
 
+// ExtractProjects extracts projects list from response
 func ExtractProjects(page pagination.Page) ([]Project, error) {
 	var response struct {
 		Projects []Project `mapstructure:"projects"`
