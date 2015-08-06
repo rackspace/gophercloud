@@ -1,7 +1,6 @@
 package projects
 
 import (
-	"github.com/racker/perigee"
 	"github.com/rackspace/gophercloud"
 	"github.com/rackspace/gophercloud/pagination"
 )
@@ -39,12 +38,7 @@ func Create(client *gophercloud.ServiceClient, opts ProjectOpts) CreateResult {
 		},
 	}
 	var result CreateResult
-	_, result.Err = perigee.Request("POST", listURL(client), perigee.Options{
-		MoreHeaders: client.AuthenticatedHeaders(),
-		ReqBody:     &reqBody,
-		Results:     &result.Body,
-		OkCodes:     []int{201},
-	})
+	_, result.Err = client.Post(listURL(client), reqBody, &result.Body, nil)
 	return result
 }
 
@@ -77,11 +71,7 @@ func List(client *gophercloud.ServiceClient, opts ListOpts) pagination.Pager {
 // Get Shows project details
 func Get(client *gophercloud.ServiceClient, projectID string) GetResult {
 	var result GetResult
-	_, result.Err = perigee.Request("GET", projectURL(client, projectID), perigee.Options{
-		MoreHeaders: client.AuthenticatedHeaders(),
-		Results:     &result.Body,
-		OkCodes:     []int{200},
-	})
+	_, result.Err = client.Get(projectURL(client, projectID), &result.Body, nil)
 	return result
 }
 
@@ -101,22 +91,13 @@ func Update(client *gophercloud.ServiceClient, projectID string, opts ProjectOpt
 		},
 	}
 	var result UpdateResult
-	_, result.Err = perigee.Request("PUT", projectURL(client, projectID), perigee.Options{
-		MoreHeaders: client.AuthenticatedHeaders(),
-		ReqBody:     &reqBody,
-		Results:     &result.Body,
-		OkCodes:     []int{201},
-	})
+	_, result.Err = client.Put(projectURL(client, projectID), reqBody, &result.Body, nil)
 	return result
 }
 
 // Delete Deletes project
 func Delete(client *gophercloud.ServiceClient, projectID string) DeleteResult {
 	var result DeleteResult
-	_, result.Err = perigee.Request("DELETE", projectURL(client, projectID), perigee.Options{
-		MoreHeaders: client.AuthenticatedHeaders(),
-		Results:     &result.Body,
-		OkCodes:     []int{204},
-	})
+	_, result.Err = client.Delete(projectURL(client, projectID), nil)
 	return result
 }
