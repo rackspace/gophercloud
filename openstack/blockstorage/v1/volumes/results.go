@@ -93,6 +93,36 @@ type UpdateResult struct {
 	commonResult
 }
 
+// AttachResult contains the response body and error from a Get request.
+type AttachResult struct {
+	commonResult
+}
+
+// DetachResult contains the response body and error from a Get request.
+type DetachResult struct {
+	commonResult
+}
+
+// ReserveResult contains the response body and error from a Get request.
+type ReserveResult struct {
+	commonResult
+}
+
+// UnreserveResult contains the response body and error from a Get request.
+type UnreserveResult struct {
+	commonResult
+}
+
+// InitializeConnectionResult contains the response body and error from a Get request.
+type InitializeConnectionResult struct {
+	commonResult
+}
+
+// TerminateConnectionResult contains the response body and error from a Get request.
+type TerminateConnectionResult struct {
+	commonResult
+}
+
 type commonResult struct {
 	gophercloud.Result
 }
