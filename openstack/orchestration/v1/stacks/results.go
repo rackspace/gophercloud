@@ -11,6 +11,9 @@ import (
 	"github.com/rackspace/gophercloud/pagination"
 )
 
+// Time format used in cloud orchestration
+const STACK_TIME_FMT = "2006-01-02T15:04:05"
+
 // CreatedStack represents the object extracted from a Create operation.
 type CreatedStack struct {
 	ID    string             `mapstructure:"id"`
@@ -100,7 +103,7 @@ func ExtractStacks(page pagination.Page) ([]ListedStack, error) {
 		thisStack := (rawStacks[i]).(map[string]interface{})
 
 		if t, ok := thisStack["creation_time"].(string); ok && t != "" {
-			creationTime, err := time.Parse(time.RFC3339, t)
+			creationTime, err := time.Parse(STACK_TIME_FMT, t)
 			if err != nil {
 				return res.Stacks, err
 			}
@@ -108,7 +111,7 @@ func ExtractStacks(page pagination.Page) ([]ListedStack, error) {
 		}
 
 		if t, ok := thisStack["updated_time"].(string); ok && t != "" {
-			updatedTime, err := time.Parse(time.RFC3339, t)
+			updatedTime, err := time.Parse(STACK_TIME_FMT, t)
 			if err != nil {
 				return res.Stacks, err
 			}
@@ -170,7 +173,7 @@ func (r GetResult) Extract() (*RetrievedStack, error) {
 	b := r.Body.(map[string]interface{})["stack"].(map[string]interface{})
 
 	if date, ok := b["creation_time"]; ok && date != nil {
-		t, err := time.Parse(time.RFC3339, date.(string))
+		t, err := time.Parse(STACK_TIME_FMT, date.(string))
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +181,7 @@ func (r GetResult) Extract() (*RetrievedStack, error) {
 	}
 
 	if date, ok := b["updated_time"]; ok && date != nil {
-		t, err := time.Parse(time.RFC3339, date.(string))
+		t, err := time.Parse(STACK_TIME_FMT, date.(string))
 		if err != nil {
 			return nil, err
 		}
@@ -249,7 +252,7 @@ func (r PreviewResult) Extract() (*PreviewedStack, error) {
 	b := r.Body.(map[string]interface{})["stack"].(map[string]interface{})
 
 	if date, ok := b["creation_time"]; ok && date != nil {
-		t, err := time.Parse(time.RFC3339, date.(string))
+		t, err := time.Parse(STACK_TIME_FMT, date.(string))
 		if err != nil {
 			return nil, err
 		}
@@ -257,7 +260,7 @@ func (r PreviewResult) Extract() (*PreviewedStack, error) {
 	}
 
 	if date, ok := b["updated_time"]; ok && date != nil {
-		t, err := time.Parse(time.RFC3339, date.(string))
+		t, err := time.Parse(STACK_TIME_FMT, date.(string))
 		if err != nil {
 			return nil, err
 		}

@@ -10,6 +10,9 @@ import (
 	"github.com/rackspace/gophercloud/pagination"
 )
 
+// Time format used in cloud orchestration
+const STACK_TIME_FMT = "2006-01-02T15:04:05"
+
 // Event represents a stack event.
 type Event struct {
 	// The name of the resource for which the event occurred.
