@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/rackspace/gophercloud"
 	th "github.com/rackspace/gophercloud/testhelper"
@@ -60,7 +59,7 @@ var ListExpected = []ListedStack{
 		},
 		StatusReason: "Stack CREATE completed successfully",
 		Name:         "postman_stack",
-		CreationTime: time.Date(2015, 2, 3, 20, 7, 39, 0, time.UTC),
+		CreationTime: "2015-02-03T20:07:39",
 		Status:       "CREATE_COMPLETE",
 		ID:           "16ef0584-4458-41eb-87c8-0dc8d5f66c87",
 	},
@@ -74,8 +73,8 @@ var ListExpected = []ListedStack{
 		},
 		StatusReason: "Stack successfully updated",
 		Name:         "gophercloud-test-stack-2",
-		CreationTime: time.Date(2014, 12, 11, 17, 39, 16, 0, time.UTC),
-		UpdatedTime:  time.Date(2014, 12, 11, 17, 40, 37, 0, time.UTC),
+		CreationTime:  "2014-12-11T17:39:16",
+		UpdatedTime:  "2014-12-11T17:40:37",
 		Status:       "UPDATE_COMPLETE",
 		ID:           "db6977b2-27aa-4775-9ae7-6213212d4ada",
 	},
@@ -95,7 +94,7 @@ const FullListOutput = `
     ],
     "stack_status_reason": "Stack CREATE completed successfully",
     "stack_name": "postman_stack",
-    "creation_time": "2015-02-03T20:07:39Z",
+    "creation_time": "2015-02-03T20:07:39",
     "updated_time": null,
     "stack_status": "CREATE_COMPLETE",
     "id": "16ef0584-4458-41eb-87c8-0dc8d5f66c87"
@@ -110,8 +109,8 @@ const FullListOutput = `
     ],
     "stack_status_reason": "Stack successfully updated",
     "stack_name": "gophercloud-test-stack-2",
-    "creation_time": "2014-12-11T17:39:16Z",
-    "updated_time": "2014-12-11T17:40:37Z",
+    "creation_time": "2014-12-11T17:39:16",
+    "updated_time": "2014-12-11T17:40:37",
     "stack_status": "UPDATE_COMPLETE",
     "id": "db6977b2-27aa-4775-9ae7-6213212d4ada"
   }
@@ -153,7 +152,7 @@ var GetExpected = &RetrievedStack{
 	StatusReason: "Stack CREATE completed successfully",
 	Name:         "postman_stack",
 	Outputs:      []map[string]interface{}{},
-	CreationTime: time.Date(2015, 2, 3, 20, 7, 39, 0, time.UTC),
+	CreationTime: "2015-02-03T20:07:39",
 	Links: []gophercloud.Link{
 		gophercloud.Link{
 			Href: "http://166.76.160.117:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/16ef0584-4458-41eb-87c8-0dc8d5f66c87",
@@ -181,7 +180,7 @@ const GetOutput = `
     "stack_status_reason": "Stack CREATE completed successfully",
     "stack_name": "postman_stack",
     "outputs": [],
-    "creation_time": "2015-02-03T20:07:39Z",
+    "creation_time": "2015-02-03T20:07:39",
     "links": [
     {
       "href": "http://166.76.160.117:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/16ef0584-4458-41eb-87c8-0dc8d5f66c87",
@@ -250,7 +249,7 @@ var PreviewExpected = &PreviewedStack{
 	},
 	StatusReason: "Stack CREATE completed successfully",
 	Name:         "postman_stack",
-	CreationTime: time.Date(2015, 2, 3, 20, 7, 39, 0, time.UTC),
+	CreationTime: "2015-02-03T20:07:39",
 	Links: []gophercloud.Link{
 		gophercloud.Link{
 			Href: "http://166.76.160.117:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/16ef0584-4458-41eb-87c8-0dc8d5f66c87",

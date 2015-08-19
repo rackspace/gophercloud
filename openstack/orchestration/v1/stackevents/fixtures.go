@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/rackspace/gophercloud"
 	th "github.com/rackspace/gophercloud/testhelper"
@@ -15,7 +14,7 @@ import (
 var FindExpected = []Event{
 	Event{
 		ResourceName: "hello_world",
-		Time:         time.Date(2015, 2, 5, 21, 33, 11, 0, time.UTC),
+		Time:         "2015-02-05T21:33:11",
 		Links: []gophercloud.Link{
 			gophercloud.Link{
 				Href: "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/06feb26f-9298-4a9b-8749-9d770e5d577a",
@@ -38,7 +37,7 @@ var FindExpected = []Event{
 	},
 	Event{
 		ResourceName: "hello_world",
-		Time:         time.Date(2015, 2, 5, 21, 33, 27, 0, time.UTC),
+		Time:         "2015-02-05T21:33:27",
 		Links: []gophercloud.Link{
 			gophercloud.Link{
 				Href: "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/93940999-7d40-44ae-8de4-19624e7b8d18",
@@ -67,7 +66,7 @@ const FindOutput = `
   "events": [
   {
     "resource_name": "hello_world",
-    "event_time": "2015-02-05T21:33:11Z",
+    "event_time": "2015-02-05T21:33:11",
     "links": [
     {
       "href": "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/06feb26f-9298-4a9b-8749-9d770e5d577a",
@@ -90,7 +89,7 @@ const FindOutput = `
     },
     {
       "resource_name": "hello_world",
-      "event_time": "2015-02-05T21:33:27Z",
+      "event_time": "2015-02-05T21:33:27",
       "links": [
       {
         "href": "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/93940999-7d40-44ae-8de4-19624e7b8d18",
@@ -132,7 +131,7 @@ func HandleFindSuccessfully(t *testing.T, output string) {
 var ListExpected = []Event{
 	Event{
 		ResourceName: "hello_world",
-		Time:         time.Date(2015, 2, 5, 21, 33, 11, 0, time.UTC),
+		Time:         "2015-02-05T21:33:11",
 		Links: []gophercloud.Link{
 			gophercloud.Link{
 				Href: "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/06feb26f-9298-4a9b-8749-9d770e5d577a",
@@ -155,7 +154,7 @@ var ListExpected = []Event{
 	},
 	Event{
 		ResourceName: "hello_world",
-		Time:         time.Date(2015, 2, 5, 21, 33, 27, 0, time.UTC),
+		Time:         "2015-02-05T21:33:27",
 		Links: []gophercloud.Link{
 			gophercloud.Link{
 				Href: "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/93940999-7d40-44ae-8de4-19624e7b8d18",
@@ -184,7 +183,7 @@ const ListOutput = `
   "events": [
   {
     "resource_name": "hello_world",
-    "event_time": "2015-02-05T21:33:11Z",
+    "event_time": "2015-02-05T21:33:11",
     "links": [
     {
       "href": "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/06feb26f-9298-4a9b-8749-9d770e5d577a",
@@ -207,7 +206,7 @@ const ListOutput = `
     },
     {
       "resource_name": "hello_world",
-      "event_time": "2015-02-05T21:33:27Z",
+      "event_time": "2015-02-05T21:33:27",
       "links": [
       {
         "href": "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/93940999-7d40-44ae-8de4-19624e7b8d18",
@@ -257,7 +256,7 @@ func HandleListSuccessfully(t *testing.T, output string) {
 var ListResourceEventsExpected = []Event{
 	Event{
 		ResourceName: "hello_world",
-		Time:         time.Date(2015, 2, 5, 21, 33, 11, 0, time.UTC),
+		Time:         "2015-02-05T21:33:11",
 		Links: []gophercloud.Link{
 			gophercloud.Link{
 				Href: "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/06feb26f-9298-4a9b-8749-9d770e5d577a",
@@ -280,7 +279,7 @@ var ListResourceEventsExpected = []Event{
 	},
 	Event{
 		ResourceName: "hello_world",
-		Time:         time.Date(2015, 2, 5, 21, 33, 27, 0, time.UTC),
+		Time:         "2015-02-05T21:33:27",
 		Links: []gophercloud.Link{
 			gophercloud.Link{
 				Href: "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/93940999-7d40-44ae-8de4-19624e7b8d18",
@@ -309,7 +308,7 @@ const ListResourceEventsOutput = `
   "events": [
   {
     "resource_name": "hello_world",
-    "event_time": "2015-02-05T21:33:11Z",
+    "event_time": "2015-02-05T21:33:11",
     "links": [
     {
       "href": "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/06feb26f-9298-4a9b-8749-9d770e5d577a",
@@ -332,7 +331,7 @@ const ListResourceEventsOutput = `
     },
     {
       "resource_name": "hello_world",
-      "event_time": "2015-02-05T21:33:27Z",
+      "event_time": "2015-02-05T21:33:27",
       "links": [
       {
         "href": "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/93940999-7d40-44ae-8de4-19624e7b8d18",
@@ -381,7 +380,7 @@ func HandleListResourceEventsSuccessfully(t *testing.T, output string) {
 // GetExpected represents the expected object from a Get request.
 var GetExpected = &Event{
 	ResourceName: "hello_world",
-	Time:         time.Date(2015, 2, 5, 21, 33, 27, 0, time.UTC),
+	Time:         "2015-02-05T21:33:27",
 	Links: []gophercloud.Link{
 		gophercloud.Link{
 			Href: "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/93940999-7d40-44ae-8de4-19624e7b8d18",
@@ -408,7 +407,7 @@ const GetOutput = `
 {
   "event":{
     "resource_name": "hello_world",
-    "event_time": "2015-02-05T21:33:27Z",
+    "event_time": "2015-02-05T21:33:27",
     "links": [
     {
       "href": "http://166.78.160.107:8004/v1/98606384f58d4ad0b3db7d0d779549ac/stacks/postman_stack/5f57cff9-93fc-424e-9f78-df0515e7f48b/resources/hello_world/events/93940999-7d40-44ae-8de4-19624e7b8d18",

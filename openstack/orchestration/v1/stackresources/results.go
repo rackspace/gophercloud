@@ -10,6 +10,9 @@ import (
 	"github.com/rackspace/gophercloud/pagination"
 )
 
+// Time format used in cloud orchestration
+const STACK_TIME_FMT = "2006-01-02T15:04:05"
+
 // Resource represents a stack resource.
 type Resource struct {
 	Links        []gophercloud.Link `mapstructure:"links"`

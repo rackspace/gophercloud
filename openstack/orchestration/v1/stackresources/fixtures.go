@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/rackspace/gophercloud"
 	th "github.com/rackspace/gophercloud/testhelper"
@@ -27,7 +26,7 @@ var FindExpected = []Resource{
 		},
 		LogicalID:    "hello_world",
 		StatusReason: "state changed",
-		UpdatedTime:  time.Date(2015, 2, 5, 21, 33, 11, 0, time.UTC),
+		UpdatedTime:  "2015-02-05T21:33:11",
 		RequiredBy:   []interface{}{},
 		Status:       "CREATE_IN_PROGRESS",
 		PhysicalID:   "49181cd6-169a-4130-9455-31185bbfc5bf",
@@ -53,7 +52,7 @@ const FindOutput = `
     ],
     "logical_resource_id": "hello_world",
     "resource_status_reason": "state changed",
-    "updated_time": "2015-02-05T21:33:11Z",
+    "updated_time": "2015-02-05T21:33:11",
     "required_by": [],
     "resource_status": "CREATE_IN_PROGRESS",
     "physical_resource_id": "49181cd6-169a-4130-9455-31185bbfc5bf",
@@ -92,7 +91,7 @@ var ListExpected = []Resource{
 		},
 		LogicalID:    "hello_world",
 		StatusReason: "state changed",
-		UpdatedTime:  time.Date(2015, 2, 5, 21, 33, 11, 0, time.UTC),
+		UpdatedTime:  "2015-02-05T21:33:11",
 		RequiredBy:   []interface{}{},
 		Status:       "CREATE_IN_PROGRESS",
 		PhysicalID:   "49181cd6-169a-4130-9455-31185bbfc5bf",
@@ -117,7 +116,7 @@ const ListOutput = `{
     ],
     "logical_resource_id": "hello_world",
     "resource_status_reason": "state changed",
-    "updated_time": "2015-02-05T21:33:11Z",
+    "updated_time": "2015-02-05T21:33:11",
     "required_by": [],
     "resource_status": "CREATE_IN_PROGRESS",
     "physical_resource_id": "49181cd6-169a-4130-9455-31185bbfc5bf",
@@ -163,7 +162,7 @@ var GetExpected = &Resource{
 	},
 	LogicalID:    "wordpress_instance",
 	StatusReason: "state changed",
-	UpdatedTime:  time.Date(2014, 12, 10, 18, 34, 35, 0, time.UTC),
+	UpdatedTime:  "2014-12-10T18:34:35",
 	RequiredBy:   []interface{}{},
 	Status:       "CREATE_COMPLETE",
 	PhysicalID:   "00e3a2fe-c65d-403c-9483-4db9930dd194",
@@ -188,7 +187,7 @@ const GetOutput = `
     ],
     "logical_resource_id": "wordpress_instance",
     "resource_status": "CREATE_COMPLETE",
-    "updated_time": "2014-12-10T18:34:35Z",
+    "updated_time": "2014-12-10T18:34:35",
     "required_by": [],
     "resource_status_reason": "state changed",
     "physical_resource_id": "00e3a2fe-c65d-403c-9483-4db9930dd194",
