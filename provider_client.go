@@ -83,11 +83,15 @@ func (client *ProviderClient) AuthenticatedHeaders() map[string]string {
 type RequestOpts struct {
 	// JSONBody, if provided, will be encoded as JSON and used as the body of the HTTP request. The
 	// content type of the request will default to "application/json" unless overridden by MoreHeaders.
-	// It's an error to specify both a JSONBody and a RawBody.
+	// It's an error to specify both a JSONBody, RawBody or StreamingRawBody.
 	JSONBody interface{}
 	// RawBody contains an io.ReadSeeker that will be consumed by the request directly. No content-type
 	// will be set unless one is provided explicitly by MoreHeaders.
 	RawBody io.ReadSeeker
+	// StreamingRawBody contains an io.Reader that will be consumed by the request directly. The
+	// content type of the request will default to "application/octet-stream" unless overriden by
+	// MoreHeaders.
+	StreamingRawBody io.Reader
 
 	// JSONResponse, if provided, will be populated with the contents of the response body parsed as
 	// JSON.
@@ -120,11 +124,12 @@ func (err *UnexpectedResponseCodeError) Error() string {
 }
 
 var applicationJSON = "application/json"
+var applicationOctetStream = "application/octet-stream"
 
 // Request performs an HTTP request using the ProviderClient's current HTTPClient. An authentication
 // header will automatically be provided.
 func (client *ProviderClient) Request(method, url string, options RequestOpts) (*http.Response, error) {
-	var body io.ReadSeeker
+	var body io.Reader
 	var contentType *string
 
 	// Derive the content body by either encoding an arbitrary object as JSON, or by taking a provided
@@ -145,6 +150,11 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 
 	if options.RawBody != nil {
 		body = options.RawBody
+	}
+
+	if options.StreamingRawBody != nil {
+		body = options.StreamingRawBody
+		contentType = &applicationOctetStream
 	}
 
 	// Construct the http.Request.
