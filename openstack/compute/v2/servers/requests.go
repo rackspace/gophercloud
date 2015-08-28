@@ -852,3 +852,25 @@ func IDFromName(client *gophercloud.ServiceClient, name string) (string, error) 
 		return "", fmt.Errorf("Found %d servers matching %s", serverCount, name)
 	}
 }
+
+// Start allows you to start a server that was previously stopped.
+func Start(client *gophercloud.ServiceClient, id string) ActionResult {
+	var res ActionResult
+
+	reqBody := map[string]interface{}{"os-start": nil}
+	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
+		OkCodes: []int{202},
+	})
+	return res
+}
+
+// Stop allows you to shut off a server in ACTIVE or ERROR state.
+func Stop(client *gophercloud.ServiceClient, id string) ActionResult {
+	var res ActionResult
+
+	reqBody := map[string]interface{}{"os-stop": nil}
+	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
+		OkCodes: []int{202},
+	})
+	return res
+}

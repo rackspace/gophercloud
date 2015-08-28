@@ -371,3 +371,35 @@ func TestMarshalPersonality(t *testing.T) {
 		t.Fatal("file contents incorrect")
 	}
 }
+
+func TestStart(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	th.Mux.HandleFunc("/servers/1234asdf/action", func(w http.ResponseWriter, r *http.Request) {
+		th.TestMethod(t, r, "POST")
+		th.TestHeader(t, r, "X-Auth-Token", client.TokenID)
+		th.TestJSONRequest(t, r, `{ "os-start": null }`)
+
+		w.WriteHeader(http.StatusAccepted)
+	})
+
+	res := Start(client.ServiceClient(), "1234asdf")
+	th.AssertNoErr(t, res.Err)
+}
+
+func TestStop(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	th.Mux.HandleFunc("/servers/1234asdf/action", func(w http.ResponseWriter, r *http.Request) {
+		th.TestMethod(t, r, "POST")
+		th.TestHeader(t, r, "X-Auth-Token", client.TokenID)
+		th.TestJSONRequest(t, r, `{ "os-stop": null }`)
+
+		w.WriteHeader(http.StatusAccepted)
+	})
+
+	res := Stop(client.ServiceClient(), "1234asdf")
+	th.AssertNoErr(t, res.Err)
+}
