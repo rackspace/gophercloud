@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/rackspace/gophercloud"
 	tokens2 "github.com/rackspace/gophercloud/openstack/identity/v2/tokens"
@@ -64,8 +65,8 @@ func AuthenticatedClient(options gophercloud.AuthOptions) (*gophercloud.Provider
 // Authenticate or re-authenticate against the most recent identity service supported at the provided endpoint.
 func Authenticate(client *gophercloud.ProviderClient, options gophercloud.AuthOptions) error {
 	versions := []*utils.Version{
-		&utils.Version{ID: v20, Priority: 20, Suffix: "/v2.0/"},
-		&utils.Version{ID: v30, Priority: 30, Suffix: "/v3/"},
+		{ID: v20, Priority: 20, Suffix: "/v2.0/"},
+		{ID: v30, Priority: 30, Suffix: "/v3/"},
 	}
 
 	chosen, endpoint, err := utils.ChooseVersion(client, versions)
@@ -239,6 +240,26 @@ func NewBlockStorageV1(client *gophercloud.ProviderClient, eo gophercloud.Endpoi
 		return nil, err
 	}
 	return &gophercloud.ServiceClient{ProviderClient: client, Endpoint: url}, nil
+}
+
+// NewBlockStorageV2 creates a ServiceClient that may be used to access the v2 block storage service.
+func NewBlockStorageV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+	eo.ApplyDefaults("volume")
+	url, err := client.EndpointLocator(eo)
+	if err != nil {
+		return nil, err
+	}
+
+	// Force using v2 API
+	if strings.Contains(url, "/v1") {
+		url = strings.Replace(url, "/v1", "/v2", -1)
+	}
+
+	return &gophercloud.ServiceClient{
+		ProviderClient: client,
+		Endpoint:       url,
+		ResourceBase:   url,
+	}, nil
 }
 
 // NewCDNV1 creates a ServiceClient that may be used to access the OpenStack v1
