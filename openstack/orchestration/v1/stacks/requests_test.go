@@ -58,36 +58,9 @@ func TestAdoptStack(t *testing.T) {
 	HandleCreateSuccessfully(t, CreateOutput)
 
 	adoptOpts := AdoptOpts{
-		AdoptStackData: `{environment{parameters{}}}`,
-		Name:           "stackcreated",
-		Timeout:        60,
-		Template: `
-    {
-      "stack_name": "postman_stack",
-      "template": {
-        "heat_template_version": "2013-05-23",
-        "description": "Simple template to test heat commands",
-        "parameters": {
-          "flavor": {
-            "default": "m1.tiny",
-            "type": "string"
-          }
-        },
-        "resources": {
-          "hello_world": {
-            "type":"OS::Nova::Server",
-            "properties": {
-              "key_name": "heat_key",
-              "flavor": {
-                "get_param": "flavor"
-              },
-              "image": "ad091b52-742f-469e-8f3c-fd81cadf0743",
-              "user_data": "#!/bin/bash -xv\necho \"hello world\" &gt; /root/hello-world.txt\n"
-            }
-          }
-        }
-      }
-    }`,
+		AdoptStackData:  `{environment{parameters{}}}`,
+		Name:            "stackcreated",
+		Timeout:         60,
 		DisableRollback: Disable,
 	}
 	actual, err := Adopt(fake.ServiceClient(), adoptOpts).Extract()
@@ -213,5 +186,17 @@ func TestPreviewStack(t *testing.T) {
 	th.AssertNoErr(t, err)
 
 	expected := PreviewExpected
+	th.AssertDeepEquals(t, expected, actual)
+}
+
+func TestAbandonStack(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+	HandleAbandonSuccessfully(t, AbandonOutput)
+
+	actual, err := Abandon(fake.ServiceClient(), "postman_stack", "16ef0584-4458-41eb-87c8-0dc8d5f66c8").Extract()
+	th.AssertNoErr(t, err)
+
+	expected := AbandonExpected
 	th.AssertDeepEquals(t, expected, actual)
 }
