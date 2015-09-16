@@ -8,14 +8,14 @@ import (
 
 // IPAddress represents a shared IP address.
 type IPAddress struct {
-	ID        string   `mapstructure:"id"`
-	NetworkID string   `mapstructure:"network_id"`
-	Address   string   `mapstructure:"address"`
-	PortIDs   []string `mapstructure:"port_ids"`
-	SubnetID  string   `mapstructure:"subnet_id"`
-	TenantID  string   `mapstructure:"tenant_id"`
-	Version   int      `mapstructure:"version"`
-	Type      string   `mapstructure:"type"`
+	ID        string                `mapstructure:"id"`
+	NetworkID string                `mapstructure:"network_id"`
+	Address   string                `mapstructure:"address"`
+	PortIDs   []string              `mapstructure:"port_ids"`
+	SubnetID  string                `mapstructure:"subnet_id"`
+	TenantID  string                `mapstructure:"tenant_id"`
+	Version   gophercloud.IPVersion `mapstructure:"version"`
+	Type      string                `mapstructure:"type"`
 }
 
 // IPAddressPage is the page returned by a pager when traversing over a

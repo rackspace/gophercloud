@@ -57,7 +57,7 @@ type CreateOpts struct {
 	// REQUIRED
 	PortIDs []string
 	// REQUIRED
-	Version int
+	Version gophercloud.IPVersion
 	// REQUIRED
 	TenantID string
 }
