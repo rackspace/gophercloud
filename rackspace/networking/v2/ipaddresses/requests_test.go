@@ -134,7 +134,7 @@ func TestDelete(t *testing.T) {
 
 	MockDeleteResponse(t)
 
-	res := Delete(client.ServiceClient(), "4cacd68e-d7aa-4ff2-96f4-5c6f57dba737")
+	res := Delete(client.ServiceClient(), "4cacd68e-d7aa-4ff2-96f4-5c6f57dba737", DeleteOpts{})
 	th.AssertNoErr(t, res.Err)
 }
 
