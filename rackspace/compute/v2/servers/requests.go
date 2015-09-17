@@ -1,9 +1,16 @@
 package servers
 
 import (
+	"errors"
+	"fmt"
+
+	"github.com/rackspace/gophercloud"
 	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/diskconfig"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/flavors"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/images"
 	os "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // CreateOpts specifies all of the options that Rackspace accepts in its Create request, including
@@ -124,6 +131,90 @@ func (opts CreateOpts) ToServerCreateMap() (map[string]interface{}, error) {
 	return res, nil
 }
 
+// Create requests a server to be provisioned to the user in the current tenant.
+func Create(client *gophercloud.ServiceClient, opts os.CreateOptsBuilder) CreateResult {
+	var res CreateResult
+
+	reqBody, err := opts.ToServerCreateMap()
+	if err != nil {
+		res.Err = err
+		return res
+	}
+
+	// If ImageRef isn't provided, use ImageName to ascertain the image ID.
+	if reqBody["server"].(map[string]interface{})["imageRef"].(string) == "" {
+		imageName := reqBody["server"].(map[string]interface{})["imageName"].(string)
+		if imageName == "" {
+			res.Err = errors.New("One and only one of ImageRef and ImageName must be provided.")
+			return res
+		}
+		imageID, err := images.IDFromName(client, imageName)
+		if err != nil {
+			res.Err = err
+			return res
+		}
+		reqBody["server"].(map[string]interface{})["imageRef"] = imageID
+	}
+	delete(reqBody["server"].(map[string]interface{}), "imageName")
+
+	// If FlavorRef isn't provided, use FlavorName to ascertain the flavor ID.
+	if reqBody["server"].(map[string]interface{})["flavorRef"].(string) == "" {
+		flavorName := reqBody["server"].(map[string]interface{})["flavorName"].(string)
+		if flavorName == "" {
+			res.Err = errors.New("One and only one of FlavorRef and FlavorName must be provided.")
+			return res
+		}
+		flavorID, err := flavors.IDFromName(client, flavorName)
+		if err != nil {
+			res.Err = err
+			return res
+		}
+		reqBody["server"].(map[string]interface{})["flavorRef"] = flavorID
+	}
+	delete(reqBody["server"].(map[string]interface{}), "flavorName")
+
+	_, res.Err = client.Post(createURL(client), reqBody, &res.Body, nil)
+	return res
+}
+
+// List makes a request against the API to list servers accessible to you.
+func List(client *gophercloud.ServiceClient, opts os.ListOptsBuilder) pagination.Pager {
+	url := listDetailURL(client)
+
+	if opts != nil {
+		query, err := opts.ToServerListQuery()
+		if err != nil {
+			return pagination.Pager{Err: err}
+		}
+		url += query
+	}
+
+	createPageFn := func(r pagination.PageResult) pagination.Page {
+		return ServerPage{pagination.LinkedPageBase{PageResult: r}}
+	}
+
+	return pagination.NewPager(client, url, createPageFn)
+}
+
+// Update requests an existing server to be updated with the supplied options.
+func Update(client *gophercloud.ServiceClient, id string, opts os.UpdateOptsBuilder) UpdateResult {
+	var result UpdateResult
+	reqBody := opts.ToServerUpdateMap()
+	_, result.Err = client.Put(updateURL(client, id), reqBody, &result.Body, &gophercloud.RequestOpts{
+		OkCodes: []int{200},
+	})
+	return result
+}
+
+// Get requests details on a single server, by ID.
+func Get(client *gophercloud.ServiceClient, id string) GetResult {
+	var result GetResult
+	_, result.Err = client.Get(getURL(client, id), &result.Body, &gophercloud.RequestOpts{
+		OkCodes: []int{200, 203},
+	})
+	return result
+}
+
 // RebuildOpts represents all of the configuration options used in a server rebuild operation that
 // are supported by Rackspace.
 type RebuildOpts struct {
@@ -175,4 +266,24 @@ func (opts RebuildOpts) ToServerRebuildMap() (map[string]interface{}, error) {
 	}
 
 	return drive.ToServerRebuildMap()
+}
+
+// Rebuild will reprovision the server according to the configuration options provided in the
+// RebuildOpts struct.
+func Rebuild(client *gophercloud.ServiceClient, id string, opts os.RebuildOptsBuilder) RebuildResult {
+	var result RebuildResult
+
+	if id == "" {
+		result.Err = fmt.Errorf("ID is required")
+		return result
+	}
+
+	reqBody, err := opts.ToServerRebuildMap()
+	if err != nil {
+		result.Err = err
+		return result
+	}
+
+	_, result.Err = client.Post(actionURL(client, id), reqBody, &result.Body, nil)
+	return result
 }

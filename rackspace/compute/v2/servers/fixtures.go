@@ -2,10 +2,6 @@
 
 package servers
 
-import (
-	os "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
-)
-
 // ListOutput is the recorded output of a Rackspace servers.List request.
 const ListOutput = `
 {
@@ -308,7 +304,7 @@ const CreateOutput = `
 `
 
 // DevstackServer is the expected first result from parsing ListOutput.
-var DevstackServer = os.Server{
+var DevstackServer = Server{
 	ID:         "59818cee-bc8c-44eb-8073-673ee65105f7",
 	Name:       "devstack",
 	TenantID:   "111111",
@@ -372,7 +368,7 @@ var DevstackServer = os.Server{
 }
 
 // PerilServer is the expected second result from parsing ListOutput.
-var PerilServer = os.Server{
+var PerilServer = Server{
 	ID:         "25f1c7f5-e00a-4715-b354-16e24b2f4630",
 	Name:       "peril-dfw",
 	TenantID:   "111111",
@@ -436,7 +432,7 @@ var PerilServer = os.Server{
 }
 
 // GophercloudServer is the expected result from parsing GetOutput.
-var GophercloudServer = os.Server{
+var GophercloudServer = Server{
 	ID:         "8c65cb68-0681-4c30-bc88-6b83a8a26aee",
 	Name:       "Gophercloud-pxpGGuey",
 	TenantID:   "111111",
@@ -500,7 +496,7 @@ var GophercloudServer = os.Server{
 }
 
 // GophercloudUpdatedServer is the expected result from parsing UpdateOutput.
-var GophercloudUpdatedServer = os.Server{
+var GophercloudUpdatedServer = Server{
 	ID:         "8c65cb68-0681-4c30-bc88-6b83a8a26aee",
 	Name:       "test-server-updated",
 	TenantID:   "111111",
@@ -564,11 +560,11 @@ var GophercloudUpdatedServer = os.Server{
 }
 
 // CreatedServer is the partial Server struct that can be parsed from CreateOutput.
-var CreatedServer = os.Server{
+var CreatedServer = Server{
 	ID:        "bb63327b-6a2f-34bc-b0ef-4b6d97ea637e",
 	AdminPass: "v7tADqbE5pr9",
 	Links:     []interface{}{},
 }
 
 // ExpectedServerSlice is the collection of servers, in order, that should be parsed from ListOutput.
-var ExpectedServerSlice = []os.Server{DevstackServer, PerilServer}
+var ExpectedServerSlice = []Server{DevstackServer, PerilServer}
