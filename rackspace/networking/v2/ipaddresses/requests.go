@@ -1,4 +1,4 @@
-package sharedips
+package ipaddresses
 
 import (
 	"fmt"
@@ -50,7 +50,7 @@ type CreateOptsBuilder interface {
 }
 
 // CreateOpts contains options for provisioning a shared IP address. This object is passed to
-// the sharedips.Create function.
+// the ipaddresses.Create function.
 type CreateOpts struct {
 	// REQUIRED
 	NetworkID string
@@ -108,10 +108,26 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateRes
 	return res
 }
 
+// DeleteOptsBuilder allows extensions to add additional parameters to the
+// Delete request.
+type DeleteOptsBuilder interface {
+	ToSharedIPDeleteMap() (map[string]interface{}, error)
+}
+
+// DeleteOpts contains options for provisioning a shared IP address. This object is passed to
+// the ipaddresses.Delete function.
+type DeleteOpts struct{}
+
+// ToSharedIPDeleteMap assembles a request body based on the contents of a
+// DeleteOpts.
+func (opts DeleteOpts) ToSharedIPDeleteMap() (map[string]interface{}, error) {
+	return map[string]interface{}{}, nil
+}
+
 // Delete will deallocate the existing shared IP with the provided ID from the tenant.
 // Before using this operation, all IP associations must be removed from the IP address
 // by using the Disassociate function.
-func Delete(client *gophercloud.ServiceClient, id string) DeleteResult {
+func Delete(client *gophercloud.ServiceClient, id string, opts DeleteOptsBuilder) DeleteResult {
 	var res DeleteResult
 	_, res.Err = client.Delete(deleteURL(client, id), nil)
 	return res
@@ -132,7 +148,7 @@ type UpdateOptsBuilder interface {
 }
 
 // UpdateOpts contain options for updating an existing shared IP. This object is passed
-// to the sharedips.Update function.
+// to the ipaddresses.Update function.
 type UpdateOpts struct {
 	// REQUIRED
 	PortIDs []string
@@ -188,7 +204,7 @@ func (opts ListOpts) ToSharedIPListByServerQuery() (string, error) {
 }
 
 // ListByServer returns a Pager which allows you to iterate over a collection of
-// IPAssociations.
+// shared IP addresses associated with the given server.
 func ListByServer(c *gophercloud.ServiceClient, serverID string, opts ListByServerOptsBuilder) pagination.Pager {
 	url := listByServerURL(c, serverID)
 	if opts != nil {

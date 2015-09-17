@@ -1,4 +1,4 @@
-package sharedips
+package ipaddresses
 
 import (
 	"fmt"

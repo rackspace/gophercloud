@@ -1,4 +1,4 @@
-package sharedips
+package ipaddresses
 
 import (
 	"github.com/mitchellh/mapstructure"
