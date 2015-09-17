@@ -264,7 +264,14 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateRes
 	if reqBody["server"].(map[string]interface{})["imageRef"].(string) == "" {
 		imageName := reqBody["server"].(map[string]interface{})["imageName"].(string)
 		if imageName == "" {
-			res.Err = errors.New("One and only one of ImageRef and ImageName must be provided.")
+			res.Err = &ErrNeitherImageIDNorImageNameProvided{
+				&gophercloud.InvalidInputError{
+					BaseError: gophercloud.BaseError{
+						Function: "servers.Create",
+					},
+					Argument: "ImageRef/ImageName",
+				},
+			}
 			return res
 		}
 		imageID, err := images.IDFromName(client, imageName)
@@ -280,7 +287,14 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateRes
 	if reqBody["server"].(map[string]interface{})["flavorRef"].(string) == "" {
 		flavorName := reqBody["server"].(map[string]interface{})["flavorName"].(string)
 		if flavorName == "" {
-			res.Err = errors.New("One and only one of FlavorRef and FlavorName must be provided.")
+			res.Err = &ErrNeitherFlavorIDNorFlavorNameProvided{
+				&gophercloud.InvalidInputError{
+					BaseError: gophercloud.BaseError{
+						Function: "servers.Create",
+					},
+					Argument: "FlavorRef/FlavorName",
+				},
+			}
 			return res
 		}
 		flavorID, err := flavors.IDFromName(client, flavorName)
@@ -292,14 +306,18 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateRes
 	}
 	delete(reqBody["server"].(map[string]interface{}), "flavorName")
 
-	_, res.Err = client.Post(listURL(client), reqBody, &res.Body, nil)
+	_, res.Err = client.Post(listURL(client), reqBody, &res.Body, &gophercloud.RequestOpts{
+		ErrorContext: &ServerError{},
+	})
 	return res
 }
 
 // Delete requests that a server previously provisioned be removed from your account.
 func Delete(client *gophercloud.ServiceClient, id string) DeleteResult {
 	var res DeleteResult
-	_, res.Err = client.Delete(deleteURL(client, id), nil)
+	_, res.Err = client.Delete(deleteURL(client, id), &gophercloud.RequestOpts{
+		ErrorContext: &ServerError{id: id},
+	})
 	return res
 }
 
@@ -307,7 +325,8 @@ func Delete(client *gophercloud.ServiceClient, id string) DeleteResult {
 func Get(client *gophercloud.ServiceClient, id string) GetResult {
 	var result GetResult
 	_, result.Err = client.Get(getURL(client, id), &result.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200, 203},
+		OkCodes:      []int{200, 203},
+		ErrorContext: &ServerError{id: id},
 	})
 	return result
 }
@@ -323,10 +342,8 @@ type UpdateOpts struct {
 	// The server host name will *not* change.
 	// Server names are not constrained to be unique, even within the same tenant.
 	Name string
-
 	// AccessIPv4 [optional] provides a new IPv4 address for the instance.
 	AccessIPv4 string
-
 	// AccessIPv6 [optional] provides a new IPv6 address for the instance.
 	AccessIPv6 string
 }
@@ -351,7 +368,8 @@ func Update(client *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder
 	var result UpdateResult
 	reqBody := opts.ToServerUpdateMap()
 	_, result.Err = client.Put(updateURL(client, id), reqBody, &result.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200},
+		OkCodes:      []int{200},
+		ErrorContext: &ServerError{id: id},
 	})
 	return result
 }
@@ -367,7 +385,9 @@ func ChangeAdminPassword(client *gophercloud.ServiceClient, id, newPassword stri
 	req.ChangePassword.AdminPass = newPassword
 
 	var res ActionResult
-	_, res.Err = client.Post(actionURL(client, id), req, nil, nil)
+	_, res.Err = client.Post(actionURL(client, id), req, nil, &gophercloud.RequestOpts{
+		ErrorContext: &ServerError{id: id},
+	})
 	return res
 }
 
@@ -423,10 +443,15 @@ func Reboot(client *gophercloud.ServiceClient, id string, how RebootMethod) Acti
 	var res ActionResult
 
 	if (how != SoftReboot) && (how != HardReboot) {
-		res.Err = &ErrArgument{
-			Function: "Reboot",
-			Argument: "how",
-			Value:    how,
+
+		res.Err = &ErrInvalidHowParameterProvided{
+			&gophercloud.InvalidInputError{
+				BaseError: gophercloud.BaseError{
+					Function: "servers.Reboot",
+				},
+				Argument: "how",
+				Value:    how,
+			},
 		}
 		return res
 	}
@@ -437,7 +462,9 @@ func Reboot(client *gophercloud.ServiceClient, id string, how RebootMethod) Acti
 		map[string]string{"type": string(how)},
 	}
 
-	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, nil)
+	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
+		ErrorContext: &ServerError{id: id},
+	})
 	return res
 }
 
@@ -479,11 +506,25 @@ func (opts RebuildOpts) ToServerRebuildMap() (map[string]interface{}, error) {
 	server := make(map[string]interface{})
 
 	if opts.AdminPass == "" {
-		err = fmt.Errorf("AdminPass is required")
+		err = &ErrNoAdminPassProvided{
+			&gophercloud.InvalidInputError{
+				BaseError: gophercloud.BaseError{
+					Function: "servers.Rebuild",
+				},
+				Argument: "AdminPass",
+			},
+		}
 	}
 
 	if opts.ImageID == "" {
-		err = fmt.Errorf("ImageID is required")
+		err = &ErrNoImageIDProvided{
+			&gophercloud.InvalidInputError{
+				BaseError: gophercloud.BaseError{
+					Function: "servers.Rebuild",
+				},
+				Argument: "ImageID",
+			},
+		}
 	}
 
 	if err != nil {
@@ -519,7 +560,14 @@ func Rebuild(client *gophercloud.ServiceClient, id string, opts RebuildOptsBuild
 	var result RebuildResult
 
 	if id == "" {
-		result.Err = fmt.Errorf("ID is required")
+		result.Err = &ErrNoIDProvided{
+			&gophercloud.InvalidInputError{
+				BaseError: gophercloud.BaseError{
+					Function: "servers.Rebuild",
+				},
+				Argument: "id",
+			},
+		}
 		return result
 	}
 
@@ -529,7 +577,9 @@ func Rebuild(client *gophercloud.ServiceClient, id string, opts RebuildOptsBuild
 		return result
 	}
 
-	_, result.Err = client.Post(actionURL(client, id), reqBody, &result.Body, nil)
+	_, result.Err = client.Post(actionURL(client, id), reqBody, &result.Body, &gophercloud.RequestOpts{
+		ErrorContext: &ServerError{id: id},
+	})
 	return result
 }
 
@@ -570,7 +620,9 @@ func Resize(client *gophercloud.ServiceClient, id string, opts ResizeOptsBuilder
 		return res
 	}
 
-	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, nil)
+	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
+		ErrorContext: &ServerError{id: id},
+	})
 	return res
 }
 
@@ -581,7 +633,8 @@ func ConfirmResize(client *gophercloud.ServiceClient, id string) ActionResult {
 
 	reqBody := map[string]interface{}{"confirmResize": nil}
 	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
-		OkCodes: []int{201, 202, 204},
+		OkCodes:      []int{201, 202, 204},
+		ErrorContext: &ServerError{id: id},
 	})
 	return res
 }
@@ -591,7 +644,9 @@ func ConfirmResize(client *gophercloud.ServiceClient, id string) ActionResult {
 func RevertResize(client *gophercloud.ServiceClient, id string) ActionResult {
 	var res ActionResult
 	reqBody := map[string]interface{}{"revertResize": nil}
-	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, nil)
+	_, res.Err = client.Post(actionURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
+		ErrorContext: &ServerError{id: id},
+	})
 	return res
 }
 
@@ -624,7 +679,14 @@ func Rescue(client *gophercloud.ServiceClient, id string, opts RescueOptsBuilder
 	var result RescueResult
 
 	if id == "" {
-		result.Err = fmt.Errorf("ID is required")
+		result.Err = &ErrNoIDProvided{
+			&gophercloud.InvalidInputError{
+				BaseError: gophercloud.BaseError{
+					Function: "servers.Rescue",
+				},
+				Argument: "id",
+			},
+		}
 		return result
 	}
 	reqBody, err := opts.ToServerRescueMap()
@@ -634,7 +696,8 @@ func Rescue(client *gophercloud.ServiceClient, id string, opts RescueOptsBuilder
 	}
 
 	_, result.Err = client.Post(actionURL(client, id), reqBody, &result.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200},
+		OkCodes:      []int{200},
+		ErrorContext: &ServerError{id: id},
 	})
 
 	return result

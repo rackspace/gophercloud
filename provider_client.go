@@ -3,7 +3,6 @@ package gophercloud
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -88,35 +87,19 @@ type RequestOpts struct {
 	// RawBody contains an io.ReadSeeker that will be consumed by the request directly. No content-type
 	// will be set unless one is provided explicitly by MoreHeaders.
 	RawBody io.ReadSeeker
-
 	// JSONResponse, if provided, will be populated with the contents of the response body parsed as
 	// JSON.
 	JSONResponse interface{}
 	// OkCodes contains a list of numeric HTTP status codes that should be interpreted as success. If
 	// the response has a different code, an error will be returned.
 	OkCodes []int
-
 	// MoreHeaders specifies additional HTTP headers to be provide on the request. If a header is
 	// provided with a blank value (""), that header will be *omitted* instead: use this to suppress
 	// the default Accept header or an inferred Content-Type, for example.
 	MoreHeaders map[string]string
-}
-
-// UnexpectedResponseCodeError is returned by the Request method when a response code other than
-// those listed in OkCodes is encountered.
-type UnexpectedResponseCodeError struct {
-	URL      string
-	Method   string
-	Expected []int
-	Actual   int
-	Body     []byte
-}
-
-func (err *UnexpectedResponseCodeError) Error() string {
-	return fmt.Sprintf(
-		"Expected HTTP response code %v when accessing [%s %s], but got %d instead\n%s",
-		err.Expected, err.Method, err.URL, err.Actual, err.Body,
-	)
+	// ErrorType specifies the resource error type to return if an error is encountered.
+	// This lets resources override default error messages based on the response status code.
+	ErrorContext error
 }
 
 var applicationJSON = "application/json"
@@ -183,22 +166,6 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 		return nil, err
 	}
 
-	if resp.StatusCode == http.StatusUnauthorized {
-		if client.ReauthFunc != nil {
-			err = client.ReauthFunc()
-			if err != nil {
-				return nil, fmt.Errorf("Error trying to re-authenticate: %s", err)
-			}
-			if options.RawBody != nil {
-				options.RawBody.Seek(0, 0)
-			}
-			resp, err = client.Request(method, url, options)
-			if err != nil {
-				return nil, fmt.Errorf("Successfully re-authenticated, but got error executing request: %s", err)
-			}
-		}
-	}
-
 	// Allow default OkCodes if none explicitly set
 	if options.OkCodes == nil {
 		options.OkCodes = defaultOkCodes(method)
@@ -215,13 +182,90 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 	if !ok {
 		body, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
-		return resp, &UnexpectedResponseCodeError{
+		respErr := &UnexpectedResponseCodeError{
+			BaseError: BaseError{
+				Function: "*ProviderClient.Request",
+			},
 			URL:      url,
 			Method:   method,
 			Expected: options.OkCodes,
 			Actual:   resp.StatusCode,
 			Body:     body,
 		}
+
+		errType := options.ErrorContext
+		switch resp.StatusCode {
+		case http.StatusBadRequest:
+			err = defaultError400{respErr}
+			if error400er, ok := errType.(Error400er); ok {
+				err = error400er.Error400(respErr)
+			}
+		case http.StatusUnauthorized:
+			if client.ReauthFunc != nil {
+				err = client.ReauthFunc()
+				if err != nil {
+					return nil, &ErrUnableToReauthenticate{
+						BaseError: &BaseError{
+							Function: "*ProviderClient.Request",
+						},
+						OriginalError: err,
+					}
+				}
+				if options.RawBody != nil {
+					options.RawBody.Seek(0, 0)
+				}
+				resp, err = client.Request(method, url, options)
+				if err != nil {
+					return nil, &ErrErrorAfterReauthentication{
+						BaseError: &BaseError{
+							Function: "*ProviderClient.Request",
+						},
+						OriginalError: err,
+					}
+				}
+				return resp, nil
+			}
+			err = defaultError401{respErr}
+			if error401er, ok := errType.(Error401er); ok {
+				err = error401er.Error401(respErr)
+			}
+		case http.StatusNotFound:
+			err = defaultError404{respErr}
+			if error404er, ok := errType.(Error404er); ok {
+				err = error404er.Error404(respErr)
+			}
+		case http.StatusMethodNotAllowed:
+			err = defaultError405{respErr}
+			if error405er, ok := errType.(Error405er); ok {
+				err = error405er.Error405(respErr)
+			}
+		case http.StatusRequestTimeout:
+			err = defaultError408{respErr}
+			if error408er, ok := errType.(Error408er); ok {
+				err = error408er.Error408(respErr)
+			}
+		case 429:
+			err = defaultError429{respErr}
+			if error429er, ok := errType.(Error429er); ok {
+				err = error429er.Error429(respErr)
+			}
+		case http.StatusInternalServerError:
+			err = defaultError500{respErr}
+			if error500er, ok := errType.(Error500er); ok {
+				err = error500er.Error500(respErr)
+			}
+		case http.StatusServiceUnavailable:
+			err = defaultError503{respErr}
+			if error503er, ok := errType.(Error503er); ok {
+				err = error503er.Error503(respErr)
+			}
+		}
+
+		if err == nil {
+			err = respErr
+		}
+
+		return resp, err
 	}
 
 	// Parse the response body as JSON, if requested to do so.

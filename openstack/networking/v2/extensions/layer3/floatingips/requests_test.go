@@ -111,11 +111,6 @@ func TestRequiredFieldsForCreate(t *testing.T) {
 	if res1.Err == nil {
 		t.Fatalf("Expected error, got none")
 	}
-
-	res2 := Create(fake.ServiceClient(), CreateOpts{FloatingNetworkID: "foo", PortID: ""})
-	if res2.Err == nil {
-		t.Fatalf("Expected error, got none")
-	}
 }
 
 func TestCreate(t *testing.T) {

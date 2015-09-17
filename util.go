@@ -1,7 +1,6 @@
 package gophercloud
 
 import (
-	"errors"
 	"strings"
 	"time"
 )
@@ -18,7 +17,11 @@ func WaitFor(timeout int, predicate func() (bool, error)) error {
 
 		// If a timeout is set, and that's been exceeded, shut it down
 		if timeout >= 0 && time.Now().Second()-start >= timeout {
-			return errors.New("A timeout occurred")
+			return &ErrTimeOut{
+				&BaseError{
+					Function: "gophercloud.WaitFor",
+				},
+			}
 		}
 
 		// Execute the function

@@ -111,8 +111,9 @@ func Create(c *gophercloud.ServiceClient, containerName string, opts CreateOptsB
 	}
 
 	resp, err := c.Request("PUT", createURL(c, containerName), gophercloud.RequestOpts{
-		MoreHeaders: h,
-		OkCodes:     []int{201, 202, 204},
+		MoreHeaders:  h,
+		OkCodes:      []int{201, 202, 204},
+		ErrorContext: &ContainerError{},
 	})
 	if resp != nil {
 		res.Header = resp.Header
@@ -124,7 +125,9 @@ func Create(c *gophercloud.ServiceClient, containerName string, opts CreateOptsB
 // Delete is a function that deletes a container.
 func Delete(c *gophercloud.ServiceClient, containerName string) DeleteResult {
 	var res DeleteResult
-	_, res.Err = c.Delete(deleteURL(c, containerName), nil)
+	_, res.Err = c.Delete(deleteURL(c, containerName), &gophercloud.RequestOpts{
+		ErrorContext: &ContainerError{name: containerName},
+	})
 	return res
 }
 
@@ -179,8 +182,9 @@ func Update(c *gophercloud.ServiceClient, containerName string, opts UpdateOptsB
 	}
 
 	resp, err := c.Request("POST", updateURL(c, containerName), gophercloud.RequestOpts{
-		MoreHeaders: h,
-		OkCodes:     []int{201, 202, 204},
+		MoreHeaders:  h,
+		OkCodes:      []int{201, 202, 204},
+		ErrorContext: &ContainerError{name: containerName},
 	})
 	if resp != nil {
 		res.Header = resp.Header
@@ -195,7 +199,8 @@ func Update(c *gophercloud.ServiceClient, containerName string, opts UpdateOptsB
 func Get(c *gophercloud.ServiceClient, containerName string) GetResult {
 	var res GetResult
 	resp, err := c.Request("HEAD", getURL(c, containerName), gophercloud.RequestOpts{
-		OkCodes: []int{200, 204},
+		OkCodes:      []int{200, 204},
+		ErrorContext: &ContainerError{name: containerName},
 	})
 	if resp != nil {
 		res.Header = resp.Header

@@ -1,7 +1,6 @@
 package tokens
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/rackspace/gophercloud"
@@ -129,7 +128,7 @@ func TestRequireUsername(t *testing.T) {
 		Password: "thing",
 	}
 
-	tokenPostErr(t, options, fmt.Errorf("You must provide either username/password or tenantID/token values."))
+	tokenPostErr(t, options, &ErrUsernameOrTenantIDRequired{&gophercloud.BaseError{Function: "AuthOptions.ToTokenCreateMap"}})
 }
 
 func TestRequirePassword(t *testing.T) {
@@ -137,5 +136,5 @@ func TestRequirePassword(t *testing.T) {
 		Username: "me",
 	}
 
-	tokenPostErr(t, options, ErrPasswordRequired)
+	tokenPostErr(t, options, &ErrNoPassword{&gophercloud.BaseError{Function: "AuthOptions.ToTokenCreateMap"}})
 }
