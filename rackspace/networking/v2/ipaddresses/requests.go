@@ -90,7 +90,7 @@ func (opts CreateOpts) ToSharedIPCreateMap() (map[string]interface{}, error) {
 	return map[string]interface{}{"ip_address": v}, nil
 }
 
-// Create will provision a new shapred IP address based on the values in CreateOpts. To extract
+// Create will provision a new shared IP address based on the values in CreateOpts. To extract
 // the IPAddress object from the response, call the Extract method on the
 // CreateResult.
 func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateResult {
