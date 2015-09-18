@@ -7,11 +7,23 @@ title: Getting Started with Compute v2
 * [Flavors](#flavors)
   * [List flavors](#list-flavors)
   * [Get flavor](#get-flavor)
+  * [Get flavor ID](#get-flavor-id)
 * [Images](#images)
   * [List images](#list-images)
   * [Get image](#get-image)
+  * [Get image ID](#get-image-id)
   * [Delete image](#delete-image)
+* [Key Pairs](#keypairs)
+  * [Create a Key Pair](#create-keypair)
+  * [Delete a Key Pair](#delete-keypair)
+* [Security Groups](#secgroups)
+  * [Create a Security Group](#create-secgroup)
+  * [Delete a Security Group](#delete-secgroup)
+* [Server Groups](#servergroups)
+  * [Create a Server Group](#create-servergroup)
+  * [Delete a Server Group](#delete-servergroup)
 * [Servers](#servers)
+  * [Create a server](#create-server)
   * [List servers](#list-servers)
   * [Get server](#get-server)
   * [Update server](#update-server)
@@ -21,6 +33,11 @@ title: Getting Started with Compute v2
   * [Resize](#resize)
   * [Confirm resize](#confirm)
   * [Revert resize](#revert)
+  * [Start](#start-server)
+  * [Stop](#stop-server)
+  * [Boot from volume](#boot-from-volume)
+  * [Scheduler Hints](#schedulerhints)
+* [More](#more)
 * [Providers](#providers)
   * [Rackspace](#rackspace)
 
@@ -87,6 +104,15 @@ string form. You receive back a `flavors.Flavor` struct with `ID`, `Disk`, `RAM`
 flavor, err := flavors.Get(client, "flavor_id").Extract()
 {% endhighlight %}
 
+### <a name="get-flavor-id"></a>Get a flavor ID from a flavor Name
+
+You can look up the ID of a flavor by using its human-readable name.
+
+{% highlight go %}
+// Get back a flavor ID string
+flavorID, err := flavors.IDFromName(client, "flavor_name").Extract()
+{% endhighlight %}
+
 # <a name="images"></a>Images
 
 An image is the operating system for a VM - a collection of files used to
@@ -130,16 +156,134 @@ string form. You receive back an `images.Image` struct with `ID`, `Created`, `Mi
 image, err := images.Get(client, "image_id").Extract()
 {% endhighlight %}
 
+### <a name="get-image-id"></a>Get an image ID from an image Name
+
+You can look up the ID of an image by using its human-readable name.
+
+{% highlight go %}
+// Get back an image ID string
+imageID, err := images.IDFromName(client, "image_name").Extract()
+{% endhighlight %}
+
 ### <a name="delete-image"></a>Delete an image
 
 {% highlight go %}
 res := images.Delete(client, "image_id")
 {% endhighlight %}
 
+# <a name="keypairs"></a>Key Pairs
+
+### <a name="create-keypair"></a>Create a Key Pair
+
+{% highlight go %}
+import (
+  "crypto/rand"
+  "crypto/rsa"
+
+  "github.com/rackspace/gophercloud/openstack/compute/v2/extensions/keypairs"
+
+  "golang.org/x/crypto/ssh"
+)
+
+privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+publicKey := privateKey.PublicKey
+pub, err := ssh.NewPublicKey(&publicKey)
+pubBytes := ssh.MarshalAuthorizedKey(pub)
+pk := string(pubBytes)
+
+kp, err := keypairs.Create(client, keypairs.CreateOpts{
+  Name:      "keypair_name",
+  PublicKey: pk,
+}).Extract()
+{% endhighlight %}
+
+
+### <a name="delete-keypair"></a>Delete a Key Pair
+
+{% highlight go %}
+err := keypairs.Delete(client, "keypair_name").ExtractErr()
+{% endhighlight %}
+
+# <a name="secgroups"></a>Security Groups
+
+### <a name="create-secgroup"></a>Create a Security Group
+
+{% highlight go %}
+import (
+  "github.com/rackspace/gophercloud/openstack/compute/v2/extensions/secgroups"
+)
+
+opts := secgroups.CreateOpts{
+  Name:        "MySecGroup",
+  Description: "something",
+}
+
+group, err := secgroups.Create(client, opts).Extract()
+
+opts := secgroups.CreateRuleOpts{
+  ParentGroupID: group.ID,
+  FromPort:      22,
+  ToPort:        22,
+  IPProtocol:    "TCP",
+  CIDR:          "0.0.0.0/0",
+}
+
+rule, err := secgroups.CreateRule(client, opts).Extract()
+{% endhighlight %}
+
+### <a name="delete-secgroup"></a>Delete a Security Group
+
+{% highlight go %}
+err := secgroups.Delete(client, group.ID).ExtractErr()
+{% endhighlight %}
+
+# <a name="servergroups"></a>Server Groups
+
+### <a name="create-servergroup"></a>Create a Server Group
+
+{% highlight go %}
+import (
+  "github.com/rackspace/gophercloud/openstack/compute/v2/extensions/servergroups"
+)
+
+sg, err := servergroups.Create(computeClient, &servergroups.CreateOpts{
+  Name:     "test",
+  Policies: []string{"affinity"},
+}).Extract()
+
+`Policies` can either be `affinity` or `anti-affinity`.
+
+{% endhighlight %}
+
+### <a name="delete-servergroup"></a>Delete a Server Group
+
+{% highlight go %}
+err := servergroups.Delete(computeClient, "servergroup_id").ExtractErr()
+{% endhighlight %}
+
 # <a name="servers"></a>Servers
 
 A server is either a virtual machine (VM) instance or a physical device
 managed by the compute system.
+
+### <a name="create-server"></a>Create a server
+
+To create a server with a minimal configuration, do:
+
+{% highlight go %}
+server, err := servers.Create(client, servers.CreateOpts{
+  Name:      name,
+  FlavorName: "flavor_name",
+  ImageName: "image_name",
+}).Extract()
+if err != nil {
+  fmt.Println("Unable to create server: %s", err)
+}
+fmt.Println("Server ID: %s", server.ID)
+{% endhighlight %}
+
+See the [Go Documentation](http://godoc.org/github.com/rackspace/gophercloud/openstack/compute/v2/servers)
+for a full list of Create options.
 
 ### <a name="list-servers"></a>List all available servers
 
@@ -244,7 +388,90 @@ result := servers.ConfirmResize(client, "server_id")
 result := servers.RevertResize(client, "server_id")
 {% endhighlight %}
 
-## <a name="providers"></a>Providers
+### <a name="stop-server"></a>Stop a Server
+
+{% highlight go %}
+import (
+  "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+  "github.com/rackspace/gophercloud/openstack/compute/v2/extensions/startstop"
+)
+
+err := startstop.Stop(client, "server_id").ExtractErr()
+{% endhighlight %}
+
+### <a name="start-server"></a>Start a Server
+
+{% highlight go %}
+import (
+  "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+  "github.com/rackspace/gophercloud/openstack/compute/v2/extensions/startstop"
+)
+
+err := startstop.Start(client, "server_id").ExtractErr()
+{% endhighlight %}
+
+
+### <a name="boot-from-volume"></a>Boot from a Volume
+
+{% highlight go %}
+import (
+  "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+  "github.com/rackspace/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
+)
+
+bd := []bootfromvolume.BlockDevice{
+  bootfromvolume.BlockDevice{
+    UUID:       "image_id",
+    SourceType: bootfromvolume.Image,
+    VolumeSize: 10,
+  },
+}
+
+serverCreateOpts := servers.CreateOpts{
+  Name:      name,
+  FlavorRef: "flavor_id",
+}
+server, err := bootfromvolume.Create(client, bootfromvolume.CreateOptsExt{
+  serverCreateOpts,
+  bd,
+}).Extract()
+{% endhighlight %}
+
+### <a name="schedulerhints"></a>Scheduler Hints
+
+{% highlight go %}
+import (
+  "github.com/rackspace/gophercloud"
+  "github.com/rackspace/gophercloud/openstack/compute/v2/extensions/schedulerhints"
+  "github.com/rackspace/gophercloud/openstack/compute/v2/extensions/servergroups"
+  "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+)
+
+sg, err := servergroups.Create(computeClient, &servergroups.CreateOpts{
+  Name:     "test",
+  Policies: []string{"affinity"},
+}).Extract()
+
+serverCreateOpts := servers.CreateOpts{
+  Name:      name,
+  FlavorName: "flavor_name",
+  ImageName:  "image_name",
+}
+server, err := servers.Create(computeClient, schedulerhints.CreateOptsExt{
+  serverCreateOpts,
+  schedulerhints.SchedulerHints{
+    Group: sg.ID,
+  },
+}).Extract()
+{% endhighlight %}
+
+# <a name="more"></a>More
+
+It's possible for a new feature or action to be added before the documentation is updated.
+Check the [extensions](http://godoc.org/github.com/rackspace/gophercloud/openstack/compute/v2/extensions)
+directory for a full list of Compute extensions.
+
+# <a name="providers"></a>Providers
 
 ### <a name="rackspace"></a>Rackspace
 
