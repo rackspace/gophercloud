@@ -129,6 +129,16 @@ type Link struct {
 	Rel  string `mapstructure:"rel"`
 }
 
+// PrettyPrintJSON creates a string containing the links as
+// pretty-printed JSON. It is useful for displaying the results.
+func (link Link) PrettyPrintJSON() string {
+	pretty, err := json.MarshalIndent(link, "", "  ")
+	if err != nil {
+		panic(err.Error())
+	}
+	return string(pretty)
+}
+
 /*
 ExtractNextURL is an internal function useful for packages of collection
 resources that are paginated in a certain way.
