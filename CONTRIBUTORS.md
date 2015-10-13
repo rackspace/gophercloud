@@ -10,4 +10,5 @@ Contributors
 | Ash Wilson | <ash.wilson@rackspace.com>
 | Jamie Hannaford | <jamie.hannaford@rackspace.com>
 | Don Schenck | don.schenck@rackspace.com>
+| Gaurav Bajaj | gaurav.bajaj@rackspace.com>
 | Joe Topjian | <joe@topjian.net>

@@ -212,3 +212,13 @@ func NewRackConnectV3(client *gophercloud.ProviderClient, eo gophercloud.Endpoin
 	}
 	return &gophercloud.ServiceClient{ProviderClient: client, Endpoint: url}, nil
 }
+
+// NewRackMetricsV2 creates a ServiceClient that may be used to access the v2 Rackspace metrics service.
+func NewRackMetricsV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+	eo.ApplyDefaults("rax:cloudmetrics")
+	url, err := client.EndpointLocator(eo)
+	if err != nil {
+		return nil, err
+	}
+	return &gophercloud.ServiceClient{ProviderClient: client, Endpoint: url}, nil
+}
