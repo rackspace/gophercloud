@@ -24,6 +24,15 @@ const (
 	MIN1440 = "min1440"
 )
 
+type ListOpts struct {
+	From       int64 `q:"from"`
+	To         int64 `q:"to"`
+	Points     int32  `q:"points"`
+	Resolution string `q:"resolution"`
+	Select     string `q:"select"`
+}
+
+
 // GetDataForListByPoints retrieve data against a list of metrics and number of points, for the specified tenant associated with RackspaceMetrics.
 func GetDataForListByPoints(c *gophercloud.ServiceClient, from int64, to int64, points int32, metrics ...string) (MetricListData, error) {
 	var res GetResult
