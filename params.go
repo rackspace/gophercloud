@@ -63,6 +63,7 @@ func MaybeInt(original int) *int {
 var t time.Time
 
 func isZero(v reflect.Value) bool {
+
 	switch v.Kind() {
 	case reflect.Func, reflect.Map, reflect.Slice:
 		return v.IsNil()
@@ -140,7 +141,7 @@ func BuildQueryString(opts interface{}) (*url.URL, error) {
 					switch v.Kind() {
 					case reflect.String:
 						params.Add(tags[0], v.String())
-					case reflect.Int:
+					case reflect.Int, reflect.Int32, reflect.Int64:
 						params.Add(tags[0], strconv.FormatInt(v.Int(), 10))
 					case reflect.Bool:
 						params.Add(tags[0], strconv.FormatBool(v.Bool()))
@@ -165,7 +166,6 @@ func BuildQueryString(opts interface{}) (*url.URL, error) {
 				}
 			}
 		}
-
 		return &url.URL{RawQuery: params.Encode()}, nil
 	}
 	// Return an error if the underlying type of 'opts' isn't a struct.

@@ -103,8 +103,13 @@ func TestGetDataForListByPoints(t *testing.T) {
 		},
 	}
 
+	queryParams := QueryParams{
+		From: 1444354736000,
+		To: 1444602340000,
+		Points: 3,
+	}
 	// Actual metric data when queried using list of metrics.
-	actualMetrics, err := GetDataForListByPoints(fake.ServiceClient(), 1444354736000, 1444602340000, 3,
+	actualMetrics, err := GetDataForListByPoints(fake.ServiceClient(), queryParams,
 		"rollup00.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.RollupService.Rollup-Execution-Timer.count",
 		"rollup01.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.RollupService.Rollup-Execution-Timer.count")
 	th.AssertNoErr(t, err)
@@ -224,8 +229,14 @@ func TestGetDataForListByResolution(t *testing.T) {
 		},
 	}
 
+	queryParams := QueryParams{
+		From: 1444354736000,
+		To: 1444602340000,
+		Resolution: MIN1440,
+	}
+
 	// Actual metric data when queried using list of metrics.
-	actualMetrics, err := GetDataForListByResolution(fake.ServiceClient(), 1444354736000, 1444602340000, MIN1440,
+	actualMetrics, err := GetDataForListByResolution(fake.ServiceClient(), queryParams,
 		"rollup02.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.RollupService.Rollup-Execution-Timer.count",
 		"rollup03.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.RollupService.Rollup-Execution-Timer.count")
 	th.AssertNoErr(t, err)
@@ -482,33 +493,59 @@ func TestGetDataByPoints(t *testing.T) {
 		},
 	}
 
+	queryParamsFor5Points := QueryParams{
+		From: 1444354736000,
+		To: 1444602340000,
+		Points: 5,
+	}
+
 	//Actual Metric data for 5 points.
-	actualMetricDataFor5Points, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, 1444354736000, 1444355736000, 5).GetMetricsData()
+	actualMetricDataFor5Points, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, queryParamsFor5Points).GetMetricsData()
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedMetricDataFor5Points, actualMetricDataFor5Points)
 
 	//Actual metric values (part of metric data) for 5 points.
-	actualValuesFor5Points, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, 1444354736000, 1444355736000, 5).GetValues()
+	actualValuesFor5Points, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, queryParamsFor5Points).GetValues()
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedValuesFor5Points, actualValuesFor5Points)
 
 	//Actual metadata (part of metric data) for 5 points.
-	actualMetaDataFor5Points, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, 1444354736000, 1444355736000, 5).ExtractMetadata()
+	actualMetaDataFor5Points, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, queryParamsFor5Points).ExtractMetadata()
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedMetaDataFor5Points, actualMetaDataFor5Points)
 
+	queryParamsFor2Points := QueryParams{
+		From: 1444354736000,
+		To: 1444602340000,
+		Points: 2,
+	}
+
 	//Actual Metric data for 2 points.
-	actualMetricDataFor2Points, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, 1444354736000, 1444355736000, 2).GetMetricsData()
+	actualMetricDataFor2Points, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, queryParamsFor2Points).GetMetricsData()
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedMetricDataFor2Points, actualMetricDataFor2Points)
 
+	queryParamsFor2PointsWithMax := QueryParams{
+		From: 1444354736000,
+		To: 1444602340000,
+		Points:2,
+		Select: []string{MAX},
+	}
+
 	//Actual Metric data for 2 points with "max" as select param.
-	actualMetricDataFor2PointsWithMaxSelectParam, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, 1444354736000, 1444355736000, 2, MAX).GetMetricsData()
+	actualMetricDataFor2PointsWithMaxSelectParam, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, queryParamsFor2PointsWithMax).GetMetricsData()
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedMetricDataFor2PointsWithMaxSelectParam, actualMetricDataFor2PointsWithMaxSelectParam)
 
+	queryParamsFor2PointsWithMin := QueryParams{
+		From: 1444354736000,
+		To: 1444602340000,
+		Points:2,
+		Select: []string{MIN},
+	}
+
 	//Actual Metric data for 2 points with "min" as select param.
-	actualMetricDataFor2PointsWithMinSelectParam, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, 1444354736000, 1444355736000, 2, MIN).GetMetricsData()
+	actualMetricDataFor2PointsWithMinSelectParam, err := GetDataByPoints(fake.ServiceClient(), DUMMY_METRIC, queryParamsFor2PointsWithMin).GetMetricsData()
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedMetricDataFor2PointsWithMinSelectParam, actualMetricDataFor2PointsWithMinSelectParam)
 }
@@ -631,13 +668,26 @@ func TestGetDataByResolution(t *testing.T) {
 		},
 	}
 
-	//Actual Metric data for 5 points.
-	actualMetricDataFor5Points, err := GetDataByResolution(fake.ServiceClient(), DUMMY_METRIC, 1444354736000, 1444355736000, MIN1440).GetMetricsData()
+	queryParamsForMin1440Resolution := QueryParams{
+		From: 1444354736000,
+		To: 1444355736000,
+		Resolution: MIN1440,
+	}
+
+	//Actual Metric data for Min1440.
+	actualMetricDataFor5Points, err := GetDataByResolution(fake.ServiceClient(), DUMMY_METRIC, queryParamsForMin1440Resolution).GetMetricsData()
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedMetricDataForMin1440, actualMetricDataFor5Points)
 
-	//Actual Metric data for 5 points with "max" as select param..
-	actualMetricDataFor5PointsWithMinSelectParam, err := GetDataByResolution(fake.ServiceClient(), DUMMY_METRIC, 1444354736000, 1444355736000, MIN1440, MIN).GetMetricsData()
+	queryParamsForMin1440ResolutionWithMinSelect := QueryParams{
+		From: 1444354736000,
+		To: 1444355736000,
+		Resolution: MIN1440,
+		Select:[]string{MIN},
+	}
+
+	//Actual Metric data for Min1440 with "max" as select param..
+	actualMetricDataFor5PointsWithMinSelectParam, err := GetDataByResolution(fake.ServiceClient(), DUMMY_METRIC, queryParamsForMin1440ResolutionWithMinSelect).GetMetricsData()
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedMetricDataForMin1440WithMinSelectParam, actualMetricDataFor5PointsWithMinSelectParam)
 }
@@ -687,8 +737,12 @@ func TestSearchMetric(t *testing.T) {
 		},
 	}
 
+	queryParamsForSearch := QueryParams{
+		Query: "*.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.ShardStatePuller.Stats.count",
+	}
+
 	// Actual metrics received for search query.
-	actualMetrics, err := SearchMetric(fake.ServiceClient(), "*.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.ShardStatePuller.Stats.count")
+	actualMetrics, err := SearchMetric(fake.ServiceClient(), queryParamsForSearch)
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedMetrics, actualMetrics)
 }
@@ -777,13 +831,24 @@ func TestGetEvents(t *testing.T) {
 		},
 	}
 
+	queryParamsForEvents := QueryParams{
+		From: 1444354736000,
+		Until: 1444355736000,
+	}
+
 	// Actual events data received when no tag is specified.
-	actualEvents, err := GetEvents(fake.ServiceClient(), 1444354736000, 1444355736000)
+	actualEvents, err := GetEvents(fake.ServiceClient(), queryParamsForEvents)
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedEvents, actualEvents)
 
+	queryParamsForEventsWithTags := QueryParams{
+		From: 1444354736000,
+		Until: 1444355736000,
+		Tags: "Restart",
+	}
+
 	// Actual events data received when tag is specified.
-	actualEventsWithTags, err := GetEvents(fake.ServiceClient(), 1444354736000, 1444355736000, "Restart")
+	actualEventsWithTags, err := GetEvents(fake.ServiceClient(), queryParamsForEventsWithTags)
 	th.AssertNoErr(t, err)
 	th.AssertDeepEquals(t, expectedEventsWithTags, actualEventsWithTags)
 }

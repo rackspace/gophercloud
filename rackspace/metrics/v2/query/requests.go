@@ -24,23 +24,30 @@ const (
 	MIN1440 = "min1440"
 )
 
-type ListOpts struct {
+type QueryParams struct {
 	From       int64 `q:"from"`
 	To         int64 `q:"to"`
+	Until      int64 `q:"until"`
 	Points     int32  `q:"points"`
 	Resolution string `q:"resolution"`
-	Select     string `q:"select"`
+	Select     []string `q:"select"`
+	Query      string `q:"query"`
+	Tags       string `q:"tags"`
 }
 
 
 // GetDataForListByPoints retrieve data against a list of metrics and number of points, for the specified tenant associated with RackspaceMetrics.
-func GetDataForListByPoints(c *gophercloud.ServiceClient, from int64, to int64, points int32, metrics ...string) (MetricListData, error) {
+func GetDataForListByPoints(c *gophercloud.ServiceClient, opts QueryParams, metrics ...string) (MetricListData, error) {
 	var res GetResult
+
 	reqBody := make([]interface{}, len(metrics))
 	for i, v := range metrics {
 		reqBody[i] = v
 	}
-	_, res.Err = c.Post(getURLForListAndPoints(c, from, to, points), reqBody, &res.Body, &gophercloud.RequestOpts{
+	url := getURLForListAndPoints(c)
+	query, _ := gophercloud.BuildQueryString(opts)
+	url +=query.String()
+	_, res.Err = c.Post(url, reqBody, &res.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
 	b := res.Body.(interface{})
@@ -50,13 +57,17 @@ func GetDataForListByPoints(c *gophercloud.ServiceClient, from int64, to int64, 
 }
 
 // GetDataForListByResolution retrieve data against a list of metrics and specified resolution, for the specified tenant associated with RackspaceMetrics.
-func GetDataForListByResolution(c *gophercloud.ServiceClient, from int64, to int64, resolution string, metrics ...string) (MetricListData, error) {
+func GetDataForListByResolution(c *gophercloud.ServiceClient, opts QueryParams, metrics ...string) (MetricListData, error) {
 	var res GetResult
+
 	reqBody := make([]interface{}, len(metrics))
 	for i, v := range metrics {
 		reqBody[i] = v
 	}
-	_, res.Err = c.Post(getURLForListAndResolution(c, from, to, resolution), reqBody, &res.Body, &gophercloud.RequestOpts{
+	url := getURLForListAndResolution(c)
+	query, _ := gophercloud.BuildQueryString(opts)
+	url +=query.String()
+	_, res.Err = c.Post(url, reqBody, &res.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
 	b := res.Body.(interface{})
@@ -66,31 +77,36 @@ func GetDataForListByResolution(c *gophercloud.ServiceClient, from int64, to int
 }
 
 // GetDataByPoints retrieve metric data by points, for the specified tenant associated with RackspaceMetrics.
-func GetDataByPoints(c *gophercloud.ServiceClient, metric string, from int64, to int64, points int32, sel ...string) GetResult {
+func GetDataByPoints(c *gophercloud.ServiceClient, metric string, opts QueryParams) GetResult {
 	var res GetResult
-	if len(sel) >= 1 {
-		_, res.Err = c.Get(getURLForPointsWithSelect(c, metric, from, to, points, sel), &res.Body, nil)
-		return res
-	}
-	_, res.Err = c.Get(getURLForPoints(c, metric, from, to, points), &res.Body, nil)
+
+	url := getURLForPoints(c, metric)
+	query, _ := gophercloud.BuildQueryString(opts)
+	url +=query.String()
+	_, res.Err = c.Get(url, &res.Body, nil)
 	return res
 }
 
 // GetDataByPoints retrieve metric data by resolution, for the specified tenant associated with RackspaceMetrics.
-func GetDataByResolution(c *gophercloud.ServiceClient, metric string, from int64, to int64, resolution string, sel ...string) GetResult {
+func GetDataByResolution(c *gophercloud.ServiceClient, metric string, opts QueryParams) GetResult {
 	var res GetResult
-	if len(sel) >= 1 {
-		_, res.Err = c.Get(getURLForResolutionWithSelect(c, metric, from, to, resolution, sel), &res.Body, nil)
-		return res
-	}
-	_, res.Err = c.Get(getURLForResolution(c, metric, from, to, resolution), &res.Body, nil)
+
+	url := getURLForResolution(c, metric)
+	query, _ := gophercloud.BuildQueryString(opts)
+	url +=query.String()
+	_, res.Err = c.Get(url, &res.Body, nil)
 	return res
 }
 
 // SearchMetric retrieves a list of available metrics for the specified tenant associated with RackspaceMetrics.
-func SearchMetric(c *gophercloud.ServiceClient, metric string) ([]Metric, error) {
+func SearchMetric(c *gophercloud.ServiceClient, opts QueryParams) ([]Metric, error) {
 	var res GetResult
-	_, res.Err = c.Get(getSearchURL(c, metric), &res.Body, nil)
+
+	url := getSearchURL(c)
+	query, _ := gophercloud.BuildQueryString(opts)
+	url +=query.String()
+
+	_, res.Err = c.Get(url, &res.Body, nil)
 	b := res.Body.(interface{})
 	var metrics []Metric
 	err := mapstructure.Decode(b, &metrics)
@@ -98,13 +114,14 @@ func SearchMetric(c *gophercloud.ServiceClient, metric string) ([]Metric, error)
 }
 
 //GetEvents retrieves a list of events for the specified tenant associated with RackspaceMetrics.
-func GetEvents(c *gophercloud.ServiceClient, from int64, until int64, tag ...string) ([]Event, error) {
+func GetEvents(c *gophercloud.ServiceClient, opts QueryParams) ([]Event, error) {
 	var res GetResult
-	if len(tag) == 1 {
-		_, res.Err = c.Get(getEventURLForTag(c, from, until, tag[0]), &res.Body, nil)
-	} else {
-		_, res.Err = c.Get(getEventURL(c, from, until), &res.Body, nil)
-	}
+
+	url := getEventURL(c)
+	query, _ := gophercloud.BuildQueryString(opts)
+	url +=query.String()
+
+	_, res.Err = c.Get(url, &res.Body, nil)
 	b := res.Body.(interface{})
 	var events []Event
 	err := mapstructure.Decode(b, &events)
