@@ -23,88 +23,59 @@ func SendMetrics(c *gophercloud.ServiceClient, metrics []MetricData) {
 	})
 }
 
-// SendMetrics will ingest the pre aggregated metrics for the tenant associated with RackspaceMetrics.
+// SendAggregatedMetrics will ingest the pre aggregated metrics for the tenant associated with RackspaceMetrics.
 func SendAggregatedMetrics(c *gophercloud.ServiceClient, metrics AggregatedMetricData) {
-	var res PostResult
-
-	reqBody := map[string]interface{}{
-		"tenantId": metrics.TenantId,
-		"timestamp": metrics.Timestamp,
-		"counters": convertCounters(metrics.Counters),
-		"timers": convertTimers(metrics.Timers),
-		"gauges": convertGauges(metrics.Gauges),
-		"sets": convertSets(metrics.Sets),
-	}
-
-	_, res.Err = c.Post(getURLForIngestAggregatedMetrics(c), reqBody, &res.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200},
-	})
+	SendAggregatedMetricsData(c, metrics)
 }
 
-// SendMetrics will ingest the pre aggregated counter metrics for the tenant associated with RackspaceMetrics.
-func SendAggregatedCounters(c *gophercloud.ServiceClient, tenantId string, timestamp int64, Counters []Counter) {
-	var res PostResult
+// SendAggregatedCounters will ingest the pre aggregated counter metrics for the tenant associated with RackspaceMetrics.
+func SendAggregatedCounters(c *gophercloud.ServiceClient, tenantId string, timestamp int64, counters []Counter) {
 
-	counters := convertCounters(Counters)
-	reqBody := map[string]interface{}{
-		"tenantId": tenantId,
-		"timestamp": timestamp,
-		"counters": counters,
+	aggregatedMetaData := AggregatedMetricData{
+		TenantId:tenantId,
+		Timestamp:timestamp,
+		Counters:counters,
 	}
 
-	_, res.Err = c.Post(getURLForIngestAggregatedMetrics(c), reqBody, &res.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200},
-	})
+	SendAggregatedMetricsData(c, aggregatedMetaData)
 }
 
-// SendMetrics will ingest the pre aggregated timer metrics for the tenant associated with RackspaceMetrics.
-func SendAggregatedTimers(c *gophercloud.ServiceClient, tenantId string, timestamp int64, Timers []Timer) {
-	var res PostResult
-
-	timers := convertTimers(Timers)
-	reqBody := map[string]interface{}{
-		"tenantId": tenantId,
-		"timestamp": timestamp,
-		"timers": timers,
-	}
-	_, res.Err = c.Post(getURLForIngestAggregatedMetrics(c), reqBody, &res.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200},
-	})
-}
-
-// SendMetrics will ingest the pre aggregated gauge metrics for the tenant associated with RackspaceMetrics.
-func SendAggregatedGauges(c *gophercloud.ServiceClient, tenantId string, timestamp int64, Gauges []Gauge) {
-	var res PostResult
-
-	gauges := convertGauges(Gauges)
-	reqBody := map[string]interface{}{
-		"tenantId": tenantId,
-		"timestamp": timestamp,
-		"gauges": gauges,
+// SendAggregatedTimers will ingest the pre aggregated timer metrics for the tenant associated with RackspaceMetrics.
+func SendAggregatedTimers(c *gophercloud.ServiceClient, tenantId string, timestamp int64, timers []Timer) {
+	aggregatedMetaData := AggregatedMetricData{
+		TenantId:tenantId,
+		Timestamp:timestamp,
+		Timers:timers,
 	}
 
-	_, res.Err = c.Post(getURLForIngestAggregatedMetrics(c), reqBody, &res.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200},
-	})
+	SendAggregatedMetricsData(c, aggregatedMetaData)
 }
 
-// SendMetrics will ingest the pre aggregated set metrics for the tenant associated with RackspaceMetrics.
-func SendAggregatedSets(c *gophercloud.ServiceClient, tenantId string, timestamp int64, Sets []Set) {
-	var res PostResult
+// SendAggregatedGauges will ingest the pre aggregated gauge metrics for the tenant associated with RackspaceMetrics.
+func SendAggregatedGauges(c *gophercloud.ServiceClient, tenantId string, timestamp int64, gauges []Gauge) {
 
-	sets := convertSets(Sets)
-	reqBody := map[string]interface{}{
-		"tenantId": tenantId,
-		"timestamp": timestamp,
-		"sets": sets,
+	aggregatedMetaData := AggregatedMetricData{
+		TenantId:tenantId,
+		Timestamp:timestamp,
+		Gauges:gauges,
 	}
 
-	_, res.Err = c.Post(getURLForIngestAggregatedMetrics(c), reqBody, &res.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200},
-	})
+	SendAggregatedMetricsData(c, aggregatedMetaData)
 }
 
-// SendMetrics will ingest the special events for the tenant associated with RackspaceMetrics.
+// SendAggregatedSets will ingest the pre aggregated set metrics for the tenant associated with RackspaceMetrics.
+func SendAggregatedSets(c *gophercloud.ServiceClient, tenantId string, timestamp int64, sets []Set) {
+
+	aggregatedMetaData := AggregatedMetricData{
+		TenantId:tenantId,
+		Timestamp:timestamp,
+		Sets:sets,
+	}
+
+	SendAggregatedMetricsData(c, aggregatedMetaData)
+}
+
+// SendEvent will ingest the special events for the tenant associated with RackspaceMetrics.
 func SendEvent(c *gophercloud.ServiceClient, event Event) {
 	var res PostResult
 
@@ -120,86 +91,112 @@ func SendEvent(c *gophercloud.ServiceClient, event Event) {
 	})
 }
 
-func convertCounters(Counters []Counter) []map[string]interface{} {
+//To collectively send aggregated metrics.
+func SendAggregatedMetricsData(c *gophercloud.ServiceClient, aggregatedMetricData AggregatedMetricData) {
+	var res PostResult
 
-	counters := make([]map[string]interface{}, len(Counters))
-	for i := range Counters {
-		Counter := Counters[i]
-		counters[i] = map[string]interface{}{
-			"name": Counter.Name,
-			"rate": Counter.Rate,
-			"value": Counter.Value,
-		}
-	}
+	aggregatedMetricDataMap := aggregatedMetricData.ToAggregatedMetricDataMap()
 
-	return counters
+	_, res.Err = c.Post(getURLForIngestAggregatedMetrics(c), aggregatedMetricDataMap, &res.Body, &gophercloud.RequestOpts{
+		OkCodes: []int{200},
+	})
+
 }
 
-func convertTimers(Timers []Timer) []map[string]interface{} {
+//Transforms AggregatedMetricData (Struct) to Map.
+func (aggregatedMetricData AggregatedMetricData) ToAggregatedMetricDataMap() (map[string]interface{}) {
+	aggregatedMetricDataMap := make(map[string]interface{})
 
-	timers := make([]map[string]interface{}, len(Timers))
-	for i := range Timers {
-		Timer := Timers[i]
+	aggregatedMetricDataMap["tenantId"] = aggregatedMetricData.TenantId
+	aggregatedMetricDataMap["timestamp"] = aggregatedMetricData.Timestamp
 
-		Percentiles := Timer.Percentiles
-		percentiles := make(map[string]interface{}, len(Percentiles))
-		for j := range Percentiles {
-			Percentile := Percentiles[j]
-			percentiles[fmt.Sprintf("%d", Percentile.Key)] =
-			map[string]interface{}{
-				"avg": Percentile.Value.Average,
-				"max": Percentile.Value.Max,
-				"sum": Percentile.Value.Sum,
+	if aggregatedMetricData.Counters != nil {
+		Counters := aggregatedMetricData.Counters
+		counters := make([]map[string]interface{}, len(Counters))
+		for i := range Counters {
+			Counter := Counters[i]
+			counters[i] = map[string]interface{}{
+				"name": Counter.Name,
+				"rate": Counter.Rate,
+				"value": Counter.Value,
 			}
 		}
-
-		Histograms := Timer.Histograms
-		histograms := make(map[string]interface{}, len(Histograms))
-		for j := range Histograms {
-			Histogram := Histograms[j]
-			histograms["bin_"+Histogram.Bin] = Histogram.Frequency
-		}
-
-		timers[i] = map[string]interface{}{
-			"name": Timer.Name,
-			"count": Timer.Count,
-			"rate": Timer.Rate,
-			"min": Timer.Min,
-			"max": Timer.Max,
-			"sum": Timer.Sum,
-			"avg": Timer.Average,
-			"median": Timer.Median,
-			"std": Timer.Std,
-			"percentiles": percentiles,
-			"histogram": histograms,
-		}
+		aggregatedMetricDataMap["counters"] = counters
 	}
 
-	return timers
-}
+	if aggregatedMetricData.Timers != nil {
+		Timers := aggregatedMetricData.Timers
+		timers := make([]map[string]interface{}, len(Timers))
+		for i := range Timers {
+			Timer := Timers[i]
+			timer := make(map[string]interface{})
 
-func convertGauges(Gauges []Gauge) []map[string]interface{} {
+			timer["name"] = Timer.Name
+			timer["count"] = Timer.Count
+			timer["rate"] = Timer.Rate
+			timer["min"] = Timer.Min
+			timer["max"] = Timer.Max
+			timer["sum"] = Timer.Sum
+			timer["avg"] = Timer.Average
+			timer["median"] = Timer.Median
+			timer["std"] = Timer.Std
 
-	gauges := make([]map[string]interface{}, len(Gauges))
-	for i := range Gauges {
-		Gauge := Gauges[i]
-		gauges[i] = map[string]interface{}{
-			"name": Gauge.Name,
-			"value": Gauge.Value,
+			if Timer.Histograms != nil {
+
+				Histograms := Timer.Histograms
+				histograms := make(map[string]interface{}, len(Histograms))
+				for j := range Histograms {
+					Histogram := Histograms[j]
+					histograms["bin_"+Histogram.Bin] = Histogram.Frequency
+				}
+				timer["histogram"] = histograms
+			}
+
+			if Timer.Percentiles != nil {
+
+				Percentiles := Timer.Percentiles
+				percentiles := make(map[string]interface{}, len(Percentiles))
+				for j := range Percentiles {
+					Percentile := Percentiles[j]
+					percentiles[fmt.Sprintf("%d", Percentile.Key)] =
+					map[string]interface{}{
+						"avg": Percentile.Value.Average,
+						"max": Percentile.Value.Max,
+						"sum": Percentile.Value.Sum,
+					}
+				}
+				timer["percentiles"] = percentiles
+			}
+
+			timers[i] = timer
 		}
+		aggregatedMetricDataMap["timers"] = timers
 	}
-	return gauges
-}
 
-func convertSets(Sets []Set) []map[string]interface{} {
-
-	sets := make([]map[string]interface{}, len(Sets))
-	for i := range Sets {
-		Set := Sets[i]
-		sets[i] = map[string]interface{}{
-			"name": Set.Name,
-			"values": Set.Values,
+	if aggregatedMetricData.Gauges != nil {
+		Gauges := aggregatedMetricData.Gauges
+		gauges := make([]map[string]interface{}, len(Gauges))
+		for i := range Gauges {
+			Gauge := Gauges[i]
+			gauges[i] = map[string]interface{}{
+				"name": Gauge.Name,
+				"value": Gauge.Value,
+			}
 		}
+		aggregatedMetricDataMap["gauges"] = gauges
 	}
-	return sets
+
+	if aggregatedMetricData.Sets != nil {
+		Sets := aggregatedMetricData.Sets
+		sets := make([]map[string]interface{}, len(Sets))
+		for i := range Sets {
+			Set := Sets[i]
+			sets[i] = map[string]interface{}{
+				"name": Set.Name,
+				"values": Set.Values,
+			}
+		}
+		aggregatedMetricDataMap["sets"] = sets
+	}
+	return aggregatedMetricDataMap
 }
