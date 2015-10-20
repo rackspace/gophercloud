@@ -8,10 +8,10 @@ type PostResult struct {
 
 //Metric data for ingest payload.
 type MetricData struct {
-	CollectionTime int64 `mapstructure:"collectionTime"`
-	TtlInSeconds   int64 `mapstructure:"ttlInSeconds"`
-	MetricValue    float64 `mapstructure:"metricValue"`
-	MetricName     string  `mapstructure:"metricName"`
+	CollectionTime int64 `json:"collectionTime"`
+	TtlInSeconds   int64 `json:"ttlInSeconds"`
+	MetricValue    float64 `json:"metricValue"`
+	MetricName     string  `json:"metricName"`
 }
 
 //Aggregated metric data for ingest payload.
@@ -78,8 +78,8 @@ type Set struct {
 
 //Event is mostly used to send specific events so as to annotate graphs (that's one use-case).
 type Event struct {
-	What string `mapstructure:"what"`
-	When int64 `mapstructure:"when"`
-	Data string `mapstructure:"data"`
-	Tags string `mapstructure:"tags"`
+	What string `json:"what"`
+	When int64 `json:"when"`
+	Data string `json:"data"`
+	Tags string `json:"tags"`
 }

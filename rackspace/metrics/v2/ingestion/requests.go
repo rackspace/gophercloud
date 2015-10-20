@@ -3,24 +3,21 @@ package ingestion
 import (
 	"github.com/rackspace/gophercloud"
 	"fmt"
+	"encoding/json"
+	"bytes"
 )
 
 // SendMetrics will ingest the metrics for the tenant associated with RackspaceMetrics.
-func SendMetrics(c *gophercloud.ServiceClient, metrics []MetricData) {
+func SendMetrics(c *gophercloud.ServiceClient, metrics []MetricData) (PostResult, error){
 	var res PostResult
-	reqBody := make([]map[string]interface{}, len(metrics))
-	for i := range metrics {
-		Metric := metrics[i]
-		reqBody[i] = map[string]interface{}{
-			"collectionTime": Metric.CollectionTime,
-			"ttlInSeconds":Metric.TtlInSeconds,
-			"metricValue": Metric.MetricValue,
-			"metricName": Metric.MetricName,
-		}
-	}
-	_, res.Err = c.Post(getURLForIngestMetrics(c), reqBody, &res.Body, &gophercloud.RequestOpts{
+
+	reqBody, err := json.Marshal(metrics)
+
+	_, res.Err = c.Post(getURLForIngestMetrics(c), nil, &res.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
+		RawBody: bytes.NewReader(reqBody),
 	})
+	return res, err
 }
 
 // SendAggregatedMetrics will ingest the pre aggregated metrics for the tenant associated with RackspaceMetrics.
@@ -76,19 +73,16 @@ func SendAggregatedSets(c *gophercloud.ServiceClient, tenantId string, timestamp
 }
 
 // SendEvent will ingest the special events for the tenant associated with RackspaceMetrics.
-func SendEvent(c *gophercloud.ServiceClient, event Event) {
+func SendEvent(c *gophercloud.ServiceClient, event Event) (PostResult, error){
 	var res PostResult
 
-	reqBody := map[string]interface{}{
-		"what": event.What,
-		"when": event.When,
-		"tags": event.Tags,
-		"data": event.Data,
-	}
+	reqBody, err := json.Marshal(event)
 
-	_, res.Err = c.Post(getURLForIngestEvents(c), reqBody, &res.Body, &gophercloud.RequestOpts{
+	_, res.Err = c.Post(getURLForIngestEvents(c), nil, &res.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
+		RawBody: bytes.NewReader(reqBody),
 	})
+	return res, err
 }
 
 //To collectively send aggregated metrics.
