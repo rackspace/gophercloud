@@ -1,8 +1,8 @@
 package query
 
 import (
-	"github.com/rackspace/gophercloud"
 	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/gophercloud"
 )
 
 // GetResult represents the result of a Get operation.
@@ -17,10 +17,10 @@ type MetricListData struct {
 
 // MetricList is a part of MetricListData.
 type MetricList struct {
-	Unit   string `mapstructure:"unit"`
-	Metric string `mapstructure:"metric"`
+	Unit   string  `mapstructure:"unit"`
+	Metric string  `mapstructure:"metric"`
 	Data   []Value `mapstructure:"data"`
-	Type   string `mapstructure:"type"`
+	Type   string  `mapstructure:"type"`
 }
 
 // []Metric is the result for metric search query.
@@ -30,15 +30,15 @@ type Metric struct {
 
 // MetricListData represents the result of query for a metric.
 type MetricData struct {
-	Unit     string `mapstructure:"unit"`
-	Values   []Value `mapstructure:"values"`
+	Unit     string   `mapstructure:"unit"`
+	Values   []Value  `mapstructure:"values"`
 	MetaData MetaData `mapstructure:"metadata"`
 }
 
 // Value is the metric value. It is also a part of MetricListData and MetricData.
 type Value struct {
-	NumPoints int32 `mapstructure:"numPoints"`
-	TimeStamp int64 `mapstructure:"timestamp"`
+	NumPoints int32   `mapstructure:"numPoints"`
+	TimeStamp int64   `mapstructure:"timestamp"`
 	Average   float64 `mapstructure:"average"`
 	Sum       float64 `mapstructure:"sum"`
 	Max       float64 `mapstructure:"max"`
@@ -51,14 +51,14 @@ type Value struct {
 type MetaData struct {
 	Limit     string `mapstructure:"limit"`
 	Next_Href string `mapstructure:"next_href"`
-	Count     int32 `mapstructure:"count"`
+	Count     int32  `mapstructure:"count"`
 	Marker    string `mapstructure:"marker"`
 }
 
 //Event is mostly used to get specific events so as to annotate graphs (that's one use-case).
 type Event struct {
 	What string `mapstructure:"what"`
-	When int64 `mapstructure:"when"`
+	When int64  `mapstructure:"when"`
 	Data string `mapstructure:"data"`
 	Tags string `mapstructure:"tags"`
 }
@@ -70,18 +70,18 @@ type Limits struct {
 
 //Rate is a part of Limits
 type Rate struct {
-    Limit []Limit `mapstructure:"limit"`
-	Regex string `mapstructure:"regex"`
-	URI string `mapstructure:"uri"`
+	Limit []Limit `mapstructure:"limit"`
+	Regex string  `mapstructure:"regex"`
+	URI   string  `mapstructure:"uri"`
 }
 
 //Limit is a part of Rate
 type Limit struct {
 	Next_Available string `mapstructure:"next-available"`
-	Remaining int32 `mapstructure:"remaining"`
-	Unit string `mapstructure:"unit"`
-	Value int32 `mapstructure:"value"`
-	Verb string `mapstructure:"verb"`
+	Remaining      int32  `mapstructure:"remaining"`
+	Unit           string `mapstructure:"unit"`
+	Value          int32  `mapstructure:"value"`
+	Verb           string `mapstructure:"verb"`
 }
 
 // ExtractMetadata is a function that takes a GetResult (of type *http.Response)

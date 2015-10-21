@@ -1,40 +1,39 @@
 package query
 
 import (
-	"github.com/rackspace/gophercloud"
 	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/gophercloud"
 )
 
 const (
-	SUM = "sum"
-	MAX = "max"
-	MIN = "min"
-	LATEST = "latest"
+	SUM      = "sum"
+	MAX      = "max"
+	MIN      = "min"
+	LATEST   = "latest"
 	VARIANCE = "variance"
-	AVERAGE = "averge"
+	AVERAGE  = "averge"
 )
 
 //Roll-ups process full-resolution data into coarser granularities of 5 minutes, 20 minutes, 60 minutes, 4 hours and 24 hours.
 const (
-	FULL = "full"
-	MIN5 = "min5"
-	MIN20 = "min20"
-	MIN60 = "min60"
-	MIN240 = "min240"
+	FULL    = "full"
+	MIN5    = "min5"
+	MIN20   = "min20"
+	MIN60   = "min60"
+	MIN240  = "min240"
 	MIN1440 = "min1440"
 )
 
 type QueryParams struct {
-	From       int64 `q:"from"`
-	To         int64 `q:"to"`
-	Until      int64 `q:"until"`
-	Points     int32  `q:"points"`
-	Resolution string `q:"resolution"`
+	From       int64    `q:"from"`
+	To         int64    `q:"to"`
+	Until      int64    `q:"until"`
+	Points     int32    `q:"points"`
+	Resolution string   `q:"resolution"`
 	Select     []string `q:"select"`
-	Query      string `q:"query"`
-	Tags       string `q:"tags"`
+	Query      string   `q:"query"`
+	Tags       string   `q:"tags"`
 }
-
 
 // GetDataForListByPoints retrieve data against a list of metrics and number of points, for the specified tenant associated with RackspaceMetrics.
 func GetDataForListByPoints(c *gophercloud.ServiceClient, opts QueryParams, metrics ...string) (MetricListData, error) {
@@ -46,7 +45,7 @@ func GetDataForListByPoints(c *gophercloud.ServiceClient, opts QueryParams, metr
 	}
 	url := getURLForListAndPoints(c)
 	query, _ := gophercloud.BuildQueryString(opts)
-	url +=query.String()
+	url += query.String()
 	_, res.Err = c.Post(url, reqBody, &res.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
@@ -66,7 +65,7 @@ func GetDataForListByResolution(c *gophercloud.ServiceClient, opts QueryParams, 
 	}
 	url := getURLForListAndResolution(c)
 	query, _ := gophercloud.BuildQueryString(opts)
-	url +=query.String()
+	url += query.String()
 	_, res.Err = c.Post(url, reqBody, &res.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
@@ -82,7 +81,7 @@ func GetDataByPoints(c *gophercloud.ServiceClient, metric string, opts QueryPara
 
 	url := getURLForPoints(c, metric)
 	query, _ := gophercloud.BuildQueryString(opts)
-	url +=query.String()
+	url += query.String()
 	_, res.Err = c.Get(url, &res.Body, nil)
 	return res
 }
@@ -93,7 +92,7 @@ func GetDataByResolution(c *gophercloud.ServiceClient, metric string, opts Query
 
 	url := getURLForResolution(c, metric)
 	query, _ := gophercloud.BuildQueryString(opts)
-	url +=query.String()
+	url += query.String()
 	_, res.Err = c.Get(url, &res.Body, nil)
 	return res
 }
@@ -104,7 +103,7 @@ func SearchMetric(c *gophercloud.ServiceClient, opts QueryParams) ([]Metric, err
 
 	url := getSearchURL(c)
 	query, _ := gophercloud.BuildQueryString(opts)
-	url +=query.String()
+	url += query.String()
 
 	_, res.Err = c.Get(url, &res.Body, nil)
 	b := res.Body.(interface{})
@@ -119,7 +118,7 @@ func GetEvents(c *gophercloud.ServiceClient, opts QueryParams) ([]Event, error) 
 
 	url := getEventURL(c)
 	query, _ := gophercloud.BuildQueryString(opts)
-	url +=query.String()
+	url += query.String()
 
 	_, res.Err = c.Get(url, &res.Body, nil)
 	b := res.Body.(interface{})

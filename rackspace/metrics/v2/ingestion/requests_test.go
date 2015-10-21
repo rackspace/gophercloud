@@ -1,11 +1,11 @@
 package ingestion
 
 import (
-	"testing"
-	"net/http"
 	"fmt"
-	fake "github.com/rackspace/gophercloud/testhelper/client"
 	th "github.com/rackspace/gophercloud/testhelper"
+	fake "github.com/rackspace/gophercloud/testhelper/client"
+	"net/http"
+	"testing"
 )
 
 //Test for sending metrics.
@@ -46,21 +46,21 @@ func TestSendMetrics(t *testing.T) {
 	actualMetrics := []MetricData{
 		MetricData{
 			CollectionTime: 1376509892612,
-			TtlInSeconds: 172800,
-			MetricValue: 66,
-			MetricName: "example.metric.one",
+			TtlInSeconds:   172800,
+			MetricValue:    66,
+			MetricName:     "example.metric.one",
 		},
 		MetricData{
 			CollectionTime: 1376509892612,
-			TtlInSeconds: 172800,
-			MetricValue: 66,
-			MetricName: "example.metric.two",
+			TtlInSeconds:   172800,
+			MetricValue:    66,
+			MetricName:     "example.metric.two",
 		},
 		MetricData{
 			CollectionTime: 1376509892612,
-			TtlInSeconds: 172800,
-			MetricValue: 66,
-			MetricName: "example.metric.three",
+			TtlInSeconds:   172800,
+			MetricValue:    66,
+			MetricName:     "example.metric.three",
 		},
 	}
 
@@ -147,82 +147,82 @@ func TestSendAggregatedMetrics(t *testing.T) {
 	})
 
 	aggregatedMetrics := AggregatedMetricData{
-		TenantId: "5405533",
+		TenantId:  "5405533",
 		Timestamp: 1429567619000,
-		Counters : []Counter{
+		Counters: []Counter{
 			Counter{
-				Name: "sample_counter",
-				Rate:1,
-				Value:32,
+				Name:  "sample_counter",
+				Rate:  1,
+				Value: 32,
 			},
 			Counter{
-				Name: "sample_another_counter",
-				Rate:1,
-				Value:4424,
+				Name:  "sample_another_counter",
+				Rate:  1,
+				Value: 4424,
 			},
 		},
-		Timers:  []Timer{
+		Timers: []Timer{
 			Timer{
-				Name: "timer_name",
-				Count:32,
-				Rate:2.3,
-				Min:1,
-				Max:5,
-				Sum:21,
-				Average:2.1,
-				Median:3,
-				Std:1.01,
+				Name:    "timer_name",
+				Count:   32,
+				Rate:    2.3,
+				Min:     1,
+				Max:     5,
+				Sum:     21,
+				Average: 2.1,
+				Median:  3,
+				Std:     1.01,
 				Percentiles: []Percentile{
 					Percentile{
 						Key: 50,
 						Value: Value{
 							Average: 121.72972972972973,
-							Max: 241,
-							Sum: 4504,
+							Max:     241,
+							Sum:     4504,
 						},
 					},
 					Percentile{
 						Key: 75,
 						Value: Value{
 							Average: 185.94642857142858,
-							Max: 372,
-							Sum: 10413,
+							Max:     372,
+							Sum:     10413,
 						},
 					},
 				},
 				Histograms: []Histogram{
 					Histogram{
-						Bin:"50",
-						Frequency:3,
+						Bin:       "50",
+						Frequency: 3,
 					},
 					Histogram{
-						Bin:"100",
-						Frequency:5,
+						Bin:       "100",
+						Frequency: 5,
 					},
 					Histogram{
-						Bin:"inf",
-						Frequency:2,
+						Bin:       "inf",
+						Frequency: 2,
 					},
 				},
 			},
 		},
-		Gauges : []Gauge{
+		Gauges: []Gauge{
 			Gauge{
-				Name: "gauge_name",
-				Value:42,
+				Name:  "gauge_name",
+				Value: 42,
 			},
 			Gauge{
-				Name: "another_gauge",
-				Value:4343,
+				Name:  "another_gauge",
+				Value: 4343,
 			},
 		},
-		Sets : []Set{
+		Sets: []Set{
 			Set{
-				Name: "set_name",
+				Name:   "set_name",
 				Values: []string{"foo", "bar", "baz"},
 			},
 			Set{
-				Name: "another_set",
+				Name:   "another_set",
 				Values: []string{"boo", "far", "zab"},
 			},
 		},
@@ -262,14 +262,14 @@ func TestSendAggregatedCounters(t *testing.T) {
 
 	aggregatedCounters := []Counter{
 		Counter{
-			Name: "sample_counter",
-			Rate:1,
-			Value:32,
+			Name:  "sample_counter",
+			Rate:  1,
+			Value: 32,
 		},
 		Counter{
-			Name: "sample_another_counter",
-			Rate:1,
-			Value:4424,
+			Name:  "sample_another_counter",
+			Rate:  1,
+			Value: 4424,
 		},
 	}
 
@@ -327,45 +327,45 @@ func TestSendAggregatedTimers(t *testing.T) {
 
 	aggregatedTimers := []Timer{
 		Timer{
-			Name: "timer_name",
-			Count:32,
-			Rate:2.3,
-			Min:1,
-			Max:5,
-			Sum:21,
-			Average:2.1,
-			Median:3,
-			Std:1.01,
+			Name:    "timer_name",
+			Count:   32,
+			Rate:    2.3,
+			Min:     1,
+			Max:     5,
+			Sum:     21,
+			Average: 2.1,
+			Median:  3,
+			Std:     1.01,
 			Percentiles: []Percentile{
 				Percentile{
 					Key: 50,
 					Value: Value{
 						Average: 121.72972972972973,
-						Max: 241,
-						Sum: 4504,
+						Max:     241,
+						Sum:     4504,
 					},
 				},
 				Percentile{
 					Key: 75,
 					Value: Value{
 						Average: 185.94642857142858,
-						Max: 372,
-						Sum: 10413,
+						Max:     372,
+						Sum:     10413,
 					},
 				},
 			},
 			Histograms: []Histogram{
 				Histogram{
-					Bin:"50",
-					Frequency:3,
+					Bin:       "50",
+					Frequency: 3,
 				},
 				Histogram{
-					Bin:"100",
-					Frequency:5,
+					Bin:       "100",
+					Frequency: 5,
 				},
 				Histogram{
-					Bin:"inf",
-					Frequency:2,
+					Bin:       "inf",
+					Frequency: 2,
 				},
 			},
 		},
@@ -403,12 +403,12 @@ func TestSendAggregatedGauges(t *testing.T) {
 
 	aggregatedGauges := []Gauge{
 		Gauge{
-			Name: "gauge_name",
-			Value:42,
+			Name:  "gauge_name",
+			Value: 42,
 		},
 		Gauge{
-			Name: "another_gauge",
-			Value:4343,
+			Name:  "another_gauge",
+			Value: 4343,
 		},
 	}
 
@@ -444,11 +444,11 @@ func TestSendAggregatedSets(t *testing.T) {
 
 	aggregatedSets := []Set{
 		Set{
-			Name: "set_name",
+			Name:   "set_name",
 			Values: []string{"foo", "bar", "baz"},
 		},
 		Set{
-			Name: "another_set",
+			Name:   "another_set",
 			Values: []string{"boo", "far", "zab"},
 		},
 	}
@@ -476,10 +476,10 @@ func TestSendEvent(t *testing.T) {
 	})
 
 	event := Event{
-		What:"Test Event",
-		When:1441831996000,
-		Tags:"Restart",
-		Data:"Test Data",
+		What: "Test Event",
+		When: 1441831996000,
+		Tags: "Restart",
+		Data: "Test Data",
 	}
 
 	SendEvent(fake.ServiceClient(), event)

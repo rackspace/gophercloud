@@ -35,4 +35,3 @@ func getSearchURL(c *gophercloud.ServiceClient) string {
 func getLimits(c *gophercloud.ServiceClient) string {
 	return c.ServiceURL("limits")
 }
-

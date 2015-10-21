@@ -1,11 +1,11 @@
 package query
 
 import (
-	"testing"
-	"net/http"
 	"fmt"
-	fake "github.com/rackspace/gophercloud/testhelper/client"
 	th "github.com/rackspace/gophercloud/testhelper"
+	fake "github.com/rackspace/gophercloud/testhelper/client"
+	"net/http"
+	"testing"
 )
 
 const DUMMY_METRIC = "rollup01.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.RollupService.Rollup-Execution-Timer.count"
@@ -67,35 +67,35 @@ func TestGetDataForListByPoints(t *testing.T) {
 	expectedMetrics := MetricListData{
 		Metrics: []MetricList{
 			MetricList{
-				Unit: "unknown",
+				Unit:   "unknown",
 				Metric: "rollup00.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.RollupService.Rollup-Execution-Timer.count",
 				Data: []Value{
 					Value{
 						NumPoints: 2454,
 						TimeStamp: 1444435200000,
-						Average: 26603334416.81,
+						Average:   26603334416.81,
 					},
 					Value{
 						NumPoints: 2361,
 						TimeStamp: 1444521600000,
-						Average: 28768126895.46,
+						Average:   28768126895.46,
 					},
 				},
 				Type: "number",
 			},
 			MetricList{
-				Unit: "unknown",
+				Unit:   "unknown",
 				Metric: "rollup01.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.RollupService.Rollup-Execution-Timer.count",
 				Data: []Value{
 					Value{
 						NumPoints: 2304,
 						TimeStamp: 1444435200000,
-						Average: 23165844830.65,
+						Average:   23165844830.65,
 					},
 					Value{
 						NumPoints: 2116,
 						TimeStamp: 1444521600000,
-						Average: 25393982846.12,
+						Average:   25393982846.12,
 					},
 				},
 				Type: "number",
@@ -104,8 +104,8 @@ func TestGetDataForListByPoints(t *testing.T) {
 	}
 
 	queryParams := QueryParams{
-		From: 1444354736000,
-		To: 1444602340000,
+		From:   1444354736000,
+		To:     1444602340000,
 		Points: 3,
 	}
 	// Actual metric data when queried using list of metrics.
@@ -183,45 +183,45 @@ func TestGetDataForListByResolution(t *testing.T) {
 	expectedMetrics := MetricListData{
 		Metrics: []MetricList{
 			MetricList{
-				Unit: "unknown",
+				Unit:   "unknown",
 				Metric: "rollup02.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.RollupService.Rollup-Execution-Timer.count",
 				Data: []Value{
 					Value{
 						NumPoints: 2431,
 						TimeStamp: 1444348800000,
-						Average: 24496343044.07,
+						Average:   24496343044.07,
 					},
 					Value{
 						NumPoints: 2454,
 						TimeStamp: 1444435200000,
-						Average: 26603334416.81,
+						Average:   26603334416.81,
 					},
 					Value{
 						NumPoints: 2361,
 						TimeStamp: 1444521600000,
-						Average: 28768126895.46,
+						Average:   28768126895.46,
 					},
 				},
 				Type: "number",
 			},
 			MetricList{
-				Unit: "unknown",
+				Unit:   "unknown",
 				Metric: "rollup03.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.RollupService.Rollup-Execution-Timer.count",
 				Data: []Value{
 					Value{
 						NumPoints: 2241,
 						TimeStamp: 1444348800000,
-						Average: 20980428271.97,
+						Average:   20980428271.97,
 					},
 					Value{
 						NumPoints: 2304,
 						TimeStamp: 1444435200000,
-						Average: 23165844830.65,
+						Average:   23165844830.65,
 					},
 					Value{
 						NumPoints: 2116,
 						TimeStamp: 1444521600000,
-						Average: 25393982846.12,
+						Average:   25393982846.12,
 					},
 				},
 				Type: "number",
@@ -230,8 +230,8 @@ func TestGetDataForListByResolution(t *testing.T) {
 	}
 
 	queryParams := QueryParams{
-		From: 1444354736000,
-		To: 1444602340000,
+		From:       1444354736000,
+		To:         1444602340000,
 		Resolution: MIN1440,
 	}
 
@@ -376,27 +376,27 @@ func TestGetDataByPoints(t *testing.T) {
 		Unit: "unknown",
 		Values: []Value{
 			Value{
-				Average: 20015507706.50,
+				Average:   20015507706.50,
 				NumPoints: 32,
 				TimeStamp: 1444353600000,
 			},
 			Value{
-				Average: 20045095111.91,
+				Average:   20045095111.91,
 				NumPoints: 32,
 				TimeStamp: 1444354800000,
 			},
 			Value{
-				Average: 20077360883.33,
+				Average:   20077360883.33,
 				NumPoints: 33,
 				TimeStamp: 1444356000000,
 			},
 			Value{
-				Average: 20110963258.48,
+				Average:   20110963258.48,
 				NumPoints: 25,
 				TimeStamp: 1444357200000,
 			},
 			Value{
-				Average: 25588472512.28,
+				Average:   25588472512.28,
 				NumPoints: 330,
 				TimeStamp: 1444357300000,
 			},
@@ -406,27 +406,27 @@ func TestGetDataByPoints(t *testing.T) {
 	//Expected metric values (part of metric data) for 5 points.
 	expectedValuesFor5Points := []Value{
 		Value{
-			Average: 20015507706.50,
+			Average:   20015507706.50,
 			NumPoints: 32,
 			TimeStamp: 1444353600000,
 		},
 		Value{
-			Average: 20045095111.91,
+			Average:   20045095111.91,
 			NumPoints: 32,
 			TimeStamp: 1444354800000,
 		},
 		Value{
-			Average: 20077360883.33,
+			Average:   20077360883.33,
 			NumPoints: 33,
 			TimeStamp: 1444356000000,
 		},
 		Value{
-			Average: 20110963258.48,
+			Average:   20110963258.48,
 			NumPoints: 25,
 			TimeStamp: 1444357200000,
 		},
 		Value{
-			Average: 25588472512.28,
+			Average:   25588472512.28,
 			NumPoints: 330,
 			TimeStamp: 1444357300000,
 		},
@@ -445,12 +445,12 @@ func TestGetDataByPoints(t *testing.T) {
 		Unit: "unknown",
 		Values: []Value{
 			Value{
-				Average: 20015507706.50,
+				Average:   20015507706.50,
 				NumPoints: 32,
 				TimeStamp: 1444353600000,
 			},
 			Value{
-				Average: 20045095111.91,
+				Average:   20045095111.91,
 				NumPoints: 32,
 				TimeStamp: 1444354800000,
 			},
@@ -465,11 +465,11 @@ func TestGetDataByPoints(t *testing.T) {
 		Unit: "unknown",
 		Values: []Value{
 			Value{
-				Max: 20015507706.50,
+				Max:       20015507706.50,
 				TimeStamp: 1444353600000,
 			},
 			Value{
-				Max: 20045095111.91,
+				Max:       20045095111.91,
 				TimeStamp: 1444354800000,
 			},
 		},
@@ -483,19 +483,19 @@ func TestGetDataByPoints(t *testing.T) {
 		Unit: "unknown",
 		Values: []Value{
 			Value{
-				Min: 20015507706.50,
+				Min:       20015507706.50,
 				TimeStamp: 1444353600000,
 			},
 			Value{
-				Min: 20045095111.91,
+				Min:       20045095111.91,
 				TimeStamp: 1444354800000,
 			},
 		},
 	}
 
 	queryParamsFor5Points := QueryParams{
-		From: 1444354736000,
-		To: 1444602340000,
+		From:   1444354736000,
+		To:     1444602340000,
 		Points: 5,
 	}
 
@@ -515,8 +515,8 @@ func TestGetDataByPoints(t *testing.T) {
 	th.AssertDeepEquals(t, expectedMetaDataFor5Points, actualMetaDataFor5Points)
 
 	queryParamsFor2Points := QueryParams{
-		From: 1444354736000,
-		To: 1444602340000,
+		From:   1444354736000,
+		To:     1444602340000,
 		Points: 2,
 	}
 
@@ -526,9 +526,9 @@ func TestGetDataByPoints(t *testing.T) {
 	th.AssertDeepEquals(t, expectedMetricDataFor2Points, actualMetricDataFor2Points)
 
 	queryParamsFor2PointsWithMax := QueryParams{
-		From: 1444354736000,
-		To: 1444602340000,
-		Points:2,
+		From:   1444354736000,
+		To:     1444602340000,
+		Points: 2,
 		Select: []string{MAX},
 	}
 
@@ -538,9 +538,9 @@ func TestGetDataByPoints(t *testing.T) {
 	th.AssertDeepEquals(t, expectedMetricDataFor2PointsWithMaxSelectParam, actualMetricDataFor2PointsWithMaxSelectParam)
 
 	queryParamsFor2PointsWithMin := QueryParams{
-		From: 1444354736000,
-		To: 1444602340000,
-		Points:2,
+		From:   1444354736000,
+		To:     1444602340000,
+		Points: 2,
 		Select: []string{MIN},
 	}
 
@@ -629,17 +629,17 @@ func TestGetDataByResolution(t *testing.T) {
 		Unit: "unknown",
 		Values: []Value{
 			Value{
-				Average: 209804282719.70,
+				Average:   209804282719.70,
 				NumPoints: 2241,
 				TimeStamp: 1444348800000,
 			},
 			Value{
-				Average: 231658448306.51,
+				Average:   231658448306.51,
 				NumPoints: 2304,
 				TimeStamp: 1444435200000,
 			},
 			Value{
-				Average: 253939828461.21,
+				Average:   253939828461.21,
 				NumPoints: 2116,
 				TimeStamp: 1444521600000,
 			},
@@ -654,23 +654,23 @@ func TestGetDataByResolution(t *testing.T) {
 		Unit: "unknown",
 		Values: []Value{
 			Value{
-				Min: 209804282719.70,
+				Min:       209804282719.70,
 				TimeStamp: 1444348800000,
 			},
 			Value{
-				Min: 231658448306.51,
+				Min:       231658448306.51,
 				TimeStamp: 1444435200000,
 			},
 			Value{
-				Min: 253939828461.21,
+				Min:       253939828461.21,
 				TimeStamp: 1444521600000,
 			},
 		},
 	}
 
 	queryParamsForMin1440Resolution := QueryParams{
-		From: 1444354736000,
-		To: 1444355736000,
+		From:       1444354736000,
+		To:         1444355736000,
 		Resolution: MIN1440,
 	}
 
@@ -680,10 +680,10 @@ func TestGetDataByResolution(t *testing.T) {
 	th.AssertDeepEquals(t, expectedMetricDataForMin1440, actualMetricDataFor5Points)
 
 	queryParamsForMin1440ResolutionWithMinSelect := QueryParams{
-		From: 1444354736000,
-		To: 1444355736000,
+		From:       1444354736000,
+		To:         1444355736000,
 		Resolution: MIN1440,
-		Select:[]string{MIN},
+		Select:     []string{MIN},
 	}
 
 	//Actual Metric data for Min1440 with "max" as select param..
@@ -724,16 +724,16 @@ func TestSearchMetric(t *testing.T) {
 	// Expected events data when no tag is specified.
 	expectedMetrics := []Metric{
 		Metric{
-			Metric:   "rollup00.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.ShardStatePuller.Stats.count",
+			Metric: "rollup00.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.ShardStatePuller.Stats.count",
 		},
 		Metric{
-			Metric:   "rollup01.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.ShardStatePuller.Stats.count",
+			Metric: "rollup01.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.ShardStatePuller.Stats.count",
 		},
 		Metric{
-			Metric:   "rollup02.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.ShardStatePuller.Stats.count",
+			Metric: "rollup02.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.ShardStatePuller.Stats.count",
 		},
 		Metric{
-			Metric:   "rollup03.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.ShardStatePuller.Stats.count",
+			Metric: "rollup03.iad.blueflood.rollup.com.rackspacecloud.blueflood.service.ShardStatePuller.Stats.count",
 		},
 	}
 
@@ -808,13 +808,13 @@ func TestGetEvents(t *testing.T) {
 	// Expected events data when no tag is specified.
 	expectedEvents := []Event{
 		Event{
-			What:   "Test Event 1",
+			What: "Test Event 1",
 			When: 1444354736003,
 			Data: "Test Data 1",
 			Tags: "Restart",
 		},
 		Event{
-			What:   "Test Event 2",
+			What: "Test Event 2",
 			When: 1444354736104,
 			Data: "Test Data 2",
 			Tags: "Shutdown",
@@ -824,7 +824,7 @@ func TestGetEvents(t *testing.T) {
 	// Expected events data when tag is specified.
 	expectedEventsWithTags := []Event{
 		Event{
-			What:   "Test Event 1",
+			What: "Test Event 1",
 			When: 1444354736003,
 			Data: "Test Data 1",
 			Tags: "Restart",
@@ -832,7 +832,7 @@ func TestGetEvents(t *testing.T) {
 	}
 
 	queryParamsForEvents := QueryParams{
-		From: 1444354736000,
+		From:  1444354736000,
 		Until: 1444355736000,
 	}
 
@@ -842,9 +842,9 @@ func TestGetEvents(t *testing.T) {
 	th.AssertDeepEquals(t, expectedEvents, actualEvents)
 
 	queryParamsForEventsWithTags := QueryParams{
-		From: 1444354736000,
+		From:  1444354736000,
 		Until: 1444355736000,
-		Tags: "Restart",
+		Tags:  "Restart",
 	}
 
 	// Actual events data received when tag is specified.
@@ -874,14 +874,14 @@ func TestGetLimits(t *testing.T) {
 				Limit: []Limit{
 					Limit{
 						Next_Available: "2015-10-13T16:42:18.899Z",
-						Remaining: 993,
-						Unit: "MINUTE",
-						Value: 1000,
-						Verb: "ALL",
+						Remaining:      993,
+						Unit:           "MINUTE",
+						Value:          1000,
+						Verb:           "ALL",
 					},
 				},
 				Regex: "/v[0-9.]+/((hybrid:)?[0-9]+)/.+",
-				URI: "/version/tenantId/*",
+				URI:   "/version/tenantId/*",
 			},
 		},
 	}
