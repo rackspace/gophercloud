@@ -6,4 +6,4 @@
 
 // Package metrics allows Rackspace cloud accounts to leverage version 2 of
 // Rackspace Metrics
-package v2
+package metrics
