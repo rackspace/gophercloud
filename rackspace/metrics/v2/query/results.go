@@ -50,7 +50,7 @@ type Value struct {
 //Metadata is the additional info about MetricData hence, it is a part of MetricData.
 type MetaData struct {
 	Limit     string `mapstructure:"limit"`
-	Next_Href string `mapstructure:"next_href"`
+	NextHref string `mapstructure:"next_href"`
 	Count     int32  `mapstructure:"count"`
 	Marker    string `mapstructure:"marker"`
 }
@@ -77,7 +77,7 @@ type Rate struct {
 
 //Limit is a part of Rate
 type Limit struct {
-	Next_Available string `mapstructure:"next-available"`
+	NextAvailable string `mapstructure:"next-available"`
 	Remaining      int32  `mapstructure:"remaining"`
 	Unit           string `mapstructure:"unit"`
 	Value          int32  `mapstructure:"value"`

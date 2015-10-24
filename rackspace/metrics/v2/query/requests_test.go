@@ -873,7 +873,7 @@ func TestGetLimits(t *testing.T) {
 			Rate{
 				Limit: []Limit{
 					Limit{
-						Next_Available: "2015-10-13T16:42:18.899Z",
+						NextAvailable: "2015-10-13T16:42:18.899Z",
 						Remaining:      993,
 						Unit:           "MINUTE",
 						Value:          1000,
