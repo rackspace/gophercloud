@@ -16,9 +16,11 @@ func TestProjectCRUDOperations(t *testing.T) {
 		return
 	}
 
+	enabled := true
+
 	// Create project
-	opts := projects.ProjectOpts{
-		Enabled:     true,
+	opts := projects.CreateOpts{
+		Enabled:     &enabled,
 		Name:        "Test project",
 		Description: "This is test project",
 	}
@@ -61,7 +63,7 @@ func TestProjectCRUDOperations(t *testing.T) {
 	th.AssertEquals(t, project.Description, "This is test project")
 
 	// Update project
-	project, err = projects.Update(serviceClient, projectID, projects.ProjectOpts{Name: "New test project name"}).Extract()
+	project, err = projects.Update(serviceClient, projectID, projects.UpdateOpts{Name: "New test project name"}).Extract()
 	th.AssertNoErr(t, err)
 	th.AssertEquals(t, project.Name, "New test project name")
 
