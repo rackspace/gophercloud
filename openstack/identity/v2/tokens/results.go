@@ -23,6 +23,10 @@ type Token struct {
 
 	// Tenant provides information about the tenant to which this token grants access.
 	Tenant tenants.Tenant
+
+	// the owner user of token
+	UserName string
+	UserID   string
 }
 
 // Endpoint represents a single API endpoint offered by a service.
@@ -71,6 +75,11 @@ type ServiceCatalog struct {
 // CreateResult defers the interpretation of a created token.
 // Use ExtractToken() to interpret it as a Token, or ExtractServiceCatalog() to interpret it as a service catalog.
 type CreateResult struct {
+	gophercloud.Result
+}
+
+// GetResult is the deferred response from a Get call.
+type GetResult struct {
 	gophercloud.Result
 }
 
@@ -130,4 +139,41 @@ func (result CreateResult) ExtractServiceCatalog() (*ServiceCatalog, error) {
 // createErr quickly packs an error in a CreateResult.
 func createErr(err error) CreateResult {
 	return CreateResult{gophercloud.Result{Err: err}}
+}
+
+// ExtractToken returns the Token from a GetResult.
+func (result GetResult) ExtractToken() (*Token, error) {
+	if result.Err != nil {
+		return nil, result.Err
+	}
+
+	var response struct {
+		Access struct {
+			Token struct {
+				Expires string `mapstructure:"expires"`
+				ID      string `mapstructure:"id"`
+			} `mapstructure:"token"`
+			User struct {
+				ID   string `mapstructure:"id"`
+				Name string `mapstructure:"name"`
+			} `mapstructure:"user"`
+		} `mapstructure:"access"`
+	}
+
+	err := mapstructure.Decode(result.Body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	expiresTs, err := time.Parse(gophercloud.RFC3339Milli, response.Access.Token.Expires)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Token{
+		ID:        response.Access.Token.ID,
+		ExpiresAt: expiresTs,
+		UserID:    response.Access.User.ID,
+		UserName:  response.Access.User.Name,
+	}, nil
 }
