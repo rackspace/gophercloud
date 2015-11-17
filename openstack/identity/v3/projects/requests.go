@@ -5,44 +5,77 @@ import (
 	"github.com/rackspace/gophercloud/pagination"
 )
 
-type project struct {
-	DomainID    string `json:"domain_id"`
-	ParentID    string `json:"parent_id"`
-	Enabled     bool   `json:"enabled"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
-// ProjectOpts Options for project create & update
-type ProjectOpts struct {
+type projectOpts struct {
 	DomainID    string
 	ParentID    string
+	Enabled     *bool
 	Name        string
-	Enabled     bool
 	Description string
 }
 
-// Create Creates project
-func Create(client *gophercloud.ServiceClient, opts ProjectOpts) CreateResult {
-	type request struct {
-		Project project `json:"project"`
-	}
-
-	reqBody := request{
-		Project: project{
-			DomainID:    opts.DomainID,
-			ParentID:    opts.ParentID,
-			Name:        opts.Name,
-			Enabled:     opts.Enabled,
-			Description: opts.Description,
-		},
-	}
-	var result CreateResult
-	_, result.Err = client.Post(listURL(client), reqBody, &result.Body, nil)
-	return result
+// CreateOptsBuilder is the interface options structs have to satisfy in order
+// to be used in the main Create operation in this package. Since many
+// extensions decorate or modify the common logic, it is useful for them to
+// satisfy a basic interface in order for them to be used.
+type CreateOptsBuilder interface {
+	ToProjectCreateMap() (map[string]interface{}, error)
 }
 
-// ListOpts Options for listing projects
+// CreateOpts is the common options struct used in this package's Create
+// operation.
+type CreateOpts projectOpts
+
+// ToProjectCreateMap casts a CreateOpts struct to a map.
+func (opts CreateOpts) ToProjectCreateMap() (map[string]interface{}, error) {
+	p := make(map[string]interface{})
+
+	if opts.DomainID != "" {
+		p["domain_id"] = opts.DomainID
+	}
+	if opts.ParentID != "" {
+		p["parent_id"] = opts.ParentID
+	}
+	if opts.Enabled != nil {
+		p["enabled"] = &opts.Enabled
+	}
+	if opts.Name != "" {
+		p["name"] = opts.Name
+	}
+	if opts.Description != "" {
+		p["description"] = opts.Description
+	}
+
+	return map[string]interface{}{"project": p}, nil
+}
+
+// Create accepts a CreateOpts struct and creates a new project using the values
+// provided.
+//
+// The tenant ID that is contained in the URI is the tenant that creates the
+// network. An admin user, however, has the option of specifying another tenant
+// ID in the CreateOpts struct.
+func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateResult {
+	var res CreateResult
+
+	reqBody, err := opts.ToProjectCreateMap()
+	if err != nil {
+		res.Err = err
+		return res
+	}
+	_, res.Err = client.Post(createURL(client), reqBody, &res.Body, nil)
+	return res
+}
+
+// ListOptsBuilder allows extensions to add additional parameters to the
+// List request.
+type ListOptsBuilder interface {
+	ToProjectListQuery() (string, error)
+}
+
+// ListOpts allows the filtering and of paginated collections through the API.
+// Filtering is achieved by passing in struct field values that map to
+// the project attributes you want to filter on. Page and PerPage are used for
+// pagination.
 type ListOpts struct {
 	DomainID string `q:"domain_id"`
 	ParentID string `q:"parent_id"`
@@ -52,52 +85,95 @@ type ListOpts struct {
 	PerPage  int    `q:"per_page"`
 }
 
-// List Lists projects
-func List(client *gophercloud.ServiceClient, opts ListOpts) pagination.Pager {
-	url := listURL(client)
-	query, err := gophercloud.BuildQueryString(opts)
+// ToProjectListQuery formats a ListOpts into a query string.
+func (opts ListOpts) ToProjectListQuery() (string, error) {
+	q, err := gophercloud.BuildQueryString(opts)
 	if err != nil {
-		return pagination.Pager{Err: err}
+		return "", err
+	}
+	return q.String(), nil
+}
+
+// List returns a Pager which allows you to iterate over a collection of
+// projects. It accepts a ListOpts struct, which allows you to filter the
+// returned collection.
+func List(client *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
+	url := listURL(client)
+	if opts != nil {
+		query, err := opts.ToProjectListQuery()
+		if err != nil {
+			return pagination.Pager{Err: err}
+		}
+		url += query
 	}
 
-	url += query.String()
-	createPage := func(r pagination.PageResult) pagination.Page {
+	return pagination.NewPager(client, url, func(r pagination.PageResult) pagination.Page {
 		return ProjectPage{pagination.LinkedPageBase{PageResult: r}}
-	}
-
-	return pagination.NewPager(client, url, createPage)
+	})
 }
 
-// Get Shows project details
-func Get(client *gophercloud.ServiceClient, projectID string) GetResult {
-	var result GetResult
-	_, result.Err = client.Get(projectURL(client, projectID), &result.Body, nil)
-	return result
+// Get retrieves a specific project based on its unique ID.
+func Get(client *gophercloud.ServiceClient, id string) GetResult {
+	var res GetResult
+	_, res.Err = client.Get(getURL(client, id), &res.Body, nil)
+	return res
 }
 
-// Update Updates project information
-func Update(client *gophercloud.ServiceClient, projectID string, opts ProjectOpts) UpdateResult {
-	type request struct {
-		Project project `json:"project"`
-	}
-
-	reqBody := request{
-		Project: project{
-			DomainID:    opts.DomainID,
-			ParentID:    opts.ParentID,
-			Name:        opts.Name,
-			Enabled:     opts.Enabled,
-			Description: opts.Description,
-		},
-	}
-	var result UpdateResult
-	_, result.Err = client.Put(projectURL(client, projectID), reqBody, &result.Body, nil)
-	return result
+// UpdateOptsBuilder is the interface options structs have to satisfy in order
+// to be used in the main Update operation in this package. Since many
+// extensions decorate or modify the common logic, it is useful for them to
+// satisfy a basic interface in order for them to be used.
+type UpdateOptsBuilder interface {
+	ToProjectUpdateMap() (map[string]interface{}, error)
 }
 
-// Delete Deletes project
+// UpdateOpts is the common options struct used in this package's Update
+// operation.
+type UpdateOpts projectOpts
+
+// ToProjectUpdateMap casts a UpdateOpts struct to a map.
+func (opts UpdateOpts) ToProjectUpdateMap() (map[string]interface{}, error) {
+	p := make(map[string]interface{})
+
+	if opts.DomainID != "" {
+		p["domain_id"] = opts.DomainID
+	}
+	if opts.ParentID != "" {
+		p["parent_id"] = opts.ParentID
+	}
+	if opts.Enabled != nil {
+		p["enabled"] = &opts.Enabled
+	}
+	if opts.Name != "" {
+		p["name"] = opts.Name
+	}
+	if opts.Description != "" {
+		p["description"] = opts.Description
+	}
+
+	return map[string]interface{}{"project": p}, nil
+}
+
+// Update accepts a UpdateOpts struct and updates an existing project using the
+// values provided. For more information, see the Create function.
+func Update(client *gophercloud.ServiceClient, projectID string, opts UpdateOptsBuilder) UpdateResult {
+	var res UpdateResult
+
+	reqBody, err := opts.ToProjectUpdateMap()
+	if err != nil {
+		res.Err = err
+		return res
+	}
+
+	_, res.Err = client.Patch(updateURL(client, projectID), reqBody, &res.Body, &gophercloud.RequestOpts{
+		OkCodes: []int{200},
+	})
+	return res
+}
+
+// Delete accepts a unique ID and deletes the project associated with it.
 func Delete(client *gophercloud.ServiceClient, projectID string) DeleteResult {
 	var result DeleteResult
-	_, result.Err = client.Delete(projectURL(client, projectID), nil)
+	_, result.Err = client.Delete(deleteURL(client, projectID), nil)
 	return result
 }
