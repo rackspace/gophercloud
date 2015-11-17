@@ -42,10 +42,11 @@ func TestCreateSuccessful(t *testing.T) {
     }`)
 	})
 
-	opts := ProjectOpts{
+	enabled := true
+	opts := CreateOpts{
 		DomainID:    "1789d1",
 		ParentID:    "123c56",
-		Enabled:     true,
+		Enabled:     &enabled,
 		Name:        "Test Group",
 		Description: "My new project",
 	}
@@ -200,7 +201,7 @@ func TestUpdateSuccessful(t *testing.T) {
 	defer testhelper.TeardownHTTP()
 
 	testhelper.Mux.HandleFunc("/projects/263fd9", func(w http.ResponseWriter, r *http.Request) {
-		testhelper.TestMethod(t, r, "PUT")
+		testhelper.TestMethod(t, r, "PATCH")
 		testhelper.TestHeader(t, r, "X-Auth-Token", client.TokenID)
 		testhelper.TestJSONRequest(t, r, `{
 			"project": {
@@ -213,7 +214,7 @@ func TestUpdateSuccessful(t *testing.T) {
 		}`)
 
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{
 			"project": {
 				"domain_id": "1789d1",
@@ -226,16 +227,17 @@ func TestUpdateSuccessful(t *testing.T) {
     }`)
 	})
 
-	opts := ProjectOpts{
+	enabled := true
+	opts := UpdateOpts{
 		DomainID:    "1789d1",
 		ParentID:    "123c56",
-		Enabled:     true,
+		Enabled:     &enabled,
 		Name:        "Test Group",
 		Description: "My new project",
 	}
 	result, err := Update(client.ServiceClient(), "263fd9", opts).Extract()
 	if err != nil {
-		t.Fatalf("Unexpected error from Create: %v", err)
+		t.Fatalf("Unexpected error from Update: %v", err)
 	}
 
 	if result.ID != "263fd9" {
