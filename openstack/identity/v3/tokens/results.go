@@ -3,7 +3,6 @@ package tokens
 import (
 	"time"
 
-	"github.com/kwapik/gophercloud/openstack/identity/v3/projects"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rackspace/gophercloud"
 )
@@ -42,6 +41,18 @@ type CatalogEntry struct {
 	Endpoints []Endpoint `mapstructure:"endpoints"`
 }
 
+// Project provides information about the project to which this token grants access.
+type Project struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
+}
+
+// Authorization need user info which can get from token authentication's response
+type Role struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
+}
+
 // ServiceCatalog provides a view into the service catalog from a previous, successful authentication.
 type ServiceCatalog struct {
 	Entries []CatalogEntry
@@ -66,7 +77,9 @@ func (r commonResult) ExtractToken() (*Token, error) {
 
 	var response struct {
 		Token struct {
-			ExpiresAt string `mapstructure:"expires_at"`
+			ExpiresAt string  `mapstructure:"expires_at"`
+			Project   Project `mapstructure:"project"`
+			Roles     []Role  `mapstructure:"roles"`
 		} `mapstructure:"token"`
 	}
 
@@ -82,6 +95,9 @@ func (r commonResult) ExtractToken() (*Token, error) {
 
 	// Attempt to parse the timestamp.
 	token.ExpiresAt, err = time.Parse(gophercloud.RFC3339Milli, response.Token.ExpiresAt)
+
+	token.Project = response.Token.Project
+	token.Roles = response.Token.Roles
 
 	return &token, err
 }
@@ -129,11 +145,6 @@ type RevokeResult struct {
 	commonResult
 }
 
-type Role struct {
-	ID   string `mapstructure:"id"`
-	Name string `mapstructure:"name"`
-}
-
 // Token is a string that grants a user access to a controlled set of services in an OpenStack provider.
 // Each Token is valid for a set length of time.
 type Token struct {
@@ -144,7 +155,7 @@ type Token struct {
 	ExpiresAt time.Time
 
 	// Project provides information about the project to which this token grants access.
-	Project projects.Project
+	Project Project
 
 	// Authorization need user info which can get from token authentication's response
 	Roles []Role
