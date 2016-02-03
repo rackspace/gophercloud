@@ -3,6 +3,7 @@ package tokens
 import (
 	"time"
 
+	"github.com/kwapik/gophercloud/openstack/identity/v3/projects"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rackspace/gophercloud"
 )
@@ -120,12 +121,17 @@ func createErr(err error) CreateResult {
 
 // GetResult is the deferred response from a Get call.
 type GetResult struct {
-	commonResult
+	CreateResult
 }
 
 // RevokeResult is the deferred response from a Revoke call.
 type RevokeResult struct {
 	commonResult
+}
+
+type Role struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
 }
 
 // Token is a string that grants a user access to a controlled set of services in an OpenStack provider.
@@ -136,4 +142,10 @@ type Token struct {
 
 	// ExpiresAt is the timestamp at which this token will no longer be accepted.
 	ExpiresAt time.Time
+
+	// Project provides information about the project to which this token grants access.
+	Project projects.Project
+
+	// Authorization need user info which can get from token authentication's response
+	Roles []Role
 }
