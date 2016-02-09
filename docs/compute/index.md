@@ -28,6 +28,7 @@ title: Getting Started with Compute v2
   * [Get server](#get-server)
   * [Update server](#update-server)
   * [Delete server](#delete-server)
+  * [Create image](#create-image)
   * [Change admin password](#change-password)
   * [Rebuild](#rebuild)
   * [Resize](#resize)
@@ -329,6 +330,13 @@ server, err := servers.Update(client, "server_id", opts).Extract()
 
 {% highlight go %}
 result := servers.Delete(client, "server_id")
+{% endhighlight %}
+
+### <a name="create-image"></a>Create image
+
+{% highlight go %}
+opts = servers.CreateImageOpts{Name: "My Image"}
+image_id, err = servers.CreateImage(client, "server_id", opts)
 {% endhighlight %}
 
 ### <a name="change-password"></a>Change admin password
