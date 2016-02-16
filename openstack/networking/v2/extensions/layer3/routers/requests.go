@@ -61,12 +61,16 @@ type CreateOpts struct {
 // an external network (it is external if its `router:external' field is set to
 // true).
 func Create(c *gophercloud.ServiceClient, opts CreateOpts) CreateResult {
+	type gatewayinfo struct {
+		NetworkID *string `json:"network_id,omitempty"`
+	}
+
 	type router struct {
 		Name         *string      `json:"name,omitempty"`
 		AdminStateUp *bool        `json:"admin_state_up,omitempty"`
 		Distributed  *bool        `json:"distributed,omitempty"`
 		TenantID     *string      `json:"tenant_id,omitempty"`
-		GatewayInfo  *GatewayInfo `json:"external_gateway_info,omitempty"`
+		GatewayInfo  *gatewayinfo `json:"external_gateway_info,omitempty"`
 	}
 
 	type request struct {
@@ -81,7 +85,7 @@ func Create(c *gophercloud.ServiceClient, opts CreateOpts) CreateResult {
 	}}
 
 	if opts.GatewayInfo != nil {
-		reqBody.Router.GatewayInfo = opts.GatewayInfo
+		reqBody.Router.GatewayInfo = &gatewayinfo{NetworkID: gophercloud.MaybeString(opts.GatewayInfo.NetworkID)}
 	}
 
 	var res CreateResult
@@ -111,11 +115,15 @@ type UpdateOpts struct {
 // the update of router interfaces. To do this, use the AddInterface and
 // RemoveInterface functions.
 func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) UpdateResult {
+	type gatewayinfo struct {
+		NetworkID *string `json:"network_id,omitempty"`
+	}
+
 	type router struct {
 		Name         *string      `json:"name,omitempty"`
 		AdminStateUp *bool        `json:"admin_state_up,omitempty"`
 		Distributed  *bool        `json:"distributed,omitempty"`
-		GatewayInfo  *GatewayInfo `json:"external_gateway_info,omitempty"`
+		GatewayInfo  *gatewayinfo `json:"external_gateway_info,omitempty"`
 		Routes       []Route      `json:"routes"`
 	}
 
@@ -130,7 +138,7 @@ func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) UpdateResu
 	}}
 
 	if opts.GatewayInfo != nil {
-		reqBody.Router.GatewayInfo = opts.GatewayInfo
+		reqBody.Router.GatewayInfo = &gatewayinfo{NetworkID: gophercloud.MaybeString(opts.GatewayInfo.NetworkID)}
 	}
 
 	if opts.Routes != nil {

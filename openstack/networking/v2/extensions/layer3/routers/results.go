@@ -6,10 +6,24 @@ import (
 	"github.com/rackspace/gophercloud/pagination"
 )
 
+// IP represents the subnet ID/address pair for the external gateway fixed ip
+type IP struct {
+	SubnetID  string `json:"subnet_id" mapstructure:"subnet_id"`
+	IPAddress string `json:"ip_address" mapstructure:"ip_address"`
+}
+
 // GatewayInfo represents the information of an external gateway for any
 // particular network router.
 type GatewayInfo struct {
+	// Indicates the external network ID for this gateway (read/write)
 	NetworkID string `json:"network_id" mapstructure:"network_id"`
+
+	// Indicates whether the gateway is performing SNAT for instances
+	// without a floating IP (read-only)
+	EnableSnat bool `json:"enable_snat" mapstructure:"enable_snat"`
+
+	// Fixed IPs bound to this gateway (read-only)
+	FixedIPs []IP `json:"external_fixed_ips" mapstructure:"external_fixed_ips"`
 }
 
 type Route struct {

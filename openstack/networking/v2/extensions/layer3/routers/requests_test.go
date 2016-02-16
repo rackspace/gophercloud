@@ -50,6 +50,24 @@ func TestList(t *testing.T) {
             "tenant_id": "33a40233088643acb66ff6eb0ebea679",
             "distributed": false,
             "id": "a9254bdb-2613-4a13-ac4c-adc581fba50d"
+        },
+        {
+            "status": "ACTIVE",
+            "external_gateway_info": {
+                "network_id": "c659581f-fc9b-4916-a41a-492ebccc55c2",
+                "enable_snat": true,
+                "external_fixed_ips": [
+                    {
+                        "subnet_id": "54d6f61d-db07-451c-9ab3-b9609b6b6f0b",
+                        "ip_address": "10.0.0.1"
+                    }
+                ]
+            },
+            "name": "router2",
+            "admin_state_up": true,
+            "tenant_id": "007215ed563f42d6980da58bec79df0c",
+            "distributed": false,
+            "id": "e3c4039d-a462-4897-be8d-4ee023a4bc25"
         }
     ]
 }
@@ -84,6 +102,21 @@ func TestList(t *testing.T) {
 				Name:         "router1",
 				ID:           "a9254bdb-2613-4a13-ac4c-adc581fba50d",
 				TenantID:     "33a40233088643acb66ff6eb0ebea679",
+			},
+			Router{
+				Status: "ACTIVE",
+				GatewayInfo: GatewayInfo{
+					NetworkID:  "c659581f-fc9b-4916-a41a-492ebccc55c2",
+					EnableSnat: true,
+					FixedIPs: []IP{
+						IP{SubnetID: "54d6f61d-db07-451c-9ab3-b9609b6b6f0b", IPAddress: "10.0.0.1"},
+					},
+				},
+				AdminStateUp: true,
+				Distributed:  false,
+				Name:         "router2",
+				ID:           "e3c4039d-a462-4897-be8d-4ee023a4bc25",
+				TenantID:     "007215ed563f42d6980da58bec79df0c",
 			},
 		}
 
