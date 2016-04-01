@@ -183,6 +183,9 @@ type CreateOpts struct {
 
 	// AccessIPv6 [optional] specifies an IPv6 address for the instance.
 	AccessIPv6 string
+
+	// KeyName [optional] is the key pair name for SSH Key-Based authentication.
+	KeyName string
 }
 
 // ToServerCreateMap assembles a request body based on the contents of a CreateOpts.
@@ -216,6 +219,9 @@ func (opts CreateOpts) ToServerCreateMap() (map[string]interface{}, error) {
 	}
 	if opts.AccessIPv6 != "" {
 		server["accessIPv6"] = opts.AccessIPv6
+	}
+	if opts.KeyName != "" {
+		server["key_name"] = opts.KeyName
 	}
 
 	if len(opts.SecurityGroups) > 0 {
