@@ -46,6 +46,12 @@ type ServiceCatalog struct {
 	Entries []CatalogEntry
 }
 
+// Project contains project information extracted from a scoped token.
+type Project struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
+}
+
 // commonResult is the deferred result of a Create or a Get call.
 type commonResult struct {
 	gophercloud.Result
@@ -116,6 +122,26 @@ func createErr(err error) CreateResult {
 	return CreateResult{
 		commonResult: commonResult{Result: gophercloud.Result{Err: err}},
 	}
+}
+
+// ExtractProject returns project information from a GET token request.
+func (result GetResult) ExtractProject() (*Project, error) {
+	if result.Err != nil {
+		return nil, result.Err
+	}
+
+	var response struct {
+		Token struct {
+			ValidProject Project `mapstructure:"project"`
+		} `mapstructure:"token"`
+	}
+
+	err := mapstructure.Decode(result.Body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.Token.ValidProject, nil
 }
 
 // GetResult is the deferred response from a Get call.
