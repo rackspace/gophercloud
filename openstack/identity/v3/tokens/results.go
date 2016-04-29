@@ -102,7 +102,8 @@ func (r commonResult) ExtractToken() (*Token, error) {
 }
 
 // ExtractServiceCatalog returns the ServiceCatalog that was generated along with the user's Token.
-func (result CreateResult) ExtractServiceCatalog() (*ServiceCatalog, error) {
+// It can also be retrieved as the result of a GET response to a token validation
+func (result commonResult) ExtractServiceCatalog() (*ServiceCatalog, error) {
 	if result.Err != nil {
 		return nil, result.Err
 	}
