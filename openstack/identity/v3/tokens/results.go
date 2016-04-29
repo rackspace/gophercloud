@@ -62,6 +62,17 @@ type Roles struct {
 	Entries []RoleEntry
 }
 
+type Domain struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
+}
+
+type User struct {
+	ValidDomain Domain `mapstructure:"domain"`
+	ID          string `mapstructure:"id"`
+	Name        string `mapstructure:"name"`
+}
+
 // commonResult is the deferred result of a Create or a Get call.
 type commonResult struct {
 	gophercloud.Result
@@ -133,6 +144,26 @@ func createErr(err error) CreateResult {
 	return CreateResult{
 		commonResult: commonResult{Result: gophercloud.Result{Err: err}},
 	}
+}
+
+// ExtractUser returns the User object from a token
+func (r GetResult) ExtractUser() (*User, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+
+	var response struct {
+		Token struct {
+			ValidUser User `mapstructure:"user"`
+		} `mapstructure:"token"`
+	}
+
+	err := mapstructure.Decode(r.Body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.Token.ValidUser, nil
 }
 
 // ExtractProject returns project information from a GET token request.
