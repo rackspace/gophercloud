@@ -52,6 +52,16 @@ type Project struct {
 	Name string `mapstructure:"name"`
 }
 
+// RoleEntry contains the name of a user's role in a project.
+type RoleEntry struct {
+	Name string `mapstructure:"name"`
+}
+
+// Roles contains a list of role names extracted from a token.
+type Roles struct {
+	Entries []RoleEntry
+}
+
 // commonResult is the deferred result of a Create or a Get call.
 type commonResult struct {
 	gophercloud.Result
@@ -142,6 +152,26 @@ func (result GetResult) ExtractProject() (*Project, error) {
 	}
 
 	return &response.Token.ValidProject, nil
+}
+
+// ExtractRoles gets a list of project role names from a GET token request.
+func (result GetResult) ExtractRoles() (*Roles, error) {
+	if result.Err != nil {
+		return nil, result.Err
+	}
+
+	var response struct {
+		Token struct {
+			ValidRoles []RoleEntry `mapstructure:"roles"`
+		} `mapstructure:"token"`
+	}
+
+	err := mapstructure.Decode(result.Body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Roles{Entries: response.Token.ValidRoles}, nil
 }
 
 // GetResult is the deferred response from a Get call.
