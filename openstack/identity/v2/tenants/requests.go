@@ -1,8 +1,6 @@
 package tenants
 
 import (
-	"errors"
-
 	"github.com/rackspace/gophercloud"
 	"github.com/rackspace/gophercloud/pagination"
 )

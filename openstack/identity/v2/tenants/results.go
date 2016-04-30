@@ -66,7 +66,7 @@ type commonResult struct {
 }
 
 // Extract interprets any commonResult as a Tenant, if possible.
-func (r commonResult) Extract() (*User, error) {
+func (r commonResult) Extract() (*Tenant, error) {
 	if r.Err != nil {
 		return nil, r.Err
 	}
