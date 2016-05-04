@@ -2,6 +2,7 @@ package launch
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"reflect"
 
 	"github.com/mitchellh/mapstructure"
@@ -12,6 +13,15 @@ import (
 // Network represents a reference to a Cloud Network.
 type Network struct {
 	UUID string `mapstructure:"uuid" json:"uuid"`
+}
+
+// Validate ensures a Network contains appropriate values.
+func (n *Network) Validate() error {
+	if n.UUID == "" {
+		return ErrNoNetworkID
+	}
+
+	return nil
 }
 
 // Default Rackspace networks.
@@ -34,18 +44,32 @@ const (
 // group will be attached to.
 type LoadBalancer struct {
 	// Type of load balancer: CloudLoadBalancer or RackConnectV3
-	Type LoadBalancerType
+	Type LoadBalancerType `json:"type,omitempty"`
 
-	// UUID of the RackConnectV3 load balancer, or an empty string in the case
-	// of a Cloud Load Balancer.
-	RackConnectUUID string
-
-	// ID of a Cloud Load Balancers load balancer.
-	CloudLoadBalancerID int
+	// ID of the load balancer.  This will be a UUID for RackConnectV3 load
+	// balancers, or a simple integer string for Cloud Load Balancers.
+	ID string `json:"loadBalancerId,omitempty"`
 
 	// Port on the servers in a group that the load balancer will use.  Will be
 	// zero for RackConnectV3 load balancers, where this parameter is not used.
-	Port int
+	Port int `json:"port,omitempty"`
+}
+
+// Validate ensures a LoadBalancer contains appropriate values.
+func (lb *LoadBalancer) Validate() error {
+	if lb.Type != CloudLoadBalancer && lb.Type != RackConnectV3 {
+		return ErrUnknownLBType
+	}
+
+	if lb.ID == "" {
+		return ErrNoLoadBalancerID
+	}
+
+	if lb.Type == CloudLoadBalancer && lb.Port == 0 {
+		return ErrNoPort
+	}
+
+	return nil
 }
 
 // Server represents the attributes used to create a new server in a group.
@@ -61,26 +85,58 @@ type Server struct {
 
 	// Disk Configuration mode: MANUAL, AUTO, or an empty string if no mode has
 	// been specified.
-	DiskConfig string `mapstructure:"OS-DCF:diskConfig" json:"OS-DCF:diskConfig"`
+	DiskConfig string `mapstructure:"OS-DCF:diskConfig" json:"OS-DCF:diskConfig,omitempty"`
 
 	// Name of a preexisting keypair injected into new servers, or an empty
 	// string if no keypair has been specified.
-	KeyName string `mapstructure:"key_name" json:"key_name"`
+	KeyName string `mapstructure:"key_name" json:"key_name,omitempty"`
 
 	// Whether metadata injection through a configuration drive is enabled.
 	ConfigDrive bool `mapstructure:"config_drive" json:"config_drive"`
 
 	// User provided configuration data. Base64 decoded.
-	UserData []byte `mapstructure:"user_data" json:"user_data"`
+	UserData []byte `mapstructure:"user_data" json:"user_data,omitempty"`
 
 	// Networks new servers will be attached to.
-	Networks []Network `mapstructure:"networks" json:"networks"`
+	Networks []Network `mapstructure:"networks" json:"networks,omitempty"`
 
 	// List of file paths and contents injected into new servers.
-	Personality servers.Personality `mapstructure:"Personality" json:"Personality"`
+	Personality servers.Personality `mapstructure:"personality" json:"personality,omitempty"`
 
 	// Additonal metadata associated with new servers.
-	Metadata map[string]interface{} `mapstructure:"metadata" json:"metadata"`
+	Metadata map[string]interface{} `mapstructure:"metadata" json:"metadata,omitempty"`
+}
+
+// Validate ensures a Server contains appropriate values.
+func (s *Server) Validate() error {
+	if s.Name == "" {
+		return ErrNoName
+	}
+
+	if s.FlavorRef == "" {
+		return ErrNoFlavor
+	}
+
+	if s.ImageRef == "" {
+		return ErrNoImage
+	}
+
+	return nil
+}
+
+// MarshalJSON converts a Server to JSON, base64 encoding the user data.
+func (s *Server) MarshalJSON() ([]byte, error) {
+	type server Server // Avoid infinite recursion when embedding below.
+
+	tmp := struct {
+		server
+		UserData string `json:"user_data,omitempty"`
+	}{
+		server:   server(*s),
+		UserData: base64.StdEncoding.EncodeToString(s.UserData),
+	}
+
+	return json.Marshal(tmp)
 }
 
 // ConfigurationType represents a type of launch configuration.
@@ -100,6 +156,19 @@ type Configuration struct {
 	Args Args `mapstructure:"args" json:"args"`
 }
 
+// Validate ensures a Configuration contains appropriate values.
+func (c *Configuration) Validate() error {
+	if c.Type != LaunchServer {
+		return ErrUnknownType
+	}
+
+	if err := c.Args.Validate(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Args represents a launch configuration's arguments.
 type Args struct {
 	// Attributes used to create new servers in the group.
@@ -112,6 +181,25 @@ type Args struct {
 	// load balancers before actually being removed.  This will be zero if no
 	// timeout as been specified, in which case nodes will not be drained.
 	DrainingTimeout int `mapstructure:"draining_timeout" json:"draining_timeout,omitempty"`
+}
+
+// Validate ensures an Args struct contains appropriate values.
+func (a *Args) Validate() error {
+	if err := a.Server.Validate(); err != nil {
+		return err
+	}
+
+	for _, lb := range a.LoadBalancers {
+		if err := lb.Validate(); err != nil {
+			return err
+		}
+	}
+
+	if a.DrainingTimeout != 0 && (a.DrainingTimeout < 30 || a.DrainingTimeout > 3600) {
+		return ErrBadDrainTimeout
+	}
+
+	return nil
 }
 
 // mapstructure.DecodeHookFuncType to convert from a map[string]interface{} to a
@@ -193,20 +281,20 @@ func mapToLoadBalancer(from reflect.Type, to reflect.Type, data interface{}) (in
 
 	lb := LoadBalancer{}
 
-	// If the ID is a string, it's a RackConnect V3 UUID, else it should be a
-	// Cloud Load Balancers ID, which is an integer.
+	if t, ok := lbMap["type"].(string); ok {
+		lb.Type = LoadBalancerType(t)
+	} else {
+		// The default load balancer type is CloudLoadBalancer.
+		// The API sometimes omits the type field in this case.
+		lb.Type = CloudLoadBalancer
+	}
+
 	if id, ok := lbMap["loadBalancerId"].(string); ok {
-		lb.RackConnectUUID = id
-	} else if id, ok := lbMap["loadBalancerId"].(float64); ok {
-		lb.CloudLoadBalancerID = int(id)
+		lb.ID = id
 	}
 
 	if p, ok := lbMap["port"].(float64); ok {
 		lb.Port = int(p)
-	}
-
-	if t, ok := lbMap["type"].(string); ok {
-		lb.Type = LoadBalancerType(t)
 	}
 
 	return lb, nil
@@ -257,4 +345,9 @@ func (r launchResult) Extract() (*Configuration, error) {
 // GetResult temporarily contains the response from a Get call.
 type GetResult struct {
 	launchResult
+}
+
+// UpdateResult represents the result of an update operation.
+type UpdateResult struct {
+	gophercloud.ErrResult
 }

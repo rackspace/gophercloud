@@ -1,6 +1,7 @@
 package launch
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
@@ -39,7 +40,7 @@ func TestStringToBytes(t *testing.T) {
 func TestMapToLoadBalancer(t *testing.T) {
 	lbMap := map[string]interface{}{
 		"port":           float64(443),
-		"loadBalancerId": float64(123456),
+		"loadBalancerId": "123456",
 	}
 
 	lb, err := mapToLoadBalancer(
@@ -50,4 +51,24 @@ func TestMapToLoadBalancer(t *testing.T) {
 
 	th.AssertNoErr(t, err)
 	th.CheckDeepEquals(t, CloudLB, lb)
+}
+
+func TestServerMarshalJSON(t *testing.T) {
+	serverJSON, err := json.MarshalIndent(&ExampleServer, "", "  ")
+
+	th.AssertNoErr(t, err)
+	th.AssertEquals(t, ExampleServerJSON, string(serverJSON))
+}
+
+func BenchmarkServerMarshalJSON(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		json.Marshal(ExampleServer)
+	}
+}
+
+func TestLoadBalancerMarshalJSON(t *testing.T) {
+	lbJSON, err := json.MarshalIndent(&CloudLB, "", "  ")
+
+	th.AssertNoErr(t, err)
+	th.AssertEquals(t, CloudLBJSON, string(lbJSON))
 }
