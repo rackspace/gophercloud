@@ -11,6 +11,11 @@ type groupResult struct {
 	gophercloud.Result
 }
 
+// StateResult represents the result of a GetState operation.
+type StateResult struct {
+	groupResult
+}
+
 // Group represents an Auto Scale group.
 type Group struct {
 	// UUID for the group
@@ -124,4 +129,26 @@ func ExtractGroups(page pagination.Page) ([]Group, error) {
 	}
 
 	return response.Groups, err
+}
+
+// Extract attempts to interpret any StateResult as a State struct.
+func (res StateResult) Extract() (*State, error) {
+	if res.Err != nil {
+		return nil, res.Err
+	}
+
+	// When listing groups or requesting group details, the state is an object
+	// under the "state" key. For some reason, it's under "group" when
+	// explicitly requesting state information.
+	var response struct {
+		State State `mapstructure:"group"`
+	}
+
+	err := mapstructure.Decode(res.Body, &response)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.State, nil
 }

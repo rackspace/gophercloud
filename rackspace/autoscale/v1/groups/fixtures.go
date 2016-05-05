@@ -169,47 +169,94 @@ const GroupListBody = `
 }
 `
 
+// FirstGroupStateBody contains the canned body of a groups.GetState response.
+// The response corresponds to the state of first result in GroupListBody.
+const FirstGroupStateBody = `
+{
+  "group": {
+    "status": "ACTIVE",
+    "desiredCapacity": 2,
+    "paused": false,
+    "active": [
+      {
+        "id": "449cead0-48b2-44fe-9107-dea7cdb6d925",
+        "links": [
+          {
+            "href": "https://dfw.servers.api.rackspacecloud.com/v2/123456/servers/449cead0-48b2-44fe-9107-dea7cdb6d925",
+            "rel": "self"
+          },
+          {
+            "href": "https://dfw.servers.api.rackspacecloud.com/123456/servers/449cead0-48b2-44fe-9107-dea7cdb6d925",
+            "rel": "bookmark"
+          }
+        ]
+      },
+      {
+        "id": "d8c2696f-1936-45c7-892d-f5f741ef0f60",
+        "links": [
+          {
+            "href": "https://dfw.servers.api.rackspacecloud.com/v2/123456/servers/d8c2696f-1936-45c7-892d-f5f741ef0f60",
+            "rel": "self"
+          },
+          {
+            "href": "https://dfw.servers.api.rackspacecloud.com/123456/servers/d8c2696f-1936-45c7-892d-f5f741ef0f60",
+            "rel": "bookmark"
+          }
+        ]
+      }
+    ],
+    "pendingCapacity": 0,
+    "activeCapacity": 2,
+    "name": "first-group"
+  }
+}
+`
+
 var (
-	// FirstGroup is a Group struct corresponding to the first result in GroupListBody.
-	FirstGroup = Group{
-		ID: "10eb3219-1b12-4b34-b1e4-e10ee4f24c65",
-		State: State{
-			Name:            "first-group",
-			Status:          ACTIVE,
-			DesiredCapacity: 2,
-			PendingCapacity: 0,
-			ActiveCapacity:  2,
-			Paused:          false,
-			Errors:          nil,
-			Active: []ActiveServer{
-				ActiveServer{
-					ID: "449cead0-48b2-44fe-9107-dea7cdb6d925",
-					Links: []gophercloud.Link{
-						gophercloud.Link{
-							Href: "https://dfw.servers.api.rackspacecloud.com/v2/123456/servers/449cead0-48b2-44fe-9107-dea7cdb6d925",
-							Rel:  "self",
-						},
-						gophercloud.Link{
-							Href: "https://dfw.servers.api.rackspacecloud.com/123456/servers/449cead0-48b2-44fe-9107-dea7cdb6d925",
-							Rel:  "bookmark",
-						},
+	// FirstGroupState is a State struct corresponding to the state of
+	// the first result in GroupListBody.
+	FirstGroupState = State{
+		Name:            "first-group",
+		Status:          ACTIVE,
+		DesiredCapacity: 2,
+		PendingCapacity: 0,
+		ActiveCapacity:  2,
+		Paused:          false,
+		Errors:          nil,
+		Active: []ActiveServer{
+			ActiveServer{
+				ID: "449cead0-48b2-44fe-9107-dea7cdb6d925",
+				Links: []gophercloud.Link{
+					gophercloud.Link{
+						Href: "https://dfw.servers.api.rackspacecloud.com/v2/123456/servers/449cead0-48b2-44fe-9107-dea7cdb6d925",
+						Rel:  "self",
+					},
+					gophercloud.Link{
+						Href: "https://dfw.servers.api.rackspacecloud.com/123456/servers/449cead0-48b2-44fe-9107-dea7cdb6d925",
+						Rel:  "bookmark",
 					},
 				},
-				ActiveServer{
-					ID: "d8c2696f-1936-45c7-892d-f5f741ef0f60",
-					Links: []gophercloud.Link{
-						gophercloud.Link{
-							Href: "https://dfw.servers.api.rackspacecloud.com/v2/123456/servers/d8c2696f-1936-45c7-892d-f5f741ef0f60",
-							Rel:  "self",
-						},
-						gophercloud.Link{
-							Href: "https://dfw.servers.api.rackspacecloud.com/123456/servers/d8c2696f-1936-45c7-892d-f5f741ef0f60",
-							Rel:  "bookmark",
-						},
+			},
+			ActiveServer{
+				ID: "d8c2696f-1936-45c7-892d-f5f741ef0f60",
+				Links: []gophercloud.Link{
+					gophercloud.Link{
+						Href: "https://dfw.servers.api.rackspacecloud.com/v2/123456/servers/d8c2696f-1936-45c7-892d-f5f741ef0f60",
+						Rel:  "self",
+					},
+					gophercloud.Link{
+						Href: "https://dfw.servers.api.rackspacecloud.com/123456/servers/d8c2696f-1936-45c7-892d-f5f741ef0f60",
+						Rel:  "bookmark",
 					},
 				},
 			},
 		},
+	}
+
+	// FirstGroup is a Group struct corresponding to the first result in GroupListBody.
+	FirstGroup = Group{
+		ID:    "10eb3219-1b12-4b34-b1e4-e10ee4f24c65",
+		State: FirstGroupState,
 	}
 )
 
@@ -232,5 +279,19 @@ func HandleGroupListSuccessfully(t *testing.T) {
 		default:
 			t.Fatalf("/groups invoked with unexpected marker=[%s]", marker)
 		}
+	})
+}
+
+// HandleGroupGetStateSuccessfully sets up the test server to respond to a group GetState request.
+func HandleGroupGetStateSuccessfully(t *testing.T) {
+	path := "/groups/10eb3219-1b12-4b34-b1e4-e10ee4f24c65/state"
+
+	th.Mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		th.TestMethod(t, r, "GET")
+		th.TestHeader(t, r, "X-Auth-Token", client.TokenID)
+
+		w.Header().Add("Content-Type", "application/json")
+
+		fmt.Fprintf(w, FirstGroupStateBody)
 	})
 }

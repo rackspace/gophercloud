@@ -52,3 +52,12 @@ func List(client *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pa
 
 	return pagination.NewPager(client, url, createPageFn)
 }
+
+// GetState requests the details of a given auto scale group's current state.
+func GetState(client *gophercloud.ServiceClient, groupID string) StateResult {
+	var result StateResult
+
+	_, result.Err = client.Get(stateURL(client, groupID), &result.Body, nil)
+
+	return result
+}
