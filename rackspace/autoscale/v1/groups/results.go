@@ -13,7 +13,12 @@ type groupResult struct {
 
 // StateResult represents the result of a GetState operation.
 type StateResult struct {
-	groupResult
+	gophercloud.Result
+}
+
+// GetConfigResult represents the result of a GetConfig operation.
+type GetConfigResult struct {
+	gophercloud.Result
 }
 
 // Group represents an Auto Scale group.
@@ -79,6 +84,24 @@ const (
 	ERROR    Status = "ERROR"
 	DELETING Status = "DELETING"
 )
+
+// Configuration represents the basic configuration of a scaling group.
+type Configuration struct {
+	// The name of the scaling group.
+	Name string `mapstructure:"name" json:"name"`
+
+	// The cooldown period, in seconds, before any additional changes can happen.
+	Cooldown int `mapstructure:"cooldown" json:"cooldown"`
+
+	// The minimum number of entities in the scaling group.
+	MinEntities int `mapstructure:"minEntities" json:"minEntities"`
+
+	// The maximum number of entities that are allowed in the scaling group.
+	MaxEntities int `mapstructure:"maxEntities" json:"maxEntities"`
+
+	// Additional metadata for the group configuration.
+	Metadata map[string]string `mapstructure:"metadata" json:"metadata"`
+}
 
 // GroupPage is the page returned by a pager when traversing over a collection
 // of Auto Scale groups.
@@ -151,4 +174,23 @@ func (res StateResult) Extract() (*State, error) {
 	}
 
 	return &response.State, nil
+}
+
+// Extract attempts to interpret any GetConfigResult as a Configuration struct.
+func (res GetConfigResult) Extract() (*Configuration, error) {
+	if res.Err != nil {
+		return nil, res.Err
+	}
+
+	var response struct {
+		Configuration Configuration `mapstructure:"groupConfiguration"`
+	}
+
+	err := mapstructure.Decode(res.Body, &response)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.Configuration, nil
 }

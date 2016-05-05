@@ -212,7 +212,34 @@ const FirstGroupStateBody = `
 }
 `
 
+// GroupConfigurationBody contains the canned body of a groups.GetConfig response.
+const GroupConfigurationBody = `
+{
+  "groupConfiguration": {
+    "maxEntities": 3,
+    "name": "test-group",
+    "cooldown": 60,
+    "minEntities": 3,
+    "metadata": {
+      "foo": "bar"
+    }
+  }
+}
+`
+
 var (
+	// GroupConfiguration is a Configuration struct corresponding to the result
+	// in GroupConfigurationBody.
+	GroupConfiguration = Configuration{
+		Name:        "test-group",
+		Cooldown:    60,
+		MinEntities: 3,
+		MaxEntities: 3,
+		Metadata: map[string]string{
+			"foo": "bar",
+		},
+	}
+
 	// FirstGroupState is a State struct corresponding to the state of
 	// the first result in GroupListBody.
 	FirstGroupState = State{
@@ -293,5 +320,19 @@ func HandleGroupGetStateSuccessfully(t *testing.T) {
 		w.Header().Add("Content-Type", "application/json")
 
 		fmt.Fprintf(w, FirstGroupStateBody)
+	})
+}
+
+// HandleGroupGetConfigSuccessfully sets up the test server to respond to a group GetConfig request.
+func HandleGroupGetConfigSuccessfully(t *testing.T) {
+	path := "/groups/10eb3219-1b12-4b34-b1e4-e10ee4f24c65/config"
+
+	th.Mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		th.TestMethod(t, r, "GET")
+		th.TestHeader(t, r, "X-Auth-Token", client.TokenID)
+
+		w.Header().Add("Content-Type", "application/json")
+
+		fmt.Fprintf(w, GroupConfigurationBody)
 	})
 }

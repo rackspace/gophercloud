@@ -55,3 +55,20 @@ func TestGetState(t *testing.T) {
 
 	th.CheckDeepEquals(t, FirstGroupState, *state)
 }
+
+func TestGetConfig(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+	HandleGroupGetConfigSuccessfully(t)
+
+	client := client.ServiceClient()
+	groupID := "10eb3219-1b12-4b34-b1e4-e10ee4f24c65"
+
+	state, err := GetConfig(client, groupID).Extract()
+
+	if err != nil {
+		t.Fatalf("Unexpected GetState error: %v", err)
+	}
+
+	th.CheckDeepEquals(t, GroupConfiguration, *state)
+}

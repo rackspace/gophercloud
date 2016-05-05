@@ -61,3 +61,12 @@ func GetState(client *gophercloud.ServiceClient, groupID string) StateResult {
 
 	return result
 }
+
+// GetConfig requests the details of a given auto scale group's basic configuration.
+func GetConfig(client *gophercloud.ServiceClient, groupID string) GetConfigResult {
+	var result GetConfigResult
+
+	_, result.Err = client.Get(configURL(client, groupID), &result.Body, nil)
+
+	return result
+}
