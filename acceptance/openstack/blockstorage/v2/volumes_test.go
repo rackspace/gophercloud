@@ -51,7 +51,7 @@ func TestVolumes(t *testing.T) {
 	t.Logf("Got volume: %+v\n", v)
 
 	if v.Name != "gophercloud-updated-volume" {
-		t.Errorf("Unable to update volume: Expected name: gophercloud-updated-volume\nActual name: %s", v.Name)
+		t.Errorf("Unable to update volume: Expected name: gophercloud-updated-volume\nActual name: %q", v.Name)
 	}
 
 	err = volumes.List(client, &volumes.ListOpts{Name: "gophercloud-updated-volume"}).EachPage(func(page pagination.Page) (bool, error) {

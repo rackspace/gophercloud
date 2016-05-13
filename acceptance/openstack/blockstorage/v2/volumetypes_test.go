@@ -15,12 +15,13 @@ func TestVolumeTypes(t *testing.T) {
 	client, err := newClient(t)
 	th.AssertNoErr(t, err)
 
+	const volName = "gophercloud-test-volumeType"
 	vt, err := volumetypes.Create(client, &volumetypes.CreateOpts{
 		ExtraSpecs: map[string]interface{}{
 			"capabilities": "gpu",
 			"priority":     3,
 		},
-		Name: "gophercloud-test-volumeType",
+		Name: volName,
 	}).Extract()
 	th.AssertNoErr(t, err)
 	defer func() {
@@ -37,13 +38,22 @@ func TestVolumeTypes(t *testing.T) {
 	th.AssertNoErr(t, err)
 	t.Logf("Got volume type: %+v\n", vt)
 
+	found := false
 	err = volumetypes.List(client).EachPage(func(page pagination.Page) (bool, error) {
 		volTypes, err := volumetypes.ExtractVolumeTypes(page)
-		if len(volTypes) != 1 {
-			t.Errorf("Expected 1 volume type, got %d", len(volTypes))
+		if err != nil {
+			return false, err
 		}
-		t.Logf("Listing volume types: %+v\n", volTypes)
+		for _, volType := range volTypes {
+			t.Logf("Listing volume type: %+v\n", volType)
+			if volType.Name == volName {
+				found = true
+			}
+		}
 		return true, err
 	})
 	th.AssertNoErr(t, err)
+	if !found {
+		t.Errorf("Didn't find volume we created: %q", volName)
+	}
 }
