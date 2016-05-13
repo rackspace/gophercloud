@@ -1,12 +1,12 @@
 // +build acceptance
 
-package v1
+package v2
 
 import (
 	"testing"
 	"time"
 
-	"github.com/rackspace/gophercloud/openstack/blockstorage/v1/volumetypes"
+	"github.com/rackspace/gophercloud/openstack/blockstorage/v2/volumetypes"
 	"github.com/rackspace/gophercloud/pagination"
 	th "github.com/rackspace/gophercloud/testhelper"
 )

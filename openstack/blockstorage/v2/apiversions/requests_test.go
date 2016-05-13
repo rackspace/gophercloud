@@ -26,10 +26,10 @@ func TestListVersions(t *testing.T) {
 				{
 					"status": "CURRENT",
 					"updated": "2012-01-04T11:33:21Z",
-					"id": "v1.0",
+					"id": "v2.0",
 					"links": [
 						{
-							"href": "http://23.253.228.211:8776/v1/",
+							"href": "http://23.253.228.211:8776/v2/",
 							"rel": "self"
 						}
 					]
@@ -61,7 +61,7 @@ func TestListVersions(t *testing.T) {
 
 		expected := []APIVersion{
 			APIVersion{
-				ID:      "v1.0",
+				ID:      "v2.0",
 				Status:  "CURRENT",
 				Updated: "2012-01-04T11:33:21Z",
 			},
@@ -86,7 +86,7 @@ func TestAPIInfo(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 
-	th.Mux.HandleFunc("/v1/", func(w http.ResponseWriter, r *http.Request) {
+	th.Mux.HandleFunc("/v2/", func(w http.ResponseWriter, r *http.Request) {
 		th.TestMethod(t, r, "GET")
 		th.TestHeader(t, r, "X-Auth-Token", client.TokenID)
 
@@ -107,10 +107,10 @@ func TestAPIInfo(t *testing.T) {
 						"type": "application/vnd.openstack.volume+json;version=1"
 					}
 				],
-				"id": "v1.0",
+				"id": "v2.0",
 				"links": [
 					{
-						"href": "http://23.253.228.211:8776/v1/",
+						"href": "http://23.253.228.211:8776/v2/",
 						"rel": "self"
 					},
 					{
@@ -128,13 +128,13 @@ func TestAPIInfo(t *testing.T) {
 		}`)
 	})
 
-	actual, err := Get(client.ServiceClient(), "v1").Extract()
+	actual, err := Get(client.ServiceClient(), "v2").Extract()
 	if err != nil {
 		t.Errorf("Failed to extract version: %v", err)
 	}
 
 	expected := APIVersion{
-		ID:      "v1.0",
+		ID:      "v2.0",
 		Status:  "CURRENT",
 		Updated: "2012-01-04T11:33:21Z",
 	}

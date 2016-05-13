@@ -1,6 +1,6 @@
 // +build acceptance blockstorage
 
-package v1
+package v2
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/rackspace/gophercloud"
 	"github.com/rackspace/gophercloud/openstack"
-	"github.com/rackspace/gophercloud/openstack/blockstorage/v1/volumes"
+	"github.com/rackspace/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/rackspace/gophercloud/pagination"
 	th "github.com/rackspace/gophercloud/testhelper"
 )
@@ -20,7 +20,7 @@ func newClient(t *testing.T) (*gophercloud.ServiceClient, error) {
 	client, err := openstack.AuthenticatedClient(ao)
 	th.AssertNoErr(t, err)
 
-	return openstack.NewBlockStorageV1(client, gophercloud.EndpointOpts{
+	return openstack.NewBlockStorageV2(client, gophercloud.EndpointOpts{
 		Region: os.Getenv("OS_REGION_NAME"),
 	})
 }

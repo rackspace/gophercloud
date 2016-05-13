@@ -8,7 +8,7 @@ import (
 )
 
 const endpoint = "http://localhost:57909/"
-const endpoint2 = "http://localhost:57909/v1/3a02ee0b5cf14816b41b17e851d29a94"
+const endpoint2 = "http://localhost:57909/v2/3a02ee0b5cf14816b41b17e851d29a94"
 
 func endpointClient() *gophercloud.ServiceClient {
 	return &gophercloud.ServiceClient{Endpoint: endpoint}
@@ -19,8 +19,8 @@ func endpointClient2() *gophercloud.ServiceClient {
 }
 
 func TestGetURL(t *testing.T) {
-	actual := getURL(endpointClient(), "v1")
-	expected := endpoint + "v1/"
+	actual := getURL(endpointClient(), "v2")
+	expected := endpoint + "v2/"
 	th.AssertEquals(t, expected, actual)
 }
 

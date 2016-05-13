@@ -3,7 +3,7 @@ package volumes
 import (
 	"testing"
 
-	fixtures "github.com/rackspace/gophercloud/openstack/blockstorage/v1/volumes/testing"
+	fixtures "github.com/rackspace/gophercloud/openstack/blockstorage/v2/volumes/testing"
 	"github.com/rackspace/gophercloud/pagination"
 	th "github.com/rackspace/gophercloud/testhelper"
 	"github.com/rackspace/gophercloud/testhelper/client"

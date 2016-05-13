@@ -92,7 +92,7 @@ func MockUpdateMetadataResponse(t *testing.T) {
 		th.TestJSONRequest(t, r, `
     {
       "metadata": {
-        "key": "v1"
+        "key": "v2"
       }
     }
     `)
@@ -100,7 +100,7 @@ func MockUpdateMetadataResponse(t *testing.T) {
 		fmt.Fprintf(w, `
       {
         "metadata": {
-          "key": "v1"
+          "key": "v2"
         }
       }
     `)
