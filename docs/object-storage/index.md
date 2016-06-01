@@ -204,12 +204,12 @@ err := pager.EachPage(func(page pagination.Page) (bool, error) {
 
 	// Get a slice of objects.Object structs
 	objectList, err := objects.ExtractInfo(page)
-	for _, n := range objectNames {
+	for _, o := range objectList {
 		// ...
 	}
 
 	// Get a slice of strings, i.e. object names
-	objectNames, err := containers.ExtractNames(page)
+	objectNames, err := objects.ExtractNames(page)
 	for _, n := range objectNames {
 		// ...
 	}
