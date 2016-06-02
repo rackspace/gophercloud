@@ -109,17 +109,10 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 		// Password authentication.
 		req.Auth.Identity.Methods = []string{"password"}
 
-		// At least one of Username and UserID must be specified.
-		if options.Username == "" && options.UserID == "" {
+		if options.UserID != "" && options.Username != "" {
+			// At least one of Username and UserID must be specified.
 			return createErr(ErrUsernameOrUserID)
-		}
-
-		if options.Username != "" {
-			// If Username is provided, UserID may not be provided.
-			if options.UserID != "" {
-				return createErr(ErrUsernameOrUserID)
-			}
-
+		} else if options.Username != "" {
 			// Either DomainID or DomainName must also be specified.
 			if options.DomainID == "" && options.DomainName == "" {
 				return createErr(ErrDomainIDOrDomainName)
@@ -150,9 +143,7 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 					},
 				}
 			}
-		}
-
-		if options.UserID != "" {
+		} else if options.UserID != "" {
 			// If UserID is specified, neither DomainID nor DomainName may be.
 			if options.DomainID != "" {
 				return createErr(ErrDomainIDWithUserID)
@@ -165,6 +156,9 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 			req.Auth.Identity.Password = &passwordReq{
 				User: userReq{ID: &options.UserID, Password: options.Password},
 			}
+		} else {
+			// At least one of Username and UserID must be specified.
+			return createErr(ErrUsernameOrUserID)
 		}
 	}
 
