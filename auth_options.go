@@ -27,10 +27,6 @@ type AuthOptions struct {
 	// preferred method of authentication.
 	Password, APIKey string
 
-	// At most one of DomainID and DomainName must be provided if using Username
-	// with Identity V3. Otherwise, either are optional.
-	DomainID, DomainName string
-
 	// The TenantID and TenantName fields are optional for the Identity V2 API.
 	// Some providers allow you to specify a TenantName instead of the TenantId.
 	// Some require both. Your provider's authentication policies will determine
@@ -44,7 +40,7 @@ type AuthOptions struct {
 	// possible.  This setting defaults to false.
 	//
 	// NOTE: The reauth function will try to re-authenticate endlessly if left unchecked.
-	// The way to limit the number of attempts is to provide a custom HTTP client to the provider client 
+	// The way to limit the number of attempts is to provide a custom HTTP client to the provider client
 	// and provide a transport that implements the RoundTripper interface and stores the number of failed retries.
 	// For an example of this, see here: https://github.com/rackspace/rack/blob/1.0.0/auth/clients.go#L311
 	AllowReauth bool
@@ -52,4 +48,21 @@ type AuthOptions struct {
 	// TokenID allows users to authenticate (possibly as another user) with an
 	// authentication token ID.
 	TokenID string
+
+	// Identity API v3: if the user and project share the same domain, the User
+	// Domain and Project/Domain scope can be set to this value.
+	DefaultDomain string
+
+	// Identity API v3: Domain of the user in order to uniquely identify the user
+	UserDomainName, UserDomainID string
+
+	// Identity API v3: Domain for domain scoping.
+	// At most one of DomainID and DomainName must be provided if using Username
+	// with Identity V3. Otherwise, either are optional.
+	DomainID, DomainName string
+
+	// Identity API v3: Project's domain for project scoping.
+	// Note: The tenant_* keyword is deprecated as of the 1.7.0 release in
+	// favor of project_*
+	ProjectDomainID, ProjectDomainName string
 }
