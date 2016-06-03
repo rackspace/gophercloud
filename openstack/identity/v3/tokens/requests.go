@@ -210,14 +210,15 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 				}
 			}
 		} else if scope.DomainID != "" {
+			// Domain scoping using the domain id
 			// DomainID provided. ProjectID, ProjectName, and DomainName may not be provided.
 			if scope.DomainName != "" {
 				return createErr(ErrScopeDomainIDOrDomainName)
-			}
-
-			// DomainID
-			req.Auth.Scope = &scopeReq{
-				Domain: &domainReq{ID: &scope.DomainID},
+			} else {
+				// DomainID scope
+				req.Auth.Scope = &scopeReq{
+					Domain: &domainReq{ID: &scope.DomainID},
+				}
 			}
 		} else if scope.DomainName != "" {
 			return createErr(ErrScopeDomainName)
