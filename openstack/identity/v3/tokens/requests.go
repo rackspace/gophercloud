@@ -113,17 +113,11 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 			// At least one of Username and UserID must be specified.
 			return createErr(ErrUsernameOrUserID)
 		} else if options.Username != "" {
-			// Either DomainID or DomainName must also be specified.
-			if options.DomainID == "" && options.DomainName == "" {
+			switch {
+			case options.DomainID != "" && options.DomainName != "":
 				return createErr(ErrDomainIDOrDomainName)
-			}
-
-			if options.DomainID != "" {
-				if options.DomainName != "" {
-					return createErr(ErrDomainIDOrDomainName)
-				}
-
-				// Configure the request for Username and Password authentication with a DomainID.
+			// Configure the request for Username and Password authentication with a DomainID.
+			case options.DomainID != "":
 				req.Auth.Identity.Password = &passwordReq{
 					User: userReq{
 						Name:     &options.Username,
@@ -131,10 +125,8 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 						Domain:   &domainReq{ID: &options.DomainID},
 					},
 				}
-			}
-
-			if options.DomainName != "" {
-				// Configure the request for Username and Password authentication with a DomainName.
+			// Configure the request for Username and Password authentication with a DomainName.
+			case options.DomainName != "":
 				req.Auth.Identity.Password = &passwordReq{
 					User: userReq{
 						Name:     &options.Username,
@@ -142,6 +134,18 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 						Domain:   &domainReq{Name: &options.DomainName},
 					},
 				}
+			// Configure the request for Username and Password authentication with a DefaultDomain.
+			case options.DefaultDomain != "":
+				req.Auth.Identity.Password = &passwordReq{
+					User: userReq{
+						Name:     &options.Username,
+						Password: options.Password,
+						Domain:   &domainReq{Name: &options.DefaultDomain},
+					},
+				}
+			default:
+				// Either DomainID or DomainName or DefaultDomain must also be specified.
+				return createErr(ErrDomainIDOrDomainNameOrDefaultDomain)
 			}
 		} else if options.UserID != "" {
 			// If UserID is specified, neither DomainID nor DomainName may be.
