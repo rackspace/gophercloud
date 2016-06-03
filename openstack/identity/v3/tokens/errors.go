@@ -52,6 +52,9 @@ var (
 	// It may also indicate that both a DomainID and a DomainName were provided at once.
 	ErrDomainIDOrDomainName = errors.New("You must provide exactly one of DomainID or DomainName to authenticate by Username")
 
+	// ErrDomainIDOrDomainNameORDefaultDomain indicates that a username was provided, but no domain to scope it.
+	ErrDomainIDOrDomainNameOrDefaultDomain = errors.New("You must provide exactly one of DomainID/DomainName/DefaultDomain to authenticate by Username")
+
 	// ErrMissingPassword indicates that no password was provided and no token is available.
 	ErrMissingPassword = errors.New("You must provide a password to authenticate")
 
