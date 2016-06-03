@@ -148,17 +148,18 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 				return createErr(ErrDomainIDOrDomainNameOrDefaultDomain)
 			}
 		} else if options.UserID != "" {
-			// If UserID is specified, neither DomainID nor DomainName may be.
-			if options.DomainID != "" {
+			// If UserID is specified, neither UserDomainID nor UserDomainName may be.
+			// Note: keeping DomainID and DomainName to not break previous versions of GopherCloud
+			switch {
+			case options.DomainID != "" || options.UserDomainID != "":
 				return createErr(ErrDomainIDWithUserID)
-			}
-			if options.DomainName != "" {
+			case options.DomainName != "" || options.UserDomainName != "":
 				return createErr(ErrDomainNameWithUserID)
-			}
-
-			// Configure the request for UserID and Password authentication.
-			req.Auth.Identity.Password = &passwordReq{
-				User: userReq{ID: &options.UserID, Password: options.Password},
+			default:
+				// Configure the request for UserID and Password authentication.
+				req.Auth.Identity.Password = &passwordReq{
+					User: userReq{ID: &options.UserID, Password: options.Password},
+				}
 			}
 		} else {
 			// At least one of Username and UserID must be specified.
