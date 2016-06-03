@@ -221,7 +221,11 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 				}
 			}
 		} else if scope.DomainName != "" {
-			return createErr(ErrScopeDomainName)
+			// Domain scoping using the domain name
+			// DomainName scope
+			req.Auth.Scope = &scopeReq{
+				Domain: &domainReq{Name: &scope.DomainName},
+			}
 		} else {
 			return createErr(ErrScopeEmpty)
 		}
