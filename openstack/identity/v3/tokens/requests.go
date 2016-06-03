@@ -169,14 +169,14 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 
 	// Add a "scope" element if a Scope has been provided.
 	if scope != nil {
-		if scope.ProjectName != "" {
+		if scope.ProjectName != "" && scope.ProjectID != "" {
+			// ProjectID may not be supplied.
+			return createErr(ErrScopeProjectIDOrProjectName)
+		} else if scope.ProjectName != "" {
 			// ProjectName provided: either DomainID or DomainName must also be supplied.
 			// ProjectID may not be supplied.
 			if scope.DomainID == "" && scope.DomainName == "" {
 				return createErr(ErrScopeDomainIDOrDomainName)
-			}
-			if scope.ProjectID != "" {
-				return createErr(ErrScopeProjectIDOrProjectName)
 			}
 
 			if scope.DomainID != "" {
