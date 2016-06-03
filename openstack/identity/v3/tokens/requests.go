@@ -173,13 +173,9 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 			// ProjectID may not be supplied.
 			return createErr(ErrScopeProjectIDOrProjectName)
 		} else if scope.ProjectName != "" {
-			// ProjectName provided: either DomainID or DomainName must also be supplied.
-			// ProjectID may not be supplied.
-			if scope.DomainID == "" && scope.DomainName == "" {
-				return createErr(ErrScopeDomainIDOrDomainName)
-			}
-
-			if scope.DomainID != "" {
+			// Project scoping using the project name
+			switch {
+			case scope.DomainID != "":
 				// ProjectName + DomainID
 				req.Auth.Scope = &scopeReq{
 					Project: &projectReq{
@@ -187,9 +183,7 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 						Domain: &domainReq{ID: &scope.DomainID},
 					},
 				}
-			}
-
-			if scope.DomainName != "" {
+			case scope.DomainName != "":
 				// ProjectName + DomainName
 				req.Auth.Scope = &scopeReq{
 					Project: &projectReq{
@@ -197,6 +191,9 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 						Domain: &domainReq{Name: &scope.DomainName},
 					},
 				}
+			default:
+				// Either DomainID or DomainName must be supplied.
+				return createErr(ErrScopeDomainIDOrDomainName)
 			}
 		} else if scope.ProjectID != "" {
 			// ProjectID provided. ProjectName, DomainID, and DomainName may not be provided.
