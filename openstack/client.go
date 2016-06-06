@@ -145,15 +145,29 @@ func v3auth(client *gophercloud.ProviderClient, endpoint string, options gopherc
 		}
 		v3Options.TenantID = ""
 		v3Options.TenantName = ""
-	} else {
-		if options.TenantName != "" {
+	} else if options.TenantName != "" {
+		switch {
+		// Project scoping
+		case options.ProjectDomainID != "" || options.ProjectDomainName != "":
 			scope = &tokens3.Scope{
 				ProjectName: options.TenantName,
-				DomainID:    options.DomainID,
-				DomainName:  options.DomainName,
+				DomainID:    options.ProjectDomainID,
+				DomainName:  options.ProjectDomainName,
 			}
-			v3Options.TenantName = ""
+		// Domain scoping
+		case options.DomainID != "" || options.DomainName != "":
+			scope = &tokens3.Scope{
+				DomainID:   options.DomainID,
+				DomainName: options.DomainName,
+			}
+		// Default domain scoping
+		default:
+			scope = &tokens3.Scope{
+				DomainID: options.DefaultDomain,
+			}
 		}
+
+		v3Options.TenantName = ""
 	}
 
 	result := tokens3.Create(v3Client, v3Options, scope)

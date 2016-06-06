@@ -87,23 +87,19 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 		if c.TokenID != "" {
 			// Because we aren't using password authentication, it's an error to also provide any of the user-based authentication
 			// parameters.
-			if options.Username != "" {
+			switch {
+			case options.Username != "":
 				return createErr(ErrUsernameWithToken)
-			}
-			if options.UserID != "" {
+			case options.UserID != "":
 				return createErr(ErrUserIDWithToken)
-			}
-			if options.DomainID != "" {
+			case options.DomainID != "":
 				return createErr(ErrDomainIDWithToken)
-			}
-			if options.DomainName != "" {
+			case options.DomainName != "":
 				return createErr(ErrDomainNameWithToken)
-			}
-
-			// Configure the request for Token authentication.
-			req.Auth.Identity.Methods = []string{"token"}
-			req.Auth.Identity.Token = &tokenReq{
-				ID: c.TokenID,
+			default:
+				// Configure the request for Token authentication.
+				req.Auth.Identity.Methods = []string{"token"}
+				req.Auth.Identity.Token = &tokenReq{ID: c.TokenID}
 			}
 		} else {
 			// If no password or token ID are available, authentication can't continue.
@@ -113,28 +109,15 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 		// Password authentication.
 		req.Auth.Identity.Methods = []string{"password"}
 
-		// At least one of Username and UserID must be specified.
-		if options.Username == "" && options.UserID == "" {
+		if options.UserID != "" && options.Username != "" {
+			// At least one of Username and UserID must be specified.
 			return createErr(ErrUsernameOrUserID)
-		}
-
-		if options.Username != "" {
-			// If Username is provided, UserID may not be provided.
-			if options.UserID != "" {
-				return createErr(ErrUsernameOrUserID)
-			}
-
-			// Either DomainID or DomainName must also be specified.
-			if options.DomainID == "" && options.DomainName == "" {
+		} else if options.Username != "" {
+			switch {
+			case options.DomainID != "" && options.DomainName != "":
 				return createErr(ErrDomainIDOrDomainName)
-			}
-
-			if options.DomainID != "" {
-				if options.DomainName != "" {
-					return createErr(ErrDomainIDOrDomainName)
-				}
-
-				// Configure the request for Username and Password authentication with a DomainID.
+			// Configure the request for Username and Password authentication with a DomainID.
+			case options.DomainID != "":
 				req.Auth.Identity.Password = &passwordReq{
 					User: userReq{
 						Name:     &options.Username,
@@ -142,10 +125,8 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 						Domain:   &domainReq{ID: &options.DomainID},
 					},
 				}
-			}
-
-			if options.DomainName != "" {
-				// Configure the request for Username and Password authentication with a DomainName.
+			// Configure the request for Username and Password authentication with a DomainName.
+			case options.DomainName != "":
 				req.Auth.Identity.Password = &passwordReq{
 					User: userReq{
 						Name:     &options.Username,
@@ -153,38 +134,48 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 						Domain:   &domainReq{Name: &options.DomainName},
 					},
 				}
+			// Configure the request for Username and Password authentication with a DefaultDomain.
+			case options.DefaultDomain != "":
+				req.Auth.Identity.Password = &passwordReq{
+					User: userReq{
+						Name:     &options.Username,
+						Password: options.Password,
+						Domain:   &domainReq{Name: &options.DefaultDomain},
+					},
+				}
+			default:
+				// Either DomainID or DomainName or DefaultDomain must also be specified.
+				return createErr(ErrDomainIDOrDomainNameOrDefaultDomain)
 			}
-		}
-
-		if options.UserID != "" {
-			// If UserID is specified, neither DomainID nor DomainName may be.
-			if options.DomainID != "" {
+		} else if options.UserID != "" {
+			// If UserID is specified, neither UserDomainID nor UserDomainName may be.
+			// Note: keeping DomainID and DomainName to not break previous versions of GopherCloud
+			switch {
+			case options.DomainID != "" || options.UserDomainID != "":
 				return createErr(ErrDomainIDWithUserID)
-			}
-			if options.DomainName != "" {
+			case options.DomainName != "" || options.UserDomainName != "":
 				return createErr(ErrDomainNameWithUserID)
+			default:
+				// Configure the request for UserID and Password authentication.
+				req.Auth.Identity.Password = &passwordReq{
+					User: userReq{ID: &options.UserID, Password: options.Password},
+				}
 			}
-
-			// Configure the request for UserID and Password authentication.
-			req.Auth.Identity.Password = &passwordReq{
-				User: userReq{ID: &options.UserID, Password: options.Password},
-			}
+		} else {
+			// At least one of Username and UserID must be specified.
+			return createErr(ErrUsernameOrUserID)
 		}
 	}
 
 	// Add a "scope" element if a Scope has been provided.
 	if scope != nil {
-		if scope.ProjectName != "" {
-			// ProjectName provided: either DomainID or DomainName must also be supplied.
+		if scope.ProjectName != "" && scope.ProjectID != "" {
 			// ProjectID may not be supplied.
-			if scope.DomainID == "" && scope.DomainName == "" {
-				return createErr(ErrScopeDomainIDOrDomainName)
-			}
-			if scope.ProjectID != "" {
-				return createErr(ErrScopeProjectIDOrProjectName)
-			}
-
-			if scope.DomainID != "" {
+			return createErr(ErrScopeProjectIDOrProjectName)
+		} else if scope.ProjectName != "" {
+			// Project scoping using the project name
+			switch {
+			case scope.DomainID != "":
 				// ProjectName + DomainID
 				req.Auth.Scope = &scopeReq{
 					Project: &projectReq{
@@ -192,9 +183,7 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 						Domain: &domainReq{ID: &scope.DomainID},
 					},
 				}
-			}
-
-			if scope.DomainName != "" {
+			case scope.DomainName != "":
 				// ProjectName + DomainName
 				req.Auth.Scope = &scopeReq{
 					Project: &projectReq{
@@ -202,32 +191,41 @@ func Create(c *gophercloud.ServiceClient, options gophercloud.AuthOptions, scope
 						Domain: &domainReq{Name: &scope.DomainName},
 					},
 				}
+			default:
+				// Either DomainID or DomainName must be supplied.
+				return createErr(ErrScopeDomainIDOrDomainName)
 			}
 		} else if scope.ProjectID != "" {
+			// Project scoping using the project id
 			// ProjectID provided. ProjectName, DomainID, and DomainName may not be provided.
-			if scope.DomainID != "" {
+			switch {
+			case scope.DomainID != "":
 				return createErr(ErrScopeProjectIDAlone)
-			}
-			if scope.DomainName != "" {
+			case scope.DomainName != "":
 				return createErr(ErrScopeProjectIDAlone)
-			}
-
-			// ProjectID
-			req.Auth.Scope = &scopeReq{
-				Project: &projectReq{ID: &scope.ProjectID},
+			default:
+				// ProjectID
+				req.Auth.Scope = &scopeReq{
+					Project: &projectReq{ID: &scope.ProjectID},
+				}
 			}
 		} else if scope.DomainID != "" {
+			// Domain scoping using the domain id
 			// DomainID provided. ProjectID, ProjectName, and DomainName may not be provided.
 			if scope.DomainName != "" {
 				return createErr(ErrScopeDomainIDOrDomainName)
-			}
-
-			// DomainID
-			req.Auth.Scope = &scopeReq{
-				Domain: &domainReq{ID: &scope.DomainID},
+			} else {
+				// DomainID scope
+				req.Auth.Scope = &scopeReq{
+					Domain: &domainReq{ID: &scope.DomainID},
+				}
 			}
 		} else if scope.DomainName != "" {
-			return createErr(ErrScopeDomainName)
+			// Domain scoping using the domain name
+			// DomainName scope
+			req.Auth.Scope = &scopeReq{
+				Domain: &domainReq{Name: &scope.DomainName},
+			}
 		} else {
 			return createErr(ErrScopeEmpty)
 		}
