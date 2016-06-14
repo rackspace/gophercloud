@@ -31,6 +31,8 @@ type CreateOpts struct {
 	SnapshotID, SourceVolID, ImageID string
 	// OPTIONAL
 	VolumeType string
+	// OPTIONAL
+	Multiattach bool
 }
 
 // ToVolumeCreateMap assembles a request body based on the contents of a
@@ -66,6 +68,9 @@ func (opts CreateOpts) ToVolumeCreateMap() (map[string]interface{}, error) {
 	}
 	if opts.VolumeType != "" {
 		v["volume_type"] = opts.VolumeType
+	}
+	if opts.Multiattach {
+		v["multiattach"] = "1"
 	}
 
 	return map[string]interface{}{"volume": v}, nil

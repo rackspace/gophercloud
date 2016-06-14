@@ -42,6 +42,9 @@ type Volume struct {
 	// Arbitrary key-value pairs defined by the user.
 	Metadata map[string]string `mapstructure:"metadata"`
 
+	// Multiattach denotes if the volume is multi-attach capable.
+	Multiattach bool `mapstructure:"multiattach"`
+
 	// Unique identifier for the volume.
 	ID string `mapstructure:"id"`
 
