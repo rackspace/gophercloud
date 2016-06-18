@@ -74,7 +74,7 @@ func Detach(client *gophercloud.ServiceClient, id string) DetachResult {
 	var res DetachResult
 
 	v := make(map[string]interface{})
-	reqBody := map[string]interface{}{"os-detach": v}
+	reqBody := map[string]interface{}{"os-force_detach": v}
 
 	_, res.Err = client.Post(detachURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
 		OkCodes: []int{202},
