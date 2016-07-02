@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -153,6 +155,13 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 		return nil, err
 	}
 
+	// If GOPHERCLOUD_DEBUG is set, print the request URL and Body for debugging purposes
+	if os.Getenv("GOPHERCLOUD_DEBUG") != "" {
+		log.Printf("[gophercloud] Request URL: %s", url)
+		log.Printf("[gophercloud] Request Method: %s", method)
+		log.Printf("[gophercloud] Request Body: %s", body)
+	}
+
 	// Populate the request headers. Apply options.MoreHeaders last, to give the caller the chance to
 	// modify or omit any header.
 	if contentType != nil {
@@ -179,7 +188,7 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 
 	// Set connection parameter to close the connection immediately when we've got the response
 	req.Close = true
-	
+
 	// Issue the request.
 	resp, err := client.HTTPClient.Do(req)
 	if err != nil {
@@ -236,6 +245,13 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 		if err := json.NewDecoder(resp.Body).Decode(options.JSONResponse); err != nil {
 			return nil, err
 		}
+	}
+
+	// If GOPHERCLOUD_DEBUG is set, print the result URL and Body for debugging purposes
+	if os.Getenv("GOPHERCLOUD_DEBUG") != "" {
+		log.Printf("[gophercloud] Result URL: %s", url)
+		log.Printf("[gophercloud] Result Method: %s", method)
+		log.Printf("[gophercloud] Result Body: %s", body)
 	}
 
 	return resp, nil
