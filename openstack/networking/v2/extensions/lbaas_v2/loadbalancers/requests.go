@@ -30,6 +30,9 @@ type loadbalancerOpts struct {
 	// Optional. The IP address of the Loadbalancer.
 	VipAddress string
 
+	// Optional. The Port ID associated with the VIP address of the Loadbalancer.
+	VipPortID string
+
 	// Optional. The administrative state of the Loadbalancer. A valid value is true (UP)
 	// or false (DOWN).
 	AdminStateUp *bool
@@ -67,6 +70,7 @@ type ListOpts struct {
 	TenantID           string `q:"tenant_id"`
 	ProvisioningStatus string `q:"provisioning_status"`
 	VipAddress         string `q:"vip_address"`
+	VipPortID          string `q:"vip_port_id"`
 	VipSubnetID        string `q:"vip_subnet_id"`
 	ID                 string `q:"id"`
 	OperatingStatus    string `q:"operating_status"`
@@ -148,6 +152,9 @@ func (opts CreateOpts) ToLoadbalancerCreateMap() (map[string]interface{}, error)
 	}
 	if opts.VipAddress != "" {
 		l["vip_address"] = opts.VipAddress
+	}
+	if opts.VipPortID != "" {
+		l["vip_port_id"] = opts.VipPortID
 	}
 	if opts.Flavor != "" {
 		l["flavor"] = opts.Flavor
