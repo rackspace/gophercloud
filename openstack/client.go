@@ -162,6 +162,7 @@ func v3auth(client *gophercloud.ProviderClient, endpoint string, options gopherc
 	v3Options := options
 
 	var scope *tokens3.Scope
+
 	if options.TenantID != "" {
 		scope = &tokens3.Scope{
 			ProjectID: options.TenantID,
