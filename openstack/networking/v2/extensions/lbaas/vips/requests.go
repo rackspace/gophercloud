@@ -126,10 +126,6 @@ func Create(c *gophercloud.ServiceClient, opts CreateOpts) CreateResult {
 		res.Err = errNameRequired
 		return res
 	}
-	if opts.SubnetID == "" {
-		res.Err = errSubnetIDRequried
-		return res
-	}
 	if opts.Protocol == "" {
 		res.Err = errProtocolRequired
 		return res
@@ -145,7 +141,7 @@ func Create(c *gophercloud.ServiceClient, opts CreateOpts) CreateResult {
 
 	type vip struct {
 		Name         string              `json:"name"`
-		SubnetID     string              `json:"subnet_id"`
+		SubnetID     string              `json:"subnet_id,omitempty"`
 		Protocol     string              `json:"protocol"`
 		ProtocolPort int                 `json:"protocol_port"`
 		PoolID       string              `json:"pool_id"`
