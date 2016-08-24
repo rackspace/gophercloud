@@ -25,6 +25,12 @@ func TestDettachURL(t *testing.T) {
 	th.AssertEquals(t, expected, actual)
 }
 
+func TestUploadImageURL(t *testing.T) {
+	actual := uploadURL(endpointClient(), "foo")
+	expected := endpoint + "volumes/foo/action"
+	th.AssertEquals(t, expected, actual)
+}
+
 func TestReserveURL(t *testing.T) {
 	actual := reserveURL(endpointClient(), "foo")
 	expected := endpoint + "volumes/foo/action"

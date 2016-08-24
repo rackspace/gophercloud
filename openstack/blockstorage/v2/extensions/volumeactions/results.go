@@ -29,6 +29,11 @@ type UnreserveResult struct {
 	gophercloud.ErrResult
 }
 
+// UploadImageResult contains the response body and error from a UploadImage request.
+type UploadImageResult struct {
+	gophercloud.ErrResult
+}
+
 // InitializeConnectionResult contains the response body and error from a Get request.
 type InitializeConnectionResult struct {
 	commonResult
