@@ -17,7 +17,7 @@ func authTokenPost(t *testing.T, options gophercloud.AuthOptions, scope *tokens.
 
 	client := gophercloud.ServiceClient{
 		ProviderClient: &gophercloud.ProviderClient{
-			TokenID: "12345abcdef",
+			TokenID: options.TokenID,
 		},
 		Endpoint: testhelper.Endpoint(),
 	}
@@ -64,7 +64,7 @@ func authTokenPostErr(t *testing.T, options gophercloud.AuthOptions, scope *toke
 }
 
 func TestTrustIDTokenID(t *testing.T) {
-	options := gophercloud.AuthOptions{TokenID: "old_trustee"}
+	options := gophercloud.AuthOptions{TokenID: "trustee_token"}
 	var scope *tokens.Scope
 	authTokenPost(t, options, scope, `
 		{
@@ -74,7 +74,7 @@ func TestTrustIDTokenID(t *testing.T) {
 				"token"
 			      ],
 				"token": {
-					"id": "12345abcdef"
+					"id": "trustee_token"
 			      }
 		    },
 		    "scope": {
@@ -89,7 +89,7 @@ func TestTrustIDTokenID(t *testing.T) {
 }
 
 func TestFailurePassword(t *testing.T) {
-	options := gophercloud.AuthOptions{TokenID: "fakeidnopass"}
+	options := gophercloud.AuthOptions{TokenID: ""}
 	//Service Client must have tokenId or password,
 	//setting include tokenId to false
 	//scope := &Scope{TrustID: "notenough"}
