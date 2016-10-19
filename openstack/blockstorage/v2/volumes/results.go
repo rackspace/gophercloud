@@ -71,6 +71,9 @@ type Volume struct {
 
 	// UserID is the id of the user who created the volume.
 	UserID string `mapstructure:"user_id"`
+
+	// Attachment identifier for detaching a volume from a storage
+	AttachmentID string `mapstructure:"attachment_id"`
 }
 
 // CreateResult contains the response body and error from a Create request.

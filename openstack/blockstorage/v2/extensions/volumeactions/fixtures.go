@@ -43,7 +43,10 @@ func MockDetachResponse(t *testing.T) {
 			th.TestHeader(t, r, "Accept", "application/json")
 			th.TestJSONRequest(t, r, `
 {
-    "os-detach": {}
+    "os-detach":
+    {
+        "attachment_id": "d8483b65-515b-4dae-b811-3ffaca3cc6e7"
+    }
 }
           `)
 
