@@ -47,6 +47,19 @@ type Project struct {
 	Name string `mapstructure:"name"`
 }
 
+// Domain provides information about the domain to which this token grants access.
+type Domain struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
+}
+
+// User represents a user resource that exists on the API.
+type User struct {
+	Domain Domain `mapstructure:"domain"`
+	ID     string `mapstructure:"id"`
+	Name   string `mapstructure:"name"`
+}
+
 // Authorization need user info which can get from token authentication's response
 type Role struct {
 	ID   string `mapstructure:"id"`
@@ -120,6 +133,26 @@ func (result CreateResult) ExtractServiceCatalog() (*ServiceCatalog, error) {
 	}
 
 	return &ServiceCatalog{Entries: response.Token.Entries}, nil
+}
+
+// ExtractUser returns the User that was generated along with the user's Token.
+func (result CreateResult) ExtractUser() (*User, error) {
+	if result.Err != nil {
+		return nil, result.Err
+	}
+
+	var response struct {
+		Token struct {
+			User User `mapstructure:"user"`
+		} `mapstructure:"token"`
+	}
+
+	err := mapstructure.Decode(result.Body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.Token.User, nil
 }
 
 // CreateResult defers the interpretation of a created token.
