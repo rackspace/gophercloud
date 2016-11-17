@@ -37,7 +37,7 @@ go get github.com/rackspace/gophercloud
 godep save ./...
 ```
 
-This will install all the source files you need into a `Godeps/_workspace` directory, which is
+This will install all the source files you need into a `vendor/` directory (or `Godeps/_workspace` when using older versions of Go), which is
 referenceable from your own source files when you use the `godep go` command.
 
 ## Getting started
