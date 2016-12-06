@@ -131,8 +131,6 @@ func (opts CreateOpts) ToLoadbalancerCreateMap() (map[string]interface{}, error)
 
 	if opts.VipSubnetID != "" {
 		l["vip_subnet_id"] = opts.VipSubnetID
-	} else {
-		return nil, errVipSubnetIDRequried
 	}
 	if opts.AdminStateUp != nil {
 		l["admin_state_up"] = &opts.AdminStateUp

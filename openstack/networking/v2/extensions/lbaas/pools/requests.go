@@ -86,7 +86,7 @@ func Create(c *gophercloud.ServiceClient, opts CreateOpts) CreateResult {
 		Name     string `json:"name"`
 		TenantID string `json:"tenant_id,omitempty"`
 		Protocol string `json:"protocol"`
-		SubnetID string `json:"subnet_id"`
+		SubnetID string `json:"subnet_id,omitempty"`
 		LBMethod string `json:"lb_method"`
 		Provider string `json:"provider,omitempty"`
 	}
