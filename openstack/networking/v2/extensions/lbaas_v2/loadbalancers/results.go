@@ -26,6 +26,9 @@ type LoadBalancer struct {
 	// The IP address of the Loadbalancer.
 	VipAddress string `mapstructure:"vip_address" json:"vip_address"`
 
+	// The UUID of the port associated with the IP address.
+	VipPortID string `mapstructure:"vip_port_id" json:"vip_port_id"`
+
 	// The UUID of the subnet on which to allocate the virtual IP for the Loadbalancer address.
 	VipSubnetID string `mapstructure:"vip_subnet_id" json:"vip_subnet_id"`
 
