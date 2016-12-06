@@ -32,6 +32,23 @@ func TestDetach(t *testing.T) {
 	th.AssertNoErr(t, err)
 }
 
+func TestUploadImage(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	MockUploadImageResponse(t)
+
+	options := &UploadImageOpts{
+		ContainerFormat: "bare",
+		DiskFormat:      "raw",
+		ImageName:       "test",
+		Force:           true,
+	}
+
+	err := UploadImage(client.ServiceClient(), "cd281d77-8217-4830-be95-9528227c105c", options).ExtractErr()
+	th.AssertNoErr(t, err)
+}
+
 func TestReserve(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()

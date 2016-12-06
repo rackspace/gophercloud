@@ -10,6 +10,12 @@ type AttachOptsBuilder interface {
 	ToVolumeAttachMap() (map[string]interface{}, error)
 }
 
+// UploadImageOptsBuilder allows extensions to add additional parameters to the
+// UploadImage request.
+type UploadImageOptsBuilder interface {
+	ToVolumeUploadImageMap() (map[string]interface{}, error)
+}
+
 // AttachMode describes the attachment mode for volumes.
 type AttachMode string
 
@@ -31,6 +37,21 @@ type AttachOpts struct {
 	Mode AttachMode
 }
 
+// UploadImageOpts contains options for uploading a Volume to image storage.
+type UploadImageOpts struct {
+	// Container format, may be bare, ofv, ova, etc.
+	ContainerFormat string
+
+	// Disk format, may be raw, qcow2, vhd, vdi, vmdk, etc.
+	DiskFormat string
+
+	// The name of image that will be stored in glance
+	ImageName string
+
+	// Force image creation, usable if volume attached to instance
+	Force bool
+}
+
 // ToVolumeAttachMap assembles a request body based on the contents of a
 // AttachOpts.
 func (opts AttachOpts) ToVolumeAttachMap() (map[string]interface{}, error) {
@@ -50,6 +71,30 @@ func (opts AttachOpts) ToVolumeAttachMap() (map[string]interface{}, error) {
 	}
 
 	return map[string]interface{}{"os-attach": v}, nil
+}
+
+// ToVolumeUploadImageMap assembles a request body based on the contents of a
+// UploadImageOpts.
+func (opts UploadImageOpts) ToVolumeUploadImageMap() (map[string]interface{}, error) {
+	v := make(map[string]interface{})
+
+	if opts.ContainerFormat != "" {
+		v["container_format"] = opts.ContainerFormat
+	}
+
+	if opts.DiskFormat != "" {
+		v["disk_format"] = opts.DiskFormat
+	}
+
+	if opts.ImageName != "" {
+		v["image_name"] = opts.ImageName
+	}
+
+	if opts.Force == true {
+		v["force"] = true
+	}
+
+	return map[string]interface{}{"os-volume_upload_image": v}, nil
 }
 
 // Attach will attach a volume based on the values in AttachOpts.
@@ -77,6 +122,23 @@ func Detach(client *gophercloud.ServiceClient, id string) DetachResult {
 	reqBody := map[string]interface{}{"os-detach": v}
 
 	_, res.Err = client.Post(detachURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
+		OkCodes: []int{202},
+	})
+
+	return res
+}
+
+// UploadImage will upload image base on the values in UploadImageOptsBuilder
+func UploadImage(client *gophercloud.ServiceClient, id string, opts UploadImageOptsBuilder) UploadImageResult {
+	var res UploadImageResult
+
+	reqBody, err := opts.ToVolumeUploadImageMap()
+	if err != nil {
+		res.Err = err
+		return res
+	}
+
+	_, res.Err = client.Post(uploadURL(client, id), reqBody, nil, &gophercloud.RequestOpts{
 		OkCodes: []int{202},
 	})
 
