@@ -1,6 +1,6 @@
 package ports
 
-import "github.com/rackspace/gophercloud"
+import "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
 
 func resourceURL(c *gophercloud.ServiceClient, id string) string {
 	return c.ServiceURL("ports", id)

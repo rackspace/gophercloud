@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 )
 
 // Event represents a stack event.
@@ -72,7 +72,7 @@ func (r FindResult) Extract() ([]Event, error) {
 // As OpenStack extensions may freely alter the response bodies of structures returned to the client, you may only safely access the
 // data provided through the ExtractResources call.
 type EventPage struct {
-	pagination.MarkerPageBase
+	pagination.SinglePageBase
 }
 
 // IsEmpty returns true if a page contains no Server results.

@@ -3,9 +3,9 @@ package tokens
 import (
 	"time"
 
-	"github.com/mitchellh/mapstructure"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack/identity/v2/tenants"
+	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/identity/v2/tenants"
 )
 
 // Token provides only the most basic information related to an authentication token.
@@ -23,17 +23,6 @@ type Token struct {
 
 	// Tenant provides information about the tenant to which this token grants access.
 	Tenant tenants.Tenant
-}
-
-// Authorization need user info which can get from token authentication's response
-type Role struct {
-	Name string `mapstructure:"name"`
-}
-type User struct {
-	ID       string `mapstructure:"id"`
-	Name     string `mapstructure:"name"`
-	UserName string `mapstructure:"username"`
-	Roles    []Role `mapstructure:"roles"`
 }
 
 // Endpoint represents a single API endpoint offered by a service.
@@ -83,12 +72,6 @@ type ServiceCatalog struct {
 // Use ExtractToken() to interpret it as a Token, or ExtractServiceCatalog() to interpret it as a service catalog.
 type CreateResult struct {
 	gophercloud.Result
-}
-
-// GetResult is the deferred response from a Get call, which is the same with a Created token.
-// Use ExtractUser() to interpret it as a User.
-type GetResult struct {
-	CreateResult
 }
 
 // ExtractToken returns the just-created Token from a CreateResult.
@@ -147,24 +130,4 @@ func (result CreateResult) ExtractServiceCatalog() (*ServiceCatalog, error) {
 // createErr quickly packs an error in a CreateResult.
 func createErr(err error) CreateResult {
 	return CreateResult{gophercloud.Result{Err: err}}
-}
-
-// ExtractUser returns the User from a GetResult.
-func (result GetResult) ExtractUser() (*User, error) {
-	if result.Err != nil {
-		return nil, result.Err
-	}
-
-	var response struct {
-		Access struct {
-			User User `mapstructure:"user"`
-		} `mapstructure:"access"`
-	}
-
-	err := mapstructure.Decode(result.Body, &response)
-	if err != nil {
-		return nil, err
-	}
-
-	return &response.Access.User, nil
 }

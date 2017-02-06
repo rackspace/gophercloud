@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 )
 
 // CreatedStack represents the object extracted from a Create operation.
@@ -269,16 +269,16 @@ func (r PreviewResult) Extract() (*PreviewedStack, error) {
 
 // AbandonedStack represents the result of an Abandon operation.
 type AbandonedStack struct {
-	Status             string                 `mapstructure:"status"`
-	Name               string                 `mapstructure:"name"`
-	Template           map[string]interface{} `mapstructure:"template"`
-	Action             string                 `mapstructure:"action"`
-	ID                 string                 `mapstructure:"id"`
-	Resources          map[string]interface{} `mapstructure:"resources"`
-	Files              map[string]string      `mapstructure:"files"`
-	StackUserProjectID string                 `mapstructure:"stack_user_project_id"`
-	ProjectID          string                 `mapstructure:"project_id"`
-	Environment        map[string]interface{} `mapstructure:"environment"`
+	Status             string                 `json:"status,omitempty" mapstructure:"status"`
+	Name               string                 `json:"name,omitempty" mapstructure:"name"`
+	Template           map[string]interface{} `json:"template,omitempty" mapstructure:"template"`
+	Action             string                 `json:"action,omitempty" mapstructure:"action"`
+	ID                 string                 `json:"id,omitempty" mapstructure:"id"`
+	Resources          map[string]interface{} `json:"resources,omitempty" mapstructure:"resources"`
+	Files              map[string]string      `json:"files,omitempty" mapstructure:"files"`
+	StackUserProjectID string                 `json:"stack_user_project_id,omitempty" mapstructure:"stack_user_project_id"`
+	ProjectID          string                 `json:"project_id,omitempty" mapstructure:"project_id"`
+	Environment        map[string]interface{} `json:"environment,omitempty" mapstructure:"environment"`
 }
 
 // AbandonResult represents the result of an Abandon operation.

@@ -1,16 +1,14 @@
 package servers
 
 import (
-	"crypto/rsa"
-	"encoding/base64"
 	"fmt"
 	"net/url"
 	"path"
 	"reflect"
 
-	"github.com/mitchellh/mapstructure"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 )
 
 type serverResult struct {
@@ -82,47 +80,6 @@ type RescueResult struct {
 // CreateImageResult represents the result of an image creation operation
 type CreateImageResult struct {
 	gophercloud.Result
-}
-
-// GetPasswordResult represent the result of a get os-server-password operation.
-type GetPasswordResult struct {
-	gophercloud.Result
-}
-
-// ExtractPassword gets the encrypted password.
-// If privateKey != nil the password is decrypted with the private key.
-// If privateKey == nil the encrypted password is returned and can be decrypted with:
-//   echo '<pwd>' | base64 -D | openssl rsautl -decrypt -inkey <private_key>
-func (r GetPasswordResult) ExtractPassword(privateKey *rsa.PrivateKey) (string, error) {
-
-	if r.Err != nil {
-		return "", r.Err
-	}
-
-	var response struct {
-		Password string `mapstructure:"password"`
-	}
-
-	err := mapstructure.Decode(r.Body, &response)
-	if err == nil && privateKey != nil && response.Password != "" {
-		return decryptPassword(response.Password, privateKey)
-	}
-	return response.Password, err
-}
-
-func decryptPassword(encryptedPassword string, privateKey *rsa.PrivateKey) (string, error) {
-	b64EncryptedPassword := make([]byte, base64.StdEncoding.DecodedLen(len(encryptedPassword)))
-
-	n, err := base64.StdEncoding.Decode(b64EncryptedPassword, []byte(encryptedPassword))
-	if err != nil {
-		return "", fmt.Errorf("Failed to base64 decode encrypted password: %s", err)
-	}
-	password, err := rsa.DecryptPKCS1v15(nil, privateKey, b64EncryptedPassword[0:n])
-	if err != nil {
-		return "", fmt.Errorf("Failed to decrypt password: %s", err)
-	}
-
-	return string(password), nil
 }
 
 // ExtractImageID gets the ID of the newly created server image from the header

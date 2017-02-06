@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 )
 
 // Rollback is used to specify whether or not a stack can be rolled back.
@@ -245,7 +245,7 @@ func (opts AdoptOpts) ToStackAdoptMap() (map[string]interface{}, error) {
 		} else if opts.TemplateURL != "" {
 			s["template_url"] = opts.TemplateURL
 		} else {
-			return s, errors.New("One of AdoptStackData, Template, TemplateURL or TemplateOpts must be provided.")
+			return s, errors.New("Either Template or TemplateURL must be provided.")
 		}
 	} else {
 		if err := opts.TemplateOpts.Parse(); err != nil {

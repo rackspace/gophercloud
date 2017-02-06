@@ -1,6 +1,6 @@
 package accounts
 
-import "github.com/rackspace/gophercloud"
+import "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
 
 // GetOptsBuilder allows extensions to add additional headers to the Get
 // request.
@@ -25,7 +25,7 @@ func (opts GetOpts) ToAccountGetMap() (map[string]string, error) {
 // ExtractHeader method on the GetResult.
 func Get(c *gophercloud.ServiceClient, opts GetOptsBuilder) GetResult {
 	var res GetResult
-	h := make(map[string]string)
+	h := c.AuthenticatedHeaders()
 
 	if opts != nil {
 		headers, err := opts.ToAccountGetMap()
@@ -60,6 +60,7 @@ type UpdateOptsBuilder interface {
 // deleting an account's metadata.
 type UpdateOpts struct {
 	Metadata          map[string]string
+	DeleteMetadata    []string
 	ContentType       string `h:"Content-Type"`
 	DetectContentType bool   `h:"X-Detect-Content-Type"`
 	TempURLKey        string `h:"X-Account-Meta-Temp-URL-Key"`
@@ -74,6 +75,9 @@ func (opts UpdateOpts) ToAccountUpdateMap() (map[string]string, error) {
 	}
 	for k, v := range opts.Metadata {
 		headers["X-Account-Meta-"+k] = v
+	}
+	for _, k := range opts.DeleteMetadata {
+		headers["X-Remove-Account-Meta-"+k] = "true"
 	}
 	return headers, err
 }

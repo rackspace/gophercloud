@@ -3,17 +3,16 @@ package volumes
 import (
 	"testing"
 
-	fixtures "github.com/rackspace/gophercloud/openstack/blockstorage/v1/volumes/testing"
-	"github.com/rackspace/gophercloud/pagination"
-	th "github.com/rackspace/gophercloud/testhelper"
-	"github.com/rackspace/gophercloud/testhelper/client"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper/client"
 )
 
 func TestList(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 
-	fixtures.MockListResponse(t)
+	MockListResponse(t)
 
 	count := 0
 
@@ -50,7 +49,7 @@ func TestListAll(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 
-	fixtures.MockListResponse(t)
+	MockListResponse(t)
 
 	allPages, err := List(client.ServiceClient(), &ListOpts{}).AllPages()
 	th.AssertNoErr(t, err)
@@ -76,7 +75,7 @@ func TestGet(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 
-	fixtures.MockGetResponse(t)
+	MockGetResponse(t)
 
 	v, err := Get(client.ServiceClient(), "d32019d3-bc6e-4319-9c1d-6722fc136a22").Extract()
 	th.AssertNoErr(t, err)
@@ -90,7 +89,7 @@ func TestCreate(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 
-	fixtures.MockCreateResponse(t)
+	MockCreateResponse(t)
 
 	options := &CreateOpts{Size: 75}
 	n, err := Create(client.ServiceClient(), options).Extract()
@@ -104,7 +103,7 @@ func TestDelete(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 
-	fixtures.MockDeleteResponse(t)
+	MockDeleteResponse(t)
 
 	res := Delete(client.ServiceClient(), "d32019d3-bc6e-4319-9c1d-6722fc136a22")
 	th.AssertNoErr(t, res.Err)
@@ -114,7 +113,7 @@ func TestUpdate(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 
-	fixtures.MockUpdateResponse(t)
+	MockUpdateResponse(t)
 
 	options := UpdateOpts{Name: "vol-002"}
 	v, err := Update(client.ServiceClient(), "d32019d3-bc6e-4319-9c1d-6722fc136a22", options).Extract()

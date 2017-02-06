@@ -1,6 +1,6 @@
 package stacks
 
-import "github.com/rackspace/gophercloud"
+import "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
 
 func createURL(c *gophercloud.ServiceClient) string {
 	return c.ServiceURL("stacks")

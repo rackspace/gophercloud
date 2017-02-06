@@ -3,8 +3,8 @@ package images
 import (
 	"fmt"
 
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 )
 
 // ListOptsBuilder allows extensions to add additional parameters to the

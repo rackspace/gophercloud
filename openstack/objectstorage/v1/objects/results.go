@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
 )
 
 // Object is a structure that holds information related to a storage object.
@@ -435,4 +435,9 @@ func (cr CopyResult) Extract() (CopyHeader, error) {
 	}
 
 	return ch, nil
+}
+
+// CreateLargeResult represents the result of a CreateLarge operation.
+type CreateLargeResult struct {
+	gophercloud.HeaderResult
 }

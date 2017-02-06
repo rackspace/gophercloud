@@ -3,9 +3,9 @@ package objects
 import (
 	"io"
 
-	"github.com/rackspace/gophercloud"
-	os "github.com/rackspace/gophercloud/openstack/objectstorage/v1/objects"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/objectstorage/v1/objects"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 )
 
 // ExtractInfo is a function that takes a page of objects and returns their full information.

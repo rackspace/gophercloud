@@ -1,10 +1,6 @@
 package tokens
 
-import (
-	"fmt"
-
-	"github.com/rackspace/gophercloud"
-)
+import "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
 
 // AuthOptionsBuilder describes any argument that may be passed to the Create call.
 type AuthOptionsBuilder interface {
@@ -52,14 +48,22 @@ func (auth AuthOptions) ToTokenCreateMap() (map[string]interface{}, error) {
 				"password": auth.Password,
 			}
 		} else {
-			return nil, ErrPasswordRequired
+			return nil, &ErrNoPassword{
+				BaseError: &gophercloud.BaseError{
+					Function: "AuthOptions.ToTokenCreateMap",
+				},
+			}
 		}
 	} else if auth.TokenID != "" {
 		authMap["token"] = map[string]interface{}{
 			"id": auth.TokenID,
 		}
 	} else {
-		return nil, fmt.Errorf("You must provide either username/password or tenantID/token values.")
+		return nil, &ErrUsernameOrTenantIDRequired{
+			BaseError: &gophercloud.BaseError{
+				Function: "AuthOptions.ToTokenCreateMap",
+			},
+		}
 	}
 
 	if auth.TenantID != "" {
@@ -84,15 +88,6 @@ func Create(client *gophercloud.ServiceClient, auth AuthOptionsBuilder) CreateRe
 
 	var result CreateResult
 	_, result.Err = client.Post(CreateURL(client), request, &result.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200, 203},
-	})
-	return result
-}
-
-// Validates and retrieves information for user's token.
-func Get(client *gophercloud.ServiceClient, token string) GetResult {
-	var result GetResult
-	_, result.Err = client.Get(GetURL(client, token), &result.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200, 203},
 	})
 	return result

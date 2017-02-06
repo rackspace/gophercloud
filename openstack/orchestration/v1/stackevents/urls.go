@@ -1,6 +1,6 @@
 package stackevents
 
-import "github.com/rackspace/gophercloud"
+import "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
 
 func findURL(c *gophercloud.ServiceClient, stackName string) string {
 	return c.ServiceURL("stacks", stackName, "events")

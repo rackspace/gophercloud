@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/rackspace/gophercloud"
-	"gopkg.in/yaml.v2"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/gopkg.in/yaml.v2"
 )
 
 // Client is an interface that expects a Get method similar to http.Get. This

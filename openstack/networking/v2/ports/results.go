@@ -1,9 +1,9 @@
 package ports
 
 import (
-	"github.com/mitchellh/mapstructure"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 )
 
 type commonResult struct {
@@ -19,6 +19,7 @@ func (r commonResult) Extract() (*Port, error) {
 	var res struct {
 		Port *Port `json:"port"`
 	}
+
 	err := mapstructure.Decode(r.Body, &res)
 
 	return res.Port, err
@@ -50,11 +51,6 @@ type IP struct {
 	IPAddress string `mapstructure:"ip_address" json:"ip_address,omitempty"`
 }
 
-type AddressPair struct {
-	IPAddress  string `mapstructure:"ip_address" json:"ip_address,omitempty"`
-	MACAddress string `mapstructure:"mac_address" json:"mac_address,omitempty"`
-}
-
 // Port represents a Neutron port. See package documentation for a top-level
 // description of what this is.
 type Port struct {
@@ -82,8 +78,6 @@ type Port struct {
 	SecurityGroups []string `mapstructure:"security_groups" json:"security_groups"`
 	// Identifies the device (e.g., virtual server) using this port.
 	DeviceID string `mapstructure:"device_id" json:"device_id"`
-	// Identifies the list of IP addresses the port will recognize/accept
-	AllowedAddressPairs []AddressPair `mapstructure:"allowed_address_pairs" json:"allowed_address_pairs"`
 }
 
 // PortPage is the page returned by a pager when traversing over a collection

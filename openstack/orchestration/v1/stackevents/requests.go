@@ -1,8 +1,8 @@
 package stackevents
 
 import (
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 )
 
 // Find retrieves stack events for the given stack name.
@@ -74,10 +74,6 @@ type ListOptsBuilder interface {
 // ListOpts allows the filtering and sorting of paginated collections through
 // the API. Marker and Limit are used for pagination.
 type ListOpts struct {
-	// The stack resource ID with which to start the listing.
-	Marker string `q:"marker"`
-	// Integer value for the limit of values to return.
-	Limit int `q:"limit"`
 	// Filters the event list by the specified ResourceAction. You can use this
 	// filter multiple times to filter by multiple resource actions: CREATE, DELETE,
 	// UPDATE, ROLLBACK, SUSPEND, RESUME or ADOPT.
@@ -121,9 +117,7 @@ func List(client *gophercloud.ServiceClient, stackName, stackID string, opts Lis
 	}
 
 	createPageFn := func(r pagination.PageResult) pagination.Page {
-		p := EventPage{pagination.MarkerPageBase{PageResult: r}}
-		p.MarkerPageBase.Owner = p
-		return p
+		return EventPage{pagination.SinglePageBase(r)}
 	}
 
 	return pagination.NewPager(client, url, createPageFn)
@@ -138,10 +132,6 @@ type ListResourceEventsOptsBuilder interface {
 // ListResourceEventsOpts allows the filtering and sorting of paginated resource events through
 // the API. Marker and Limit are used for pagination.
 type ListResourceEventsOpts struct {
-	// The stack resource ID with which to start the listing.
-	Marker string `q:"marker"`
-	// Integer value for the limit of values to return.
-	Limit int `q:"limit"`
 	// Filters the event list by the specified ResourceAction. You can use this
 	// filter multiple times to filter by multiple resource actions: CREATE, DELETE,
 	// UPDATE, ROLLBACK, SUSPEND, RESUME or ADOPT.
@@ -163,7 +153,7 @@ type ListResourceEventsOpts struct {
 	SortDir SortDir `q:"sort_dir"`
 }
 
-// ToResourceEventListQuery formats a ListResourceEventsOpts into a query string.
+// ToResourceEventListQuery formats a ListOpts into a query string.
 func (opts ListResourceEventsOpts) ToResourceEventListQuery() (string, error) {
 	q, err := gophercloud.BuildQueryString(opts)
 	if err != nil {
@@ -185,9 +175,7 @@ func ListResourceEvents(client *gophercloud.ServiceClient, stackName, stackID, r
 	}
 
 	createPageFn := func(r pagination.PageResult) pagination.Page {
-		p := EventPage{pagination.MarkerPageBase{PageResult: r}}
-		p.MarkerPageBase.Owner = p
-		return p
+		return EventPage{pagination.SinglePageBase(r)}
 	}
 
 	return pagination.NewPager(client, url, createPageFn)

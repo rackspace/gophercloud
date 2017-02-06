@@ -2,7 +2,7 @@ package buildinfo
 
 import (
 	"github.com/mitchellh/mapstructure"
-	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
 )
 
 // Revision represents the API/Engine revision of a Heat deployment.
@@ -12,8 +12,9 @@ type Revision struct {
 
 // BuildInfo represents the build information for a Heat deployment.
 type BuildInfo struct {
-	API    Revision `mapstructure:"api"`
-	Engine Revision `mapstructure:"engine"`
+	API       Revision `mapstructure:"api"`
+	Engine    Revision `mapstructure:"engine"`
+	FusionAPI Revision `mapstructure:"fusion-api"`
 }
 
 // GetResult represents the result of a Get operation.

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
 )
 
 /*
@@ -127,6 +127,16 @@ Rel field set to "next".
 type Link struct {
 	Href string `mapstructure:"href"`
 	Rel  string `mapstructure:"rel"`
+}
+
+// PrettyPrintJSON creates a string containing the links as
+// pretty-printed JSON. It is useful for displaying the results.
+func (link Link) PrettyPrintJSON() string {
+	pretty, err := json.MarshalIndent(link, "", "  ")
+	if err != nil {
+		panic(err.Error())
+	}
+	return string(pretty)
 }
 
 /*

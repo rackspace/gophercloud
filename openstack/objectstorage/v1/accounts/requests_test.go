@@ -3,8 +3,8 @@ package accounts
 import (
 	"testing"
 
-	th "github.com/rackspace/gophercloud/testhelper"
-	fake "github.com/rackspace/gophercloud/testhelper/client"
+	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
+	fake "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper/client"
 )
 
 func TestUpdateAccount(t *testing.T) {

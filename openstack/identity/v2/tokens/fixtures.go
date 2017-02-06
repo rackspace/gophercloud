@@ -8,9 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rackspace/gophercloud/openstack/identity/v2/tenants"
-	th "github.com/rackspace/gophercloud/testhelper"
-	thclient "github.com/rackspace/gophercloud/testhelper/client"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/identity/v2/tenants"
+	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
 )
 
 // ExpectedToken is the token that should be parsed from TokenCreationResponse.
@@ -53,14 +52,6 @@ var ExpectedServiceCatalog = &ServiceCatalog{
 			},
 		},
 	},
-}
-
-// ExpectedUser is the token that should be parsed from TokenGetResponse.
-var ExpectedUser = &User{
-	ID:       "a530fefc3d594c4ba2693a4ecd6be74e",
-	Name:     "apiserver",
-	Roles:    []Role{{"member"}, {"service"}},
-	UserName: "apiserver",
 }
 
 // TokenCreationResponse is a JSON response that contains ExpectedToken and ExpectedServiceCatalog.
@@ -108,39 +99,6 @@ const TokenCreationResponse = `
 }
 `
 
-// TokenGetResponse is a JSON response that contains ExpectedToken and ExpectedUser.
-const TokenGetResponse = `
-{
-    "access": {
-		"token": {
-			"issued_at": "2014-01-30T15:30:58.000000Z",
-			"expires": "2014-01-31T15:30:58Z",
-			"id": "aaaabbbbccccdddd",
-			"tenant": {
-				"description": "There are many tenants. This one is yours.",
-				"enabled": true,
-				"id": "fc394f2ab2df4114bde39905f800dc57",
-				"name": "test"
-			}
-		},
-        "serviceCatalog": [], 
-		"user": {
-            "id": "a530fefc3d594c4ba2693a4ecd6be74e", 
-            "name": "apiserver", 
-            "roles": [
-                {
-                    "name": "member"
-                }, 
-                {
-                    "name": "service"
-                }
-            ], 
-            "roles_links": [], 
-            "username": "apiserver"
-        }
-    }
-}`
-
 // HandleTokenPost expects a POST against a /tokens handler, ensures that the request body has been
 // constructed properly given certain auth options, and returns the result.
 func HandleTokenPost(t *testing.T, requestJSON string) {
@@ -157,19 +115,6 @@ func HandleTokenPost(t *testing.T, requestJSON string) {
 	})
 }
 
-// HandleTokenGet expects a Get against a /tokens handler, ensures that the request body has been
-// constructed properly given certain auth options, and returns the result.
-func HandleTokenGet(t *testing.T, token string) {
-	th.Mux.HandleFunc("/tokens/"+token, func(w http.ResponseWriter, r *http.Request) {
-		th.TestMethod(t, r, "GET")
-		th.TestHeader(t, r, "Accept", "application/json")
-		th.TestHeader(t, r, "X-Auth-Token", thclient.TokenID)
-
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, TokenGetResponse)
-	})
-}
-
 // IsSuccessful ensures that a CreateResult was successful and contains the correct token and
 // service catalog.
 func IsSuccessful(t *testing.T, result CreateResult) {
@@ -180,16 +125,4 @@ func IsSuccessful(t *testing.T, result CreateResult) {
 	serviceCatalog, err := result.ExtractServiceCatalog()
 	th.AssertNoErr(t, err)
 	th.CheckDeepEquals(t, ExpectedServiceCatalog, serviceCatalog)
-}
-
-// GetIsSuccessful ensures that a GetResult was successful and contains the correct token and
-// User Info.
-func GetIsSuccessful(t *testing.T, result GetResult) {
-	token, err := result.ExtractToken()
-	th.AssertNoErr(t, err)
-	th.CheckDeepEquals(t, ExpectedToken, token)
-
-	user, err := result.ExtractUser()
-	th.AssertNoErr(t, err)
-	th.CheckDeepEquals(t, ExpectedUser, user)
 }

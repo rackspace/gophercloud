@@ -1,11 +1,11 @@
 package snapshots
 
 import (
-	"github.com/rackspace/gophercloud"
-	os "github.com/rackspace/gophercloud/openstack/blockstorage/v1/snapshots"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/blockstorage/v1/snapshots"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
 )
 
 // Status is the type used to represent a snapshot's status

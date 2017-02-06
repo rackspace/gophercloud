@@ -3,8 +3,8 @@ package servers
 import (
 	"testing"
 
-	"github.com/rackspace/gophercloud"
-	th "github.com/rackspace/gophercloud/testhelper"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
 )
 
 const endpoint = "http://localhost:57909"
@@ -64,11 +64,5 @@ func TestMetadatumURL(t *testing.T) {
 func TestMetadataURL(t *testing.T) {
 	actual := metadataURL(endpointClient(), "foo")
 	expected := endpoint + "servers/foo/metadata"
-	th.CheckEquals(t, expected, actual)
-}
-
-func TestPasswordURL(t *testing.T) {
-	actual := passwordURL(endpointClient(), "foo")
-	expected := endpoint + "servers/foo/os-server-password"
 	th.CheckEquals(t, expected, actual)
 }

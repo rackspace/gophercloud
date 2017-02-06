@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	os "github.com/rackspace/gophercloud/openstack/objectstorage/v1/objects"
-	"github.com/rackspace/gophercloud/pagination"
-	th "github.com/rackspace/gophercloud/testhelper"
-	fake "github.com/rackspace/gophercloud/testhelper/client"
+	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/objectstorage/v1/objects"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
+	fake "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper/client"
 )
 
 func TestDownloadObject(t *testing.T) {
@@ -66,9 +66,9 @@ func TestListObjectNames(t *testing.T) {
 func TestCreateObject(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
-	
-        content := "Did gyre and gimble in the wabe"
-        os.HandleCreateTextObjectSuccessfully(t, content)
+
+	content := "Did gyre and gimble in the wabe"
+	os.HandleCreateTextObjectSuccessfully(t, content)
 
 	options := &os.CreateOpts{ContentType: "text/plain"}
 	res := Create(fake.ServiceClient(), "testContainer", "testObject", strings.NewReader(content), options)
@@ -79,7 +79,7 @@ func TestCreateObjectWithoutContentType(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()
 
-        content := "The sky was the color of television, tuned to a dead channel."
+	content := "The sky was the color of television, tuned to a dead channel."
 	os.HandleCreateTypelessObjectSuccessfully(t, content)
 
 	res := Create(fake.ServiceClient(), "testContainer", "testObject", strings.NewReader(content), &os.CreateOpts{})

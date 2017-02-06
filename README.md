@@ -1,5 +1,5 @@
-# Gophercloud: an OpenStack SDK for Go
-[![Build Status](https://travis-ci.org/rackspace/gophercloud.svg?branch=master)](https://travis-ci.org/rackspace/gophercloud) [![Coverage Status](https://coveralls.io/repos/rackspace/gophercloud/badge.png)](https://coveralls.io/r/rackspace/gophercloud)
+# Gophercloud: the OpenStack SDK for Go
+[![Build Status](https://travis-ci.org/rackspace/gophercloud.svg?branch=master)](https://travis-ci.org/rackspace/gophercloud)
 
 Gophercloud is a flexible SDK that allows you to consume and work with OpenStack
 clouds in a simple and idiomatic way using golang. Many services are supported,

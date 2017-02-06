@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/mitchellh/mapstructure"
-	"github.com/rackspace/gophercloud/testhelper"
+	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
 )
 
 // SinglePage sample and test cases.

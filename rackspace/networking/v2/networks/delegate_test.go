@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"testing"
 
-	os "github.com/rackspace/gophercloud/openstack/networking/v2/networks"
-	"github.com/rackspace/gophercloud/pagination"
-	fake "github.com/rackspace/gophercloud/rackspace/networking/v2/common"
-	th "github.com/rackspace/gophercloud/testhelper"
+	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/networking/v2/networks"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	fake "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/rackspace/networking/v2/common"
+	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
 )
 
 func TestList(t *testing.T) {
@@ -203,17 +203,8 @@ func TestCreateWithOptionalFields(t *testing.T) {
 	}
 }
 		`)
+
 		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, `
-{
-	"network": {
-			"name": "sample_network",
-			"admin_state_up": true,
-			"shared": true,
-			"tenant_id": "12345"
-	}
-}
-		`)
 	})
 
 	iTrue := true

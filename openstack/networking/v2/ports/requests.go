@@ -3,8 +3,8 @@ package ports
 import (
 	"fmt"
 
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 )
 
 // AdminState gives users a solid type to work with for create and update
@@ -95,16 +95,15 @@ type CreateOptsBuilder interface {
 
 // CreateOpts represents the attributes used when creating a new port.
 type CreateOpts struct {
-	NetworkID           string
-	Name                string
-	AdminStateUp        *bool
-	MACAddress          string
-	FixedIPs            interface{}
-	DeviceID            string
-	DeviceOwner         string
-	TenantID            string
-	SecurityGroups      []string
-	AllowedAddressPairs []AddressPair
+	NetworkID      string
+	Name           string
+	AdminStateUp   *bool
+	MACAddress     string
+	FixedIPs       interface{}
+	DeviceID       string
+	DeviceOwner    string
+	TenantID       string
+	SecurityGroups []string
 }
 
 // ToPortCreateMap casts a CreateOpts struct to a map.
@@ -140,9 +139,6 @@ func (opts CreateOpts) ToPortCreateMap() (map[string]interface{}, error) {
 	if opts.MACAddress != "" {
 		p["mac_address"] = opts.MACAddress
 	}
-	if opts.AllowedAddressPairs != nil {
-		p["allowed_address_pairs"] = opts.AllowedAddressPairs
-	}
 
 	return map[string]interface{}{"port": p}, nil
 }
@@ -172,13 +168,12 @@ type UpdateOptsBuilder interface {
 
 // UpdateOpts represents the attributes used when updating an existing port.
 type UpdateOpts struct {
-	Name                string
-	AdminStateUp        *bool
-	FixedIPs            interface{}
-	DeviceID            string
-	DeviceOwner         string
-	SecurityGroups      []string
-	AllowedAddressPairs []AddressPair
+	Name           string
+	AdminStateUp   *bool
+	FixedIPs       interface{}
+	DeviceID       string
+	DeviceOwner    string
+	SecurityGroups []string
 }
 
 // ToPortUpdateMap casts an UpdateOpts struct to a map.
@@ -202,9 +197,6 @@ func (opts UpdateOpts) ToPortUpdateMap() (map[string]interface{}, error) {
 	}
 	if opts.Name != "" {
 		p["name"] = opts.Name
-	}
-	if opts.AllowedAddressPairs != nil {
-		p["allowed_address_pairs"] = opts.AllowedAddressPairs
 	}
 
 	return map[string]interface{}{"port": p}, nil

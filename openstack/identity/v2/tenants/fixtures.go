@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"testing"
 
-	th "github.com/rackspace/gophercloud/testhelper"
-	"github.com/rackspace/gophercloud/testhelper/client"
+	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper/client"
 )
 
 // ListOutput provides a single page of Tenant results.

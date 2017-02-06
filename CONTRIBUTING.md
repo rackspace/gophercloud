@@ -11,8 +11,7 @@ As a contributor you will need to setup your workspace in a slightly different
 way than just downloading it. Here are the basic installation instructions:
 
 1. Configure your `$GOPATH` and run `go get` as described in the main
-[README](/README.md#how-to-install) but add `-tags "fixtures acceptance"` to
-get dependencies for unit and acceptance tests.
+[README](/README.md#how-to-install).
 
 2. Move into the directory that houses your local repository:
 
@@ -29,10 +28,11 @@ fork as `origin` instead:
    git remote add origin git@github.com/<my_username>/gophercloud
    ```
 
-4. Checkout the latest development branch:
+4. Checkout the latest development branch ([click here](/branches) to see all
+the branches):
 
    ```bash
-   git checkout master
+   git checkout release/v1.0.1
    ```
 
 5. If you're working on something (discussed more in detail below), you will
@@ -159,25 +159,25 @@ deleted after the test suite finishes.
 To run all tests:
 
 ```bash
-go test -tags fixtures ./...
+go test ./...
 ```
 
 To run all tests with verbose output:
 
 ```bash
-go test -v -tags fixtures ./...
+go test -v ./...
 ```
 
 To run tests that match certain [build tags]():
 
 ```bash
-go test -tags "fixtures foo bar" ./...
+go test -tags "foo bar" ./...
 ```
 
 To run tests for a particular sub-package:
 
 ```bash
-cd ./path/to/package && go test -tags fixtures .
+cd ./path/to/package && go test .
 ```
 
 ## Basic style guide

@@ -1,7 +1,7 @@
 package bootfromvolume
 
 import (
-	os "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 // CreateResult temporarily contains the response from a Create call.

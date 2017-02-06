@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	fake "github.com/rackspace/gophercloud/openstack/networking/v2/common"
-	"github.com/rackspace/gophercloud/pagination"
-	th "github.com/rackspace/gophercloud/testhelper"
+	fake "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/networking/v2/common"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
 )
 
 func TestList(t *testing.T) {
@@ -204,7 +204,6 @@ func TestCreateWithOptionalFields(t *testing.T) {
 		`)
 
 		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, `{}`)
 	})
 
 	iTrue := true

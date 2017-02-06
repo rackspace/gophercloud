@@ -1,6 +1,6 @@
 package stacktemplates
 
-import "github.com/rackspace/gophercloud"
+import "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
 
 func getURL(c *gophercloud.ServiceClient, stackName, stackID string) string {
 	return c.ServiceURL("stacks", stackName, stackID, "template")

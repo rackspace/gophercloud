@@ -1,10 +1,10 @@
 package volumes
 
 import (
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
 )
 
 // Volume contains all the information associated with an OpenStack Volume.

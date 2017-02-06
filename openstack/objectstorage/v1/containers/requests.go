@@ -1,8 +1,8 @@
 package containers
 
 import (
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
 )
 
 // ListOptsBuilder allows extensions to add additional parameters to the List
@@ -96,7 +96,7 @@ func (opts CreateOpts) ToContainerCreateMap() (map[string]string, error) {
 // Create is a function that creates a new container.
 func Create(c *gophercloud.ServiceClient, containerName string, opts CreateOptsBuilder) CreateResult {
 	var res CreateResult
-	h := make(map[string]string)
+	h := c.AuthenticatedHeaders()
 
 	if opts != nil {
 		headers, err := opts.ToContainerCreateMap()
@@ -111,8 +111,9 @@ func Create(c *gophercloud.ServiceClient, containerName string, opts CreateOptsB
 	}
 
 	resp, err := c.Request("PUT", createURL(c, containerName), gophercloud.RequestOpts{
-		MoreHeaders: h,
-		OkCodes:     []int{201, 202, 204},
+		MoreHeaders:  h,
+		OkCodes:      []int{201, 202, 204},
+		ErrorContext: &ContainerError{},
 	})
 	if resp != nil {
 		res.Header = resp.Header
@@ -124,7 +125,9 @@ func Create(c *gophercloud.ServiceClient, containerName string, opts CreateOptsB
 // Delete is a function that deletes a container.
 func Delete(c *gophercloud.ServiceClient, containerName string) DeleteResult {
 	var res DeleteResult
-	_, res.Err = c.Delete(deleteURL(c, containerName), nil)
+	_, res.Err = c.Delete(deleteURL(c, containerName), &gophercloud.RequestOpts{
+		ErrorContext: &ContainerError{name: containerName},
+	})
 	return res
 }
 
@@ -137,7 +140,10 @@ type UpdateOptsBuilder interface {
 // UpdateOpts is a structure that holds parameters for updating, creating, or
 // deleting a container's metadata.
 type UpdateOpts struct {
-	Metadata               map[string]string
+	// a map of key-value pairs to add/update for the container.
+	Metadata map[string]string
+	// a slice a keys of the metadata to delete from the container.
+	DeleteMetadata         []string
 	ContainerRead          string `h:"X-Container-Read"`
 	ContainerSyncTo        string `h:"X-Container-Sync-To"`
 	ContainerSyncKey       string `h:"X-Container-Sync-Key"`
@@ -157,6 +163,9 @@ func (opts UpdateOpts) ToContainerUpdateMap() (map[string]string, error) {
 	for k, v := range opts.Metadata {
 		h["X-Container-Meta-"+k] = v
 	}
+	for _, k := range opts.DeleteMetadata {
+		h["X-Remove-Container-Meta-"+k] = "true"
+	}
 	return h, nil
 }
 
@@ -164,7 +173,7 @@ func (opts UpdateOpts) ToContainerUpdateMap() (map[string]string, error) {
 // metadata.
 func Update(c *gophercloud.ServiceClient, containerName string, opts UpdateOptsBuilder) UpdateResult {
 	var res UpdateResult
-	h := make(map[string]string)
+	h := c.AuthenticatedHeaders()
 
 	if opts != nil {
 		headers, err := opts.ToContainerUpdateMap()
@@ -179,8 +188,9 @@ func Update(c *gophercloud.ServiceClient, containerName string, opts UpdateOptsB
 	}
 
 	resp, err := c.Request("POST", updateURL(c, containerName), gophercloud.RequestOpts{
-		MoreHeaders: h,
-		OkCodes:     []int{201, 202, 204},
+		MoreHeaders:  h,
+		OkCodes:      []int{201, 202, 204},
+		ErrorContext: &ContainerError{name: containerName},
 	})
 	if resp != nil {
 		res.Header = resp.Header
@@ -195,7 +205,8 @@ func Update(c *gophercloud.ServiceClient, containerName string, opts UpdateOptsB
 func Get(c *gophercloud.ServiceClient, containerName string) GetResult {
 	var res GetResult
 	resp, err := c.Request("HEAD", getURL(c, containerName), gophercloud.RequestOpts{
-		OkCodes: []int{200, 204},
+		OkCodes:      []int{200, 204},
+		ErrorContext: &ContainerError{name: containerName},
 	})
 	if resp != nil {
 		res.Header = resp.Header

@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/rackspace/gophercloud/pagination"
-	th "github.com/rackspace/gophercloud/testhelper"
-	fake "github.com/rackspace/gophercloud/testhelper/client"
+	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
+	fake "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper/client"
 )
 
 func TestListImages(t *testing.T) {
@@ -37,7 +37,8 @@ func TestListImages(t *testing.T) {
 							"created": "2014-09-23T12:54:52Z",
 							"minDisk": 0,
 							"progress": 100,
-							"minRam": 0
+							"minRam": 0,
+							"metadata": {}
 						},
 						{
 							"status": "ACTIVE",
@@ -48,7 +49,8 @@ func TestListImages(t *testing.T) {
 							"created": "2014-09-23T12:51:42Z",
 							"minDisk": 0,
 							"progress": 100,
-							"minRam": 0
+							"minRam": 0,
+							"metadata": {}
 						}
 					]
 				}
@@ -128,7 +130,8 @@ func TestGetImage(t *testing.T) {
 					"created": "2014-09-23T12:54:52Z",
 					"minDisk": 0,
 					"progress": 100,
-					"minRam": 0
+					"minRam": 0,
+					"metadata": {}
 				}
 			}
 		`)
