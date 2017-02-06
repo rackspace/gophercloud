@@ -3,10 +3,10 @@ package tokens
 import (
 	"testing"
 
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/identity/v2/tokens"
-	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper/client"
+	"github.com/rackspace/gophercloud"
+	os "github.com/rackspace/gophercloud/openstack/identity/v2/tokens"
+	th "github.com/rackspace/gophercloud/testhelper"
+	"github.com/rackspace/gophercloud/testhelper/client"
 )
 
 func tokenPost(t *testing.T, options gophercloud.AuthOptions, requestJSON string) os.CreateResult {

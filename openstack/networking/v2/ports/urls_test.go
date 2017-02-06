@@ -3,8 +3,8 @@ package ports
 import (
 	"testing"
 
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
+	"github.com/rackspace/gophercloud"
+	th "github.com/rackspace/gophercloud/testhelper"
 )
 
 const endpoint = "http://localhost:57909/"

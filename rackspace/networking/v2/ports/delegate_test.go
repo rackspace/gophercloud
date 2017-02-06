@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"testing"
 
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/networking/v2/ports"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
-	fake "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/rackspace/networking/v2/common"
-	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
+	os "github.com/rackspace/gophercloud/openstack/networking/v2/ports"
+	"github.com/rackspace/gophercloud/pagination"
+	fake "github.com/rackspace/gophercloud/rackspace/networking/v2/common"
+	th "github.com/rackspace/gophercloud/testhelper"
 )
 
 func TestList(t *testing.T) {

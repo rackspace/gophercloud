@@ -3,7 +3,7 @@ package containers
 import (
 	"fmt"
 
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud"
 )
 
 // ContainerError is a generic error type for containers.

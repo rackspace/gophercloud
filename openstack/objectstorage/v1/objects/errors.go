@@ -3,7 +3,7 @@ package objects
 import (
 	"fmt"
 
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud"
 )
 
 // ObjectError is a generic error type for objects.

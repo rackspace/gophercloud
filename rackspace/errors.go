@@ -1,6 +1,6 @@
 package rackspace
 
-import "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+import "github.com/rackspace/gophercloud"
 
 type ErrNoAuthURL struct{ *gophercloud.InvalidInputError }
 

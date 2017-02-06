@@ -1,9 +1,9 @@
 package servers
 
 import (
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/compute/v2/servers"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud"
+	os "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // List makes a request against the API to list servers accessible to you.

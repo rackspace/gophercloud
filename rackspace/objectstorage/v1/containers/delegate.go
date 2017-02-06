@@ -1,9 +1,9 @@
 package containers
 
 import (
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/objectstorage/v1/containers"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud"
+	os "github.com/rackspace/gophercloud/openstack/objectstorage/v1/containers"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // ExtractInfo interprets a page of List results when full container info

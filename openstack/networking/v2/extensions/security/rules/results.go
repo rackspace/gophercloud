@@ -1,9 +1,9 @@
 package rules
 
 import (
-	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // SecGroupRule represents a rule to dictate the behaviour of incoming or

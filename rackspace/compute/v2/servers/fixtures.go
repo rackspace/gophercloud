@@ -3,7 +3,7 @@
 package servers
 
 import (
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+	os "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 // ListOutput is the recorded output of a Rackspace servers.List request.

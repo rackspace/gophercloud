@@ -1,12 +1,12 @@
 package instances
 
 import (
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	osDBs "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/db/v1/databases"
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/db/v1/instances"
-	osUsers "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/db/v1/users"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/rackspace/db/v1/backups"
+	"github.com/rackspace/gophercloud"
+	osDBs "github.com/rackspace/gophercloud/openstack/db/v1/databases"
+	os "github.com/rackspace/gophercloud/openstack/db/v1/instances"
+	osUsers "github.com/rackspace/gophercloud/openstack/db/v1/users"
+	"github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud/rackspace/db/v1/backups"
 )
 
 // CreateOpts is the struct responsible for configuring a new database instance.

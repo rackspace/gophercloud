@@ -3,7 +3,7 @@
 package images
 
 import (
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/compute/v2/images"
+	os "github.com/rackspace/gophercloud/openstack/compute/v2/images"
 )
 
 // ListOutput is an example response from an /images/detail request.

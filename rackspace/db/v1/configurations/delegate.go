@@ -1,9 +1,9 @@
 package configurations
 
 import (
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/db/v1/configurations"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud"
+	os "github.com/rackspace/gophercloud/openstack/db/v1/configurations"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // List will list all of the available configurations.

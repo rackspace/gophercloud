@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
-	fake "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper/client"
+	th "github.com/rackspace/gophercloud/testhelper"
+	fake "github.com/rackspace/gophercloud/testhelper/client"
 )
 
 func MockListResponse(t *testing.T) {

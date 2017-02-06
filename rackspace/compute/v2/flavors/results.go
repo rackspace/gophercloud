@@ -3,10 +3,10 @@ package flavors
 import (
 	"reflect"
 
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/compute/v2/flavors"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud"
+	"github.com/mitchellh/mapstructure"
+	os "github.com/rackspace/gophercloud/openstack/compute/v2/flavors"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // ExtraSpecs provide additional information about the flavor.

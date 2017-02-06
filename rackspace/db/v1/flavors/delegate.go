@@ -1,9 +1,9 @@
 package flavors
 
 import (
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/db/v1/flavors"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud"
+	os "github.com/rackspace/gophercloud/openstack/db/v1/flavors"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // List will list all available flavors.

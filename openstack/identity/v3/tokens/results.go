@@ -3,8 +3,8 @@ package tokens
 import (
 	"time"
 
-	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/gophercloud"
 )
 
 // Endpoint represents a single API endpoint offered by a service.

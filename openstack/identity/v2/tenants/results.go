@@ -1,9 +1,9 @@
 package tenants
 
 import (
-	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // Tenant is a grouping of users in the identity service.

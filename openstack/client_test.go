@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	th "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
+	"github.com/rackspace/gophercloud"
+	th "github.com/rackspace/gophercloud/testhelper"
 )
 
 func TestAuthenticatedClientV3(t *testing.T) {

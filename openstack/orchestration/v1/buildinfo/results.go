@@ -2,7 +2,7 @@ package buildinfo
 
 import (
 	"github.com/mitchellh/mapstructure"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud"
 )
 
 // Revision represents the API/Engine revision of a Heat deployment.

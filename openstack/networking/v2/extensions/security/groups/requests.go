@@ -3,8 +3,8 @@ package groups
 import (
 	"fmt"
 
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // ListOpts allows the filtering and sorting of paginated collections through

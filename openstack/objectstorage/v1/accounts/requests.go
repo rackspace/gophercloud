@@ -1,6 +1,6 @@
 package accounts
 
-import "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
+import "github.com/rackspace/gophercloud"
 
 // GetOptsBuilder allows extensions to add additional headers to the Get
 // request.

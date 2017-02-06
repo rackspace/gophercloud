@@ -3,10 +3,10 @@ package users
 import (
 	"errors"
 
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	db "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/db/v1/databases"
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/db/v1/users"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud"
+	db "github.com/rackspace/gophercloud/openstack/db/v1/databases"
+	os "github.com/rackspace/gophercloud/openstack/db/v1/users"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // List will list all available users for a specified database instance.

@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/testhelper"
+	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/gophercloud/testhelper"
 )
 
 // LinkedPager sample and test cases.

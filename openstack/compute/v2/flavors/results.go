@@ -4,9 +4,9 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/rackspace/rack/internal/github.com/mitchellh/mapstructure"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/mitchellh/mapstructure"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // ErrCannotInterpret is returned by an Extract call if the response body doesn't have the expected structure.

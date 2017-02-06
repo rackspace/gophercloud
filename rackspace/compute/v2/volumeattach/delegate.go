@@ -1,9 +1,9 @@
 package volumeattach
 
 import (
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud"
-	os "github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/openstack/compute/v2/extensions/volumeattach"
-	"github.com/rackspace/rack/internal/github.com/rackspace/gophercloud/pagination"
+	"github.com/rackspace/gophercloud"
+	os "github.com/rackspace/gophercloud/openstack/compute/v2/extensions/volumeattach"
+	"github.com/rackspace/gophercloud/pagination"
 )
 
 // List returns a Pager that allows you to iterate over a collection of VolumeAttachments.
