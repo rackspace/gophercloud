@@ -17,7 +17,11 @@ func createURL(c *gophercloud.ServiceClient, serverId string) string {
 }
 
 func getURL(c *gophercloud.ServiceClient, serverId, aId string) string {
-	return c.ServiceURL("servers", serverId, resourcePath, aId)
+	if aId == "" {
+		return c.ServiceURL("servers", serverId, resourcePath)
+	} else {
+		return c.ServiceURL("servers", serverId, resourcePath, aId)
+	}
 }
 
 func deleteURL(c *gophercloud.ServiceClient, serverId, aId string) string {

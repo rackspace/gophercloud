@@ -65,6 +65,22 @@ func (r VolumeAttachmentResult) Extract() (*VolumeAttachment, error) {
 	return res.VolumeAttachment, err
 }
 
+// ExtractAll is a method that attempts to interpret any VolumeAttachment resources
+// response as a slice of VolumeAttachment struct.  This differs from Extract when
+// calling Get without a volume ID and results are less than a page.
+func (r VolumeAttachmentResult) ExtractAll() ([]*VolumeAttachment, error) {
+        if r.Err != nil {
+                return nil, r.Err
+        }
+
+        var res struct {
+                VolumeAttachments []*VolumeAttachment `json:"volumeAttachments" mapstructure:"volumeAttachments"`
+        }
+
+        err := mapstructure.Decode(r.Body, &res)
+        return res.VolumeAttachments, err
+}
+
 // CreateResult is the response from a Create operation. Call its Extract method to interpret it
 // as a VolumeAttachment.
 type CreateResult struct {
