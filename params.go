@@ -9,6 +9,13 @@ import (
 	"time"
 )
 
+type IPVersion int
+
+const (
+	IPv4 IPVersion = 4
+	IPv6 IPVersion = 6
+)
+
 // EnabledState is a convenience type, mostly used in Create and Update
 // operations. Because the zero value of a bool is FALSE, we need to use a
 // pointer instead to indicate zero-ness.
