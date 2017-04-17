@@ -260,19 +260,18 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) CreateRes
 		return res
 	}
 
-	// If ImageRef isn't provided, use ImageName to ascertain the image ID.
+	// If ImageRef isn't provided, and ImageName is, use ImageName to ascertain the image ID.
+	// If neither are set, assume boot-from-volume is being used.
 	if reqBody["server"].(map[string]interface{})["imageRef"].(string) == "" {
 		imageName := reqBody["server"].(map[string]interface{})["imageName"].(string)
-		if imageName == "" {
-			res.Err = errors.New("One and only one of ImageRef and ImageName must be provided.")
-			return res
+		if imageName != "" {
+			imageID, err := images.IDFromName(client, imageName)
+			if err != nil {
+				res.Err = err
+				return res
+			}
+			reqBody["server"].(map[string]interface{})["imageRef"] = imageID
 		}
-		imageID, err := images.IDFromName(client, imageName)
-		if err != nil {
-			res.Err = err
-			return res
-		}
-		reqBody["server"].(map[string]interface{})["imageRef"] = imageID
 	}
 	delete(reqBody["server"].(map[string]interface{}), "imageName")
 
