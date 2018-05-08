@@ -76,6 +76,11 @@ type CreateOpts struct {
 // ToServerCreateMap constructs a request body using all of the OpenStack extensions that are
 // active on Rackspace.
 func (opts CreateOpts) ToServerCreateMap() (map[string]interface{}, error) {
+
+    if len(opts.UserData) != 0 {
+        opts.ConfigDrive = true
+    }
+
 	base := os.CreateOpts{
 		Name:             opts.Name,
 		ImageRef:         opts.ImageRef,
