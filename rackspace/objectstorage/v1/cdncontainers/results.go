@@ -118,7 +118,7 @@ type UpdateHeader struct {
 	TransID         string    `mapstructure:"X-Trans-Id"`
 }
 
-// UpdateResult represents the result of an update operation. To extract the
+// UpdateResult represents the result of an update operation. To extract
 // the headers from the HTTP response, you can invoke the 'ExtractHeader'
 // method on the result struct.
 type UpdateResult struct {
