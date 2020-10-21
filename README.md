@@ -1,3 +1,7 @@
+# Deprecated
+
+Rackspace/Gophercloud has been deprecated in lieu of https://github.com/gophercloud/gophercloud. Please see https://github.com/rackspace/gophercloud/issues/592 for more information.
+
 # Gophercloud: an OpenStack SDK for Go
 [![Build Status](https://travis-ci.org/rackspace/gophercloud.svg?branch=master)](https://travis-ci.org/rackspace/gophercloud) [![Coverage Status](https://coveralls.io/repos/rackspace/gophercloud/badge.png)](https://coveralls.io/r/rackspace/gophercloud)
 
