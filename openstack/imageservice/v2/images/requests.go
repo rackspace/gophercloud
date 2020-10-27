@@ -90,7 +90,7 @@ type CreateOpts struct {
 	// Name [required] is the name of the new image.
 	Name string
 
-	// Id [optional] is the the image ID.
+	// Id [optional] is the image ID.
 	ID string
 
 	// Visibility [optional] defines who can see/use the image.
