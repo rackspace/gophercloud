@@ -41,6 +41,31 @@ type CatalogEntry struct {
 	Endpoints []Endpoint `mapstructure:"endpoints"`
 }
 
+// Project provides information about the project to which this token grants access.
+type Project struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
+}
+
+// Domain provides information about the domain to which this token grants access.
+type Domain struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
+}
+
+// User represents a user resource that exists on the API.
+type User struct {
+	Domain Domain `mapstructure:"domain"`
+	ID     string `mapstructure:"id"`
+	Name   string `mapstructure:"name"`
+}
+
+// Authorization need user info which can get from token authentication's response
+type Role struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
+}
+
 // ServiceCatalog provides a view into the service catalog from a previous, successful authentication.
 type ServiceCatalog struct {
 	Entries []CatalogEntry
@@ -65,7 +90,9 @@ func (r commonResult) ExtractToken() (*Token, error) {
 
 	var response struct {
 		Token struct {
-			ExpiresAt string `mapstructure:"expires_at"`
+			ExpiresAt string  `mapstructure:"expires_at"`
+			Project   Project `mapstructure:"project"`
+			Roles     []Role  `mapstructure:"roles"`
 		} `mapstructure:"token"`
 	}
 
@@ -81,6 +108,9 @@ func (r commonResult) ExtractToken() (*Token, error) {
 
 	// Attempt to parse the timestamp.
 	token.ExpiresAt, err = time.Parse(gophercloud.RFC3339Milli, response.Token.ExpiresAt)
+
+	token.Project = response.Token.Project
+	token.Roles = response.Token.Roles
 
 	return &token, err
 }
@@ -105,6 +135,26 @@ func (result CreateResult) ExtractServiceCatalog() (*ServiceCatalog, error) {
 	return &ServiceCatalog{Entries: response.Token.Entries}, nil
 }
 
+// ExtractUser returns the User that was generated along with the user's Token.
+func (result CreateResult) ExtractUser() (*User, error) {
+	if result.Err != nil {
+		return nil, result.Err
+	}
+
+	var response struct {
+		Token struct {
+			User User `mapstructure:"user"`
+		} `mapstructure:"token"`
+	}
+
+	err := mapstructure.Decode(result.Body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.Token.User, nil
+}
+
 // CreateResult defers the interpretation of a created token.
 // Use ExtractToken() to interpret it as a Token, or ExtractServiceCatalog() to interpret it as a service catalog.
 type CreateResult struct {
@@ -120,7 +170,7 @@ func createErr(err error) CreateResult {
 
 // GetResult is the deferred response from a Get call.
 type GetResult struct {
-	commonResult
+	CreateResult
 }
 
 // RevokeResult is the deferred response from a Revoke call.
@@ -136,4 +186,10 @@ type Token struct {
 
 	// ExpiresAt is the timestamp at which this token will no longer be accepted.
 	ExpiresAt time.Time
+
+	// Project provides information about the project to which this token grants access.
+	Project Project
+
+	// Authorization need user info which can get from token authentication's response
+	Roles []Role
 }
