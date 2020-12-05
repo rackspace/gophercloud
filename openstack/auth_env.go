@@ -19,7 +19,7 @@ var (
 
 // AuthOptionsFromEnv fills out an AuthOptions structure from the environment
 // variables: OS_AUTH_URL, OS_USERNAME, OS_USERID, OS_PASSWORD, OS_TENANT_ID,
-// OS_TENANT_NAME, OS_DOMAIN_ID, OS_DOMAIN_NAME, OS_TOKEN.  It checks that
+// OS_TENANT_NAME, OS_USER_DOMAIN_ID, OS_USER_DOMAIN_NAME, OS_TOKEN.  It checks that
 // (1) OS_AUTH_URL is set, (2) OS_USERNAME, OS_USERID, or OS_TOKEN is set,
 // (3) OS_PASSWORD or OS_TOKEN is set.
 func AuthOptionsFromEnv() (gophercloud.AuthOptions, error) {
@@ -29,8 +29,8 @@ func AuthOptionsFromEnv() (gophercloud.AuthOptions, error) {
 	password := os.Getenv("OS_PASSWORD")
 	tenantID := os.Getenv("OS_TENANT_ID")
 	tenantName := os.Getenv("OS_TENANT_NAME")
-	domainID := os.Getenv("OS_DOMAIN_ID")
-	domainName := os.Getenv("OS_DOMAIN_NAME")
+	domainID := os.Getenv("OS_USER_DOMAIN_ID")
+	domainName := os.Getenv("OS_USER_DOMAIN_NAME")
 	tokenID := os.Getenv("OS_TOKEN")
 
 	if authURL == "" {
