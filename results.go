@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 )
@@ -114,7 +115,7 @@ func DecodeHeader(from, to interface{}) error {
 const RFC3339Milli = "2006-01-02T15:04:05.999999Z"
 
 // Time format used in cloud orchestration
-const STACK_TIME_FMT = "2006-01-02T15:04:05"
+const STACK_TIME_FMT = time.RFC3339
 
 /*
 Link is an internal type to be used in packages of collection resources that are
