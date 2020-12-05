@@ -51,7 +51,7 @@ type Image struct {
 	Status   string
 
 	Updated string
-	
+
 	Metadata map[string]string
 }
 
@@ -94,4 +94,72 @@ func ExtractImages(page pagination.Page) ([]Image, error) {
 
 	err := mapstructure.Decode(casted, &results)
 	return results.Images, err
+}
+
+// MetadataResult contains the result of a call for (potentially) multiple key-value pairs.
+type MetadataResult struct {
+	gophercloud.Result
+}
+
+// GetMetadataResult temporarily contains the response from a metadata Get call.
+type GetMetadataResult struct {
+	MetadataResult
+}
+
+// ResetMetadataResult temporarily contains the response from a metadata Reset call.
+type ResetMetadataResult struct {
+	MetadataResult
+}
+
+// UpdateMetadataResult temporarily contains the response from a metadata Update call.
+type UpdateMetadataResult struct {
+	MetadataResult
+}
+
+// MetadatumResult contains the result of a call for individual a single key-value pair.
+type MetadatumResult struct {
+	gophercloud.Result
+}
+
+// GetMetadatumResult temporarily contains the response from a metadatum Get call.
+type GetMetadatumResult struct {
+	MetadatumResult
+}
+
+// CreateMetadatumResult temporarily contains the response from a metadatum Create call.
+type CreateMetadatumResult struct {
+	MetadatumResult
+}
+
+// DeleteMetadatumResult temporarily contains the response from a metadatum Delete call.
+type DeleteMetadatumResult struct {
+	gophercloud.ErrResult
+}
+
+// Extract interprets any MetadataResult as a Metadata, if possible.
+func (r MetadataResult) Extract() (map[string]string, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+
+	var response struct {
+		Metadata map[string]string `mapstructure:"metadata"`
+	}
+
+	err := mapstructure.Decode(r.Body, &response)
+	return response.Metadata, err
+}
+
+// Extract interprets any MetadatumResult as a Metadatum, if possible.
+func (r MetadatumResult) Extract() (map[string]string, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+
+	var response struct {
+		Metadatum map[string]string `mapstructure:"meta"`
+	}
+
+	err := mapstructure.Decode(r.Body, &response)
+	return response.Metadatum, err
 }

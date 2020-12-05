@@ -186,3 +186,73 @@ func TestDeleteImage(t *testing.T) {
 	res := Delete(fake.ServiceClient(), "12345678")
 	th.AssertNoErr(t, res.Err)
 }
+
+func TestGetMetadata(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	HandleMetadataGetSuccessfully(t)
+
+	expected := testMetadataMap
+	actual, err := Metadata(fake.ServiceClient(), "1234asdf").Extract()
+	th.AssertNoErr(t, err)
+	th.AssertDeepEquals(t, expected, actual)
+}
+
+func TestResetMetadata(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	HandleMetadataResetSuccessfully(t)
+
+	expected := testMetadataResetMap
+	actual, err := ResetMetadata(fake.ServiceClient(), "1234asdf", testMetadataChangeOpts).Extract()
+	th.AssertNoErr(t, err)
+	th.AssertDeepEquals(t, expected, actual)
+}
+
+func TestUpdateMetadata(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	HandleMetadataUpdateSuccessfully(t)
+
+	expected := testMetadataUpdateMap
+	actual, err := UpdateMetadata(fake.ServiceClient(), "1234asdf", testMetadataChangeOpts).Extract()
+	th.AssertNoErr(t, err)
+	th.AssertDeepEquals(t, expected, actual)
+}
+
+func TestGetMetadatum(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	HandleMetadatumGetSuccessfully(t)
+
+	expected := testMetadatumMap
+	actual, err := Metadatum(fake.ServiceClient(), "1234asdf", "foo").Extract()
+	th.AssertNoErr(t, err)
+	th.AssertDeepEquals(t, expected, actual)
+}
+
+func TestCreateMetadatum(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	HandleMetadatumCreateSuccessfully(t)
+
+	expected := testMetadatumCreateMap
+	actual, err := CreateMetadatum(fake.ServiceClient(), "1234asdf", testMetadatumChangeOpts).Extract()
+	th.AssertNoErr(t, err)
+	th.AssertDeepEquals(t, expected, actual)
+}
+
+func TestDeleteMetadatum(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	HandleMetadatumDeleteSuccessfully(t)
+
+	err := DeleteMetadatum(fake.ServiceClient(), "1234asdf", "foo").ExtractErr()
+	th.AssertNoErr(t, err)
+}
