@@ -16,9 +16,10 @@ func Get(c *gophercloud.ServiceClient) os.GetResult {
 // UpdateOpts is a structure that contains parameters for updating, creating, or
 // deleting an account's metadata.
 type UpdateOpts struct {
-	Metadata    map[string]string
-	TempURLKey  string `h:"X-Account-Meta-Temp-URL-Key"`
-	TempURLKey2 string `h:"X-Account-Meta-Temp-URL-Key-2"`
+	Metadata       map[string]string
+	DeleteMetadata []string
+	TempURLKey     string `h:"X-Account-Meta-Temp-URL-Key"`
+	TempURLKey2    string `h:"X-Account-Meta-Temp-URL-Key-2"`
 }
 
 // ToAccountUpdateMap formats an UpdateOpts into a map[string]string of headers.
@@ -29,6 +30,9 @@ func (opts UpdateOpts) ToAccountUpdateMap() (map[string]string, error) {
 	}
 	for k, v := range opts.Metadata {
 		headers["X-Account-Meta-"+k] = v
+	}
+	for _, k := range opts.DeleteMetadata {
+		headers["X-Remove-Account-Meta-"+k] = "true"
 	}
 	return headers, err
 }

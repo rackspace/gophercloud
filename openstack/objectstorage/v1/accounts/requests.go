@@ -60,6 +60,7 @@ type UpdateOptsBuilder interface {
 // deleting an account's metadata.
 type UpdateOpts struct {
 	Metadata          map[string]string
+	DeleteMetadata    []string
 	ContentType       string `h:"Content-Type"`
 	DetectContentType bool   `h:"X-Detect-Content-Type"`
 	TempURLKey        string `h:"X-Account-Meta-Temp-URL-Key"`
@@ -74,6 +75,9 @@ func (opts UpdateOpts) ToAccountUpdateMap() (map[string]string, error) {
 	}
 	for k, v := range opts.Metadata {
 		headers["X-Account-Meta-"+k] = v
+	}
+	for _, k := range opts.DeleteMetadata {
+		headers["X-Remove-Account-Meta-"+k] = "true"
 	}
 	return headers, err
 }
