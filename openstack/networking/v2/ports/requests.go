@@ -179,6 +179,7 @@ type UpdateOpts struct {
 	DeviceOwner         string
 	SecurityGroups      []string
 	AllowedAddressPairs []AddressPair
+	TenantID            string
 }
 
 // ToPortUpdateMap casts an UpdateOpts struct to a map.
@@ -206,7 +207,9 @@ func (opts UpdateOpts) ToPortUpdateMap() (map[string]interface{}, error) {
 	if opts.AllowedAddressPairs != nil {
 		p["allowed_address_pairs"] = opts.AllowedAddressPairs
 	}
-
+	if opts.TenantID != "" {
+		p["tenant_id"] = opts.TenantID
+	}
 	return map[string]interface{}{"port": p}, nil
 }
 
