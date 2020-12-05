@@ -168,9 +168,6 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 	}
 	req.Header.Set("Accept", applicationJSON)
 
-	for k, v := range client.AuthenticatedHeaders() {
-		req.Header.Add(k, v)
-	}
 
 	// Set the User-Agent header
 	req.Header.Set("User-Agent", client.UserAgent.Join())
@@ -183,6 +180,11 @@ func (client *ProviderClient) Request(method, url string, options RequestOpts) (
 				req.Header.Del(k)
 			}
 		}
+	}
+
+	// get latest auth token
+	for k, v := range client.AuthenticatedHeaders() {
+		req.Header.Set(k, v)
 	}
 
 	// Set connection parameter to close the connection immediately when we've got the response
