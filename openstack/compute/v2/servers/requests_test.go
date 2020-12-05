@@ -142,6 +142,17 @@ func TestRebootServer(t *testing.T) {
 	th.AssertNoErr(t, res.Err)
 }
 
+func TestVncServer(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+	HandleVncSuccessfully(t)
+
+	res := Vnc(client.ServiceClient(), "1234asdf", NoVnc)
+	th.AssertNoErr(t, res.Err)
+	url, _ := res.Extract()
+	th.AssertEquals(t, "http://example.com/vnc_auto.html?token=f9906a48-b71e-4f18-baca-c987da3ebdb3", url)
+}
+
 func TestRebuildServer(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()

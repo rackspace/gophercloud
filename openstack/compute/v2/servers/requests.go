@@ -452,6 +452,39 @@ func Reboot(client *gophercloud.ServiceClient, id string, how RebootMethod) Acti
 	return res
 }
 
+// VncType indicates what kind of VNC connection to request.
+type VncType string
+
+// These constants determine what kind of VNC connection to request in Vnc()
+const (
+	NoVnc VncType = "novnc"
+	XvpVnc = "xvpvnc"
+)
+
+// Vnc returns the VNC URL for the given VncType.
+func Vnc(client *gophercloud.ServiceClient, id string, t VncType) VncResult {
+	var res VncResult
+
+	if id == "" {
+		res.Err = fmt.Errorf("ID is required")
+		return res
+	} else if t == "" {
+		res.Err = fmt.Errorf("vnc type is required")
+		return res
+	}
+
+	reqBody := struct {
+		C map[string]string `json:"os-getVNCConsole"`
+	}{
+		map[string]string{"type": string(t)},
+	}
+
+	_, res.Err = client.Post(actionURL(client, id), reqBody, &res.Body, &gophercloud.RequestOpts{
+		OkCodes: []int{200},
+	})
+	return res
+}
+
 // RebuildOptsBuilder is an interface that allows extensions to override the
 // default behaviour of rebuild options
 type RebuildOptsBuilder interface {

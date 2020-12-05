@@ -74,6 +74,31 @@ type ActionResult struct {
 	gophercloud.ErrResult
 }
 
+// VncResult represents the result of a server VNC request
+type VncResult struct {
+	ActionResult
+}
+
+// VncConsole represents VNC call response.
+type VncConsole struct {
+	Type string `mapstructure:"type"`
+	Url string `mapstructure:"url"`
+}
+
+// Extract interprets VncResult as a VNC URL if possible.
+func (r VncResult) Extract() (string, error) {
+	if r.Err != nil {
+		return "", r.Err
+	}
+
+	var response struct {
+		Console VncConsole `mapstructure:"console"`
+	}
+
+	err := mapstructure.Decode(r.Body, &response)
+	return response.Console.Url, err
+}
+
 // RescueResult represents the result of a server rescue operation
 type RescueResult struct {
 	ActionResult
