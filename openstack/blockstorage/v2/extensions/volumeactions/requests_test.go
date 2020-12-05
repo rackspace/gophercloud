@@ -28,7 +28,7 @@ func TestDetach(t *testing.T) {
 
 	MockDetachResponse(t)
 
-	err := Detach(client.ServiceClient(), "cd281d77-8217-4830-be95-9528227c105c").ExtractErr()
+	err := Detach(client.ServiceClient(), "cd281d77-8217-4830-be95-9528227c105c", "d8483b65-515b-4dae-b811-3ffaca3cc6e7").ExtractErr()
 	th.AssertNoErr(t, err)
 }
 
