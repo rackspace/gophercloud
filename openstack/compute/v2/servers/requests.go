@@ -382,6 +382,24 @@ func ChangeAdminPassword(client *gophercloud.ServiceClient, id, newPassword stri
 	return res
 }
 
+// ResetState resets the state of instance to a state specified by newState.
+// Available newState values are: 'error' (default) or 'active'.
+func ResetState(client *gophercloud.ServiceClient, id, newState string) ActionResult {
+	var req struct {
+		OSresetState struct {
+			State string `json:"state"`
+		} `json:"os-resetState"`
+	}
+	if newState == "" {
+		newState = "error"
+	}
+	req.OSresetState.State = newState
+
+	var res ActionResult
+	_, res.Err = client.Post(actionURL(client, id), req, nil, nil)
+	return res
+}
+
 // ErrArgument errors occur when an argument supplied to a package function
 // fails to fall within acceptable values.  For example, the Reboot() function
 // expects the "how" parameter to be one of HardReboot or SoftReboot.  These
