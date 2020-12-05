@@ -67,6 +67,12 @@ func (r commonResult) ExtractToken() (*Token, error) {
 		Token struct {
 			ExpiresAt string `mapstructure:"expires_at"`
 		} `mapstructure:"token"`
+		User struct {
+			Name       string `mapstructure:"name,omitempty"`
+			ID         string `mapstucture:"id,omitempty"`
+			TenantName string `mapstructure:"tenantName,omitempty"`
+			TenantID   string `mapstructure:"tenantId,omitempty"`
+		} `mapstructure:"user,omitempty"`
 	}
 
 	var token Token
