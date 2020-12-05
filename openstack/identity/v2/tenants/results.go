@@ -60,3 +60,42 @@ func ExtractTenants(page pagination.Page) ([]Tenant, error) {
 	err := mapstructure.Decode(casted, &response)
 	return response.Tenants, err
 }
+
+type commonResult struct {
+	gophercloud.Result
+}
+
+// Extract interprets any commonResult as a Tenant, if possible.
+func (r commonResult) Extract() (*Tenant, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+
+	var response struct {
+		Tenant Tenant `mapstructure:"tenant"`
+	}
+
+	err := mapstructure.Decode(r.Body, &response)
+
+	return &response.Tenant, err
+}
+
+// CreateResult represents the result of a Create operation
+type CreateResult struct {
+	commonResult
+}
+
+// GetResult represents the result of a Get operation
+type GetResult struct {
+	commonResult
+}
+
+// UpdateResult represents the result of an Update operation
+type UpdateResult struct {
+	commonResult
+}
+
+// DeleteResult represents the result of a Delete operation
+type DeleteResult struct {
+	commonResult
+}
