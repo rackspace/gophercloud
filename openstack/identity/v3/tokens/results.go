@@ -46,6 +46,33 @@ type ServiceCatalog struct {
 	Entries []CatalogEntry
 }
 
+// Project contains project information extracted from a scoped token.
+type Project struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
+}
+
+// RoleEntry contains the name of a user's role in a project.
+type RoleEntry struct {
+	Name string `mapstructure:"name"`
+}
+
+// Roles contains a list of role names extracted from a token.
+type Roles struct {
+	Entries []RoleEntry
+}
+
+type Domain struct {
+	ID   string `mapstructure:"id"`
+	Name string `mapstructure:"name"`
+}
+
+type User struct {
+	ValidDomain Domain `mapstructure:"domain"`
+	ID          string `mapstructure:"id"`
+	Name        string `mapstructure:"name"`
+}
+
 // commonResult is the deferred result of a Create or a Get call.
 type commonResult struct {
 	gophercloud.Result
@@ -86,7 +113,8 @@ func (r commonResult) ExtractToken() (*Token, error) {
 }
 
 // ExtractServiceCatalog returns the ServiceCatalog that was generated along with the user's Token.
-func (result CreateResult) ExtractServiceCatalog() (*ServiceCatalog, error) {
+// It can also be retrieved as the result of a GET response to a token validation
+func (result commonResult) ExtractServiceCatalog() (*ServiceCatalog, error) {
 	if result.Err != nil {
 		return nil, result.Err
 	}
@@ -116,6 +144,66 @@ func createErr(err error) CreateResult {
 	return CreateResult{
 		commonResult: commonResult{Result: gophercloud.Result{Err: err}},
 	}
+}
+
+// ExtractUser returns the User object from a token
+func (r GetResult) ExtractUser() (*User, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+
+	var response struct {
+		Token struct {
+			ValidUser User `mapstructure:"user"`
+		} `mapstructure:"token"`
+	}
+
+	err := mapstructure.Decode(r.Body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.Token.ValidUser, nil
+}
+
+// ExtractProject returns project information from a GET token request.
+func (result GetResult) ExtractProject() (*Project, error) {
+	if result.Err != nil {
+		return nil, result.Err
+	}
+
+	var response struct {
+		Token struct {
+			ValidProject Project `mapstructure:"project"`
+		} `mapstructure:"token"`
+	}
+
+	err := mapstructure.Decode(result.Body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.Token.ValidProject, nil
+}
+
+// ExtractRoles gets a list of project role names from a GET token request.
+func (result GetResult) ExtractRoles() (*Roles, error) {
+	if result.Err != nil {
+		return nil, result.Err
+	}
+
+	var response struct {
+		Token struct {
+			ValidRoles []RoleEntry `mapstructure:"roles"`
+		} `mapstructure:"token"`
+	}
+
+	err := mapstructure.Decode(result.Body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Roles{Entries: response.Token.ValidRoles}, nil
 }
 
 // GetResult is the deferred response from a Get call.
