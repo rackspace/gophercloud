@@ -1,6 +1,7 @@
 package gophercloud
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -155,6 +156,17 @@ func BuildQueryString(opts interface{}) (*url.URL, error) {
 								params.Add(tags[0], v.Index(i).String())
 							}
 						}
+					case reflect.Map:
+						vi := v.Interface()
+						mp, ok := vi.(map[string]string)
+						if !ok {
+							return nil, fmt.Errorf("Query opt [%v] is not type map[string]string, not supported.", v)
+						}
+						s, err := buildMapParam(mp)
+						if err != nil {
+							return nil, err
+						}
+						params.Add(tags[0], s)
 					}
 				} else {
 					// Otherwise, the field is not set.
@@ -170,6 +182,14 @@ func BuildQueryString(opts interface{}) (*url.URL, error) {
 	}
 	// Return an error if the underlying type of 'opts' isn't a struct.
 	return nil, fmt.Errorf("Options type is not a struct.")
+}
+
+func buildMapParam(v map[string]string) (string, error) {
+	s, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(s), nil
 }
 
 /*

@@ -36,12 +36,13 @@ func TestMaybeInt(t *testing.T) {
 func TestBuildQueryString(t *testing.T) {
 	type testVar string
 	opts := struct {
-		J  int       `q:"j"`
-		R  string    `q:"r,required"`
-		C  bool      `q:"c"`
-		S  []string  `q:"s"`
-		TS []testVar `q:"ts"`
-		TI []int     `q:"ti"`
+		J  int               `q:"j"`
+		R  string            `q:"r,required"`
+		C  bool              `q:"c"`
+		S  []string          `q:"s"`
+		TS []testVar         `q:"ts"`
+		TI []int             `q:"ti"`
+		MP map[string]string `q:"mp"`
 	}{
 		J:  2,
 		R:  "red",
@@ -49,8 +50,9 @@ func TestBuildQueryString(t *testing.T) {
 		S:  []string{"one", "two", "three"},
 		TS: []testVar{"a", "b"},
 		TI: []int{1, 2},
+		MP: map[string]string{"k1": "v1", "k2": "v2"},
 	}
-	expected := &url.URL{RawQuery: "c=true&j=2&r=red&s=one&s=two&s=three&ti=1&ti=2&ts=a&ts=b"}
+	expected := &url.URL{RawQuery: "c=true&j=2&mp=%7B%22k1%22%3A%22v1%22%2C%22k2%22%3A%22v2%22%7D&r=red&s=one&s=two&s=three&ti=1&ti=2&ts=a&ts=b"}
 	actual, err := BuildQueryString(&opts)
 	if err != nil {
 		t.Errorf("Error building query string: %v", err)
@@ -58,12 +60,13 @@ func TestBuildQueryString(t *testing.T) {
 	th.CheckDeepEquals(t, expected, actual)
 
 	opts = struct {
-		J  int       `q:"j"`
-		R  string    `q:"r,required"`
-		C  bool      `q:"c"`
-		S  []string  `q:"s"`
-		TS []testVar `q:"ts"`
-		TI []int     `q:"ti"`
+		J  int               `q:"j"`
+		R  string            `q:"r,required"`
+		C  bool              `q:"c"`
+		S  []string          `q:"s"`
+		TS []testVar         `q:"ts"`
+		TI []int             `q:"ti"`
+		MP map[string]string `q:"mp"`
 	}{
 		J: 2,
 		C: true,
