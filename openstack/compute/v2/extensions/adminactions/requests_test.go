@@ -1,7 +1,6 @@
 package adminactions
 
 import (
-	"fmt"
 	"testing"
 
 	th "github.com/rackspace/gophercloud/testhelper"
@@ -35,7 +34,7 @@ func TestCreateBackupNoName(t *testing.T) {
 		Rotation:   1,
 	}).ExtractErr()
 	if err == nil {
-		fmt.Errorf("CreateBackup without a specified Name should throw an Error.")
+		t.Errorf("CreateBackup without a specified Name should throw an Error.")
 	}
 }
 
@@ -51,7 +50,7 @@ func TestCreateBackupNegativeRotation(t *testing.T) {
 		Rotation:   -1,
 	}).ExtractErr()
 	if err == nil {
-		fmt.Errorf("CreateBackup without a negative Rotation should throw an Error.")
+		t.Errorf("CreateBackup without a negative Rotation should throw an Error.")
 	}
 }
 
@@ -67,7 +66,7 @@ func TestCreateBackupNoType(t *testing.T) {
 		Rotation: 1,
 	}).ExtractErr()
 	if err == nil {
-		fmt.Errorf("CreateBackup without a specified BackupType should throw an Error.")
+		t.Errorf("CreateBackup without a specified BackupType should throw an Error.")
 	}
 }
 
